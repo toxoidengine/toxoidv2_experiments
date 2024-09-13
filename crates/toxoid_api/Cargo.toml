@@ -1,0 +1,19 @@
+[package]
+name = "toxoid_api"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+wit-bindgen-rt = "0.32.0"
+
+[profile.release]
+codegen-units = 1
+opt-level = "s"
+debug = false
+strip = true
+lto = true
+
+[package.metadata.component]
+package = "component:toxoid-api"
+
+[package.metadata.component.dependencies]

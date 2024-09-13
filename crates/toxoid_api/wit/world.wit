@@ -1,0 +1,6 @@
+package component:my-package;
+
+world my-world {
+    import name: func() -> string;
+    export greet: func() -> string;
+}

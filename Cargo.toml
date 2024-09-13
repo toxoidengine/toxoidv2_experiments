@@ -1,0 +1,5 @@
+[workspace]
+members = [
+     "crates/toxoid_api", 
+     "crates/toxoid_wasm"
+]
