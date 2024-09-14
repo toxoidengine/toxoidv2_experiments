@@ -48,7 +48,7 @@ pub trait Guest {
     fn greet() -> _rt::String;
 }
 #[doc(hidden)]
-macro_rules! __export_world_my_world_cabi {
+macro_rules! __export_world_toxoid_world_cabi {
     ($ty:ident with_types_in $($path_to_types:tt)*) => {
         const _ : () = { #[export_name = "greet"] unsafe extern "C" fn export_greet() ->
         * mut u8 { $($path_to_types)*:: _export_greet_cabi::<$ty > () } #[export_name =
@@ -57,7 +57,7 @@ macro_rules! __export_world_my_world_cabi {
     };
 }
 #[doc(hidden)]
-pub(crate) use __export_world_my_world_cabi;
+pub(crate) use __export_world_toxoid_world_cabi;
 #[repr(align(4))]
 struct _RetArea([::core::mem::MaybeUninit<u8>; 8]);
 static mut _RET_AREA: _RetArea = _RetArea([::core::mem::MaybeUninit::uninit(); 8]);
@@ -103,25 +103,25 @@ mod _rt {
 /// ```
 #[allow(unused_macros)]
 #[doc(hidden)]
-macro_rules! __export_my_world_impl {
+macro_rules! __export_toxoid_world_impl {
     ($ty:ident) => {
         self::export!($ty with_types_in self);
     };
     ($ty:ident with_types_in $($path_to_types_root:tt)*) => {
-        $($path_to_types_root)*:: __export_world_my_world_cabi!($ty with_types_in
+        $($path_to_types_root)*:: __export_world_toxoid_world_cabi!($ty with_types_in
         $($path_to_types_root)*);
     };
 }
 #[doc(inline)]
-pub(crate) use __export_my_world_impl as export;
+pub(crate) use __export_toxoid_world_impl as export;
 #[cfg(target_arch = "wasm32")]
-#[link_section = "component-type:wit-bindgen:0.30.0:my-world:encoded world"]
+#[link_section = "component-type:wit-bindgen:0.30.0:toxoid-world:encoded world"]
 #[doc(hidden)]
-pub static __WIT_BINDGEN_COMPONENT_TYPE: [u8; 190] = *b"\
-\0asm\x0d\0\x01\0\0\x19\x16wit-component-encoding\x04\0\x07@\x01A\x02\x01A\x03\x01\
-@\0\0s\x03\0\x04name\x01\0\x04\0\x05greet\x01\0\x04\x01\x1dcomponent:my-package/\
-my-world\x04\0\x0b\x0e\x01\0\x08my-world\x03\0\0\0G\x09producers\x01\x0cprocesse\
-d-by\x02\x0dwit-component\x070.215.0\x10wit-bindgen-rust\x060.30.0";
+pub static __WIT_BINDGEN_COMPONENT_TYPE: [u8; 188] = *b"\
+\0asm\x0d\0\x01\0\0\x19\x16wit-component-encoding\x04\0\x07:\x01A\x02\x01A\x03\x01\
+@\0\0s\x03\0\x04name\x01\0\x04\0\x05greet\x01\0\x04\x01\x17toxoid:api/toxoid-wor\
+ld\x04\0\x0b\x12\x01\0\x0ctoxoid-world\x03\0\0\0G\x09producers\x01\x0cprocessed-\
+by\x02\x0dwit-component\x070.215.0\x10wit-bindgen-rust\x060.30.0";
 #[inline(never)]
 #[doc(hidden)]
 pub fn __link_custom_section_describing_imports() {

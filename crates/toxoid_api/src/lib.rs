@@ -1,10 +1,10 @@
 #[allow(warnings)]
-pub mod bindings;
+mod bindings;
 
 use bindings::Guest;
 use bindings::name;
 
-pub struct Toxoid;
+struct Toxoid;
 
 impl Guest for Toxoid {
     fn greet() -> String {

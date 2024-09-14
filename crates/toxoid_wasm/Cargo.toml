@@ -5,3 +5,5 @@ edition = "2021"
 
 [dependencies]
 wasmtime = "24.0.0"
+wasmtime-wasi = "24.0.0"
+toxoid_api = { path = "../toxoid_api" }

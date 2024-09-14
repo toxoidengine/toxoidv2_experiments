@@ -1,6 +1,6 @@
-package component:my-package;
+package toxoid:api;
 
-world my-world {
+world toxoid-world {
     import name: func() -> string;
     export greet: func() -> string;
 }
