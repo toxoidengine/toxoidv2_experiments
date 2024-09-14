@@ -27,7 +27,6 @@ fn main() -> wasmtime::Result<()> {
         },
     );
     
-
     // Load the component from disk
     let bytes = std::fs::read("toxoid_api.wasm")?;
     // Create WASM Component
