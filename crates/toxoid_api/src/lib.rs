@@ -3,7 +3,6 @@ mod bindings;
 use bindings::exports::toxoid::api::ecs::{GuestComponent, Guest};
 
 struct ToxoidApi;
-
 struct Component;
 
 impl GuestComponent for Component {
