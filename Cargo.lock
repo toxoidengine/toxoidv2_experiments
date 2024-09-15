@@ -1378,6 +1378,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "toxoid_flecs"
+version = "0.1.0"
+
+[[package]]
 name = "toxoid_wasm"
 version = "0.1.0"
 dependencies = [

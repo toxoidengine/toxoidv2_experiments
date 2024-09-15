@@ -1,16 +1,21 @@
-use wasmtime::component::{bindgen, ResourceTable};
+use wasmtime::component::{bindgen, ResourceTable, Linker, Component};
+use wasmtime::Engine;
 use wasmtime_wasi::{WasiCtx, WasiView, WasiCtxBuilder};
 
+// Bindgen the WASM runtime based component instance bindings based on WIT.
 bindgen!({
     world: "toxoid-world",
     path: "../toxoid_api/wit",
 });
 
+// StoreState is the state of the WASM store.
 struct StoreState {
     ctx: WasiCtx,
     table: ResourceTable,
 }
 
+// A trait which provides access to internal WASI state.
+// For a Store<T> this trait will be implemented for the T. This also corresponds to the T in Linker<T>.
 impl WasiView for StoreState {
     fn ctx(&mut self) -> &mut WasiCtx { &mut self.ctx }
     fn table(&mut self) -> &mut ResourceTable { &mut self.table }
@@ -20,7 +25,7 @@ fn main() -> wasmtime::Result<()> {
     // Instantiate the engine and store
     let engine = wasmtime::Engine::default();
     // Create WASM Component Linker
-    let mut linker = wasmtime::component::Linker::<StoreState>::new(&engine);
+    let mut linker = Linker::<StoreState>::new(&engine);
     // Add WASI imports to the linker
     wasmtime_wasi::add_to_linker_sync(&mut linker)?;
     // Create WASI Context
@@ -37,16 +42,17 @@ fn main() -> wasmtime::Result<()> {
     // Load the component from disk
     let bytes = std::fs::read("toxoid_api.wasm")?;
     // Create WASM Component
-    let component = wasmtime::component::Component::new(&engine, bytes)?;
+    let component = Component::new(&engine, bytes)?;
 
     // Instantiate the WASM component
     let toxoid_world = ToxoidWorld::instantiate(&mut store, &component, &linker)?;
-    let ecs_interface = toxoid_world.toxoid_api_ecs();
-    let component = ecs_interface.component();
-    let component_instance = component.call_constructor(&mut store, &[])?;
-    let _ = component.call_write(&mut store, component_instance, &[]);
-    let bytes = component.call_read(&mut store, 10);
-    
+    let toxoid_ecs_interface = toxoid_world.toxoid_api_ecs();
+    let toxoid_ecs_component = toxoid_ecs_interface.component();
+    let toxoid_ecs_component_instance = toxoid_ecs_component.call_constructor(&mut store, &[])?;
+    let _ = toxoid_ecs_component.call_write(&mut store, toxoid_ecs_component_instance, &[]);
+    let bytes = toxoid_ecs_component.call_read(&mut store, 10);
+
+    // Print the bytes
     println!("Read bytes: {:?}", bytes);
 
     Ok(())
