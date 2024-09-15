@@ -5,6 +5,7 @@ edition = "2021"
 
 [dependencies]
 wit-bindgen-rt = { version = "0.32.0", features = ["bitflags"] }
+toxoid_flecs = { path = "../toxoid_flecs" }
 
 [lib]
 crate-type = ["cdylib"]
