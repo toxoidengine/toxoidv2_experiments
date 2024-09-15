@@ -1,5 +1,5 @@
 use wasmtime::component::{bindgen, ResourceTable, Linker, Component};
-use wasmtime::Engine;
+use wasmtime::{Engine, Result};
 use wasmtime_wasi::{WasiCtx, WasiView, WasiCtxBuilder};
 
 // Bindgen the WASM runtime based component instance bindings based on WIT.
@@ -21,9 +21,9 @@ impl WasiView for StoreState {
     fn table(&mut self) -> &mut ResourceTable { &mut self.table }
 }
 
-fn main() -> wasmtime::Result<()> {
+fn main() -> Result<()> {
     // Instantiate the engine and store
-    let engine = wasmtime::Engine::default();
+    let engine = Engine::default();
     // Create WASM Component Linker
     let mut linker = Linker::<StoreState>::new(&engine);
     // Add WASI imports to the linker
