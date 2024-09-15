@@ -1,6 +1,17 @@
 package toxoid:api;
 
+interface ecs {
+    record entity {
+        name: string,
+    }
+
+    resource component {
+        constructor(init: list<u8>);
+        write: func(bytes: list<u8>);
+        read: static func(n: u32) -> list<u8>;
+    }
+}
+
 world toxoid-world {
-    import name: func() -> string;
-    export greet: func() -> string;
+    export ecs;
 }

@@ -1,15 +1,27 @@
 #[allow(warnings)]
 mod bindings;
+use bindings::exports::toxoid::api::ecs::{GuestComponent, Guest};
 
-use bindings::Guest;
-use bindings::name;
+struct ToxoidApi;
 
-struct Toxoid;
+struct Component;
 
-impl Guest for Toxoid {
-    fn greet() -> String {
-        "Hello, ".to_string() + &name()
+impl GuestComponent for Component {
+    fn new(_init: Vec<u8>) -> Component {
+        Component
+    }
+
+    fn write(&self, bytes: Vec<u8>) {
+        println!("Writing bytes: {:?}", bytes);
+    }
+
+    fn read(n: u32) -> Vec<u8> {
+        vec![0; n as usize]
     }
 }
 
-bindings::export!(Toxoid with_types_in bindings);
+impl Guest for ToxoidApi {
+    type Component = Component;
+}
+
+bindings::export!(ToxoidApi with_types_in bindings);
