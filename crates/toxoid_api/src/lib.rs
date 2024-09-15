@@ -12,6 +12,7 @@ impl GuestComponent for Component {
 
     fn write(&self, bytes: Vec<u8>) {
         println!("Writing bytes: {:?}", bytes);
+        toxoid_flecs::init();
     }
 
     fn read(n: u32) -> Vec<u8> {

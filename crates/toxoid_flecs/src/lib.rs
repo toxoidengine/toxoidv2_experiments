@@ -1,11 +1,11 @@
 pub mod bindings {
     include!("./bindings.rs");
 }
-pub use bindings::*;
+use bindings::*;
 
 pub fn init() {
     unsafe {
-        let world = bindings::ecs_init();
+        let world = ecs_init();
         println!("World: {:?}", world);
     }
 }

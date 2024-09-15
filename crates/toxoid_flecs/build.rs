@@ -12,16 +12,28 @@ fn main() {
         std::env::set_var("CFLAGS", "-Wno-unused-command-line-argument");
     };
 
-    // // Bindgen
-    let bindings = bindgen::Builder::default()
-        .header(Path::new("flecs.h").to_str().unwrap())
-        .generate()
-        .expect("Unable to generate bindings");
+    // Bindgen
+    eprintln!("{}", target);
+    // let bindings = bindgen::Builder::default()
+    //     .header(Path::new("flecs.h").to_str().unwrap())
+    //     .generate()
+    //     .expect("Unable to generate bindings");
 
-    let out_path = PathBuf::from("./src");
-    bindings
-        .write_to_file(out_path.join("bindings.rs"))
-        .expect("Couldn't write bindings!");
+    // let out_path = PathBuf::from("./src");
+    // bindings
+    //     .write_to_file(out_path.join("bindings.rs"))
+    //     .expect("Couldn't write bindings!");
+
+
+    // Set the target to WASI
+    // let target = "wasm32-wasi";
+    // env::set_var("TARGET", target);
+
+    // Set the compiler to use the WASI SDK
+    // let wasi_sdk_path = "/path/to/wasi-sdk"; // Update this path
+    // env::set_var("CC", format!("{}/bin/clang", wasi_sdk_path));
+    // env::set_var("CXX", format!("{}/bin/clang++", wasi_sdk_path));
+    // env::set_var("WASI_SDK_PATH", wasi_sdk_path);
 
     // Compile Flecs
     cc::Build::new()
