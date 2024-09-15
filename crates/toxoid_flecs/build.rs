@@ -14,15 +14,20 @@ fn main() {
 
     // Bindgen
     eprintln!("{}", target);
-    // let bindings = bindgen::Builder::default()
-    //     .header(Path::new("flecs.h").to_str().unwrap())
-    //     .generate()
-    //     .expect("Unable to generate bindings");
+    std::env::set_var("CC", "/c/Users/troye/dev/toxoid/toxoidv2_experiments/crates/toxoid_flecs/wasi-sdk-24.0-x86_64-windows/bin/clang");
+    std::env::set_var("CXX", "/c/Users/troye/dev/toxoid/toxoidv2_experiments/crates/toxoid_flecs/wasi-sdk-24.0-x86_64-windows/bin/clang++");
+    let bindings = bindgen::Builder::default()
+        .clang_arg("-DFLECS_CUSTOM_BUILD")
+        .clang_arg("-Lcrates/toxoid_flecs/wasi-sdk-24.0-x86_64-windows/share/wasi-sysroot/share/wasm32-wasip1")
+        .clang_arg("-fno-exceptions")
+        .header(Path::new("flecs.h").to_str().unwrap())
+        .generate()
+        .expect("Unable to generate bindings");
 
-    // let out_path = PathBuf::from("./src");
-    // bindings
-    //     .write_to_file(out_path.join("bindings.rs"))
-    //     .expect("Couldn't write bindings!");
+    let out_path = PathBuf::from("./src");
+    bindings
+        .write_to_file(out_path.join("bindings.rs"))
+        .expect("Couldn't write bindings!");
 
 
     // Set the target to WASI
@@ -37,6 +42,7 @@ fn main() {
 
     // Compile Flecs
     cc::Build::new()
+        .define("FLECS_CUSTOM_BUILD", None)
         .include("flecs.h")
         .file("flecs.c")
         .compile("flecs_core");
