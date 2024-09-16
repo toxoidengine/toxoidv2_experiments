@@ -9,6 +9,7 @@ interface ecs {
         constructor(init: list<u8>);
         write: func(bytes: list<u8>);
         read: static func(n: u32) -> list<u8>;
+        get-id: static func() -> u64;
     }
 }
 

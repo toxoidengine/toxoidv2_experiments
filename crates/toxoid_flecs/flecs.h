@@ -2637,10 +2637,10 @@ void ecs_os_set_api_defaults(void);
     ECS_CAST(T*, ECS_OFFSET(ptr, ECS_SIZEOF(T) * index))
 
 #if !defined(ECS_TARGET_POSIX) && !defined(ECS_TARGET_MINGW)
-#define ecs_os_strcat(str1, str2) strcat_s(str1, INT_MAX, str2)
-#define ecs_os_snprintf(ptr, len, ...) sprintf_s(ptr, ECS_CAST(size_t, len), __VA_ARGS__)
+#define ecs_os_strcat(str1, str2) strcat(str1, str2)
+#define ecs_os_snprintf(ptr, len, ...) sprintf(ptr, __VA_ARGS__)
 #define ecs_os_vsnprintf(ptr, len, fmt, args) vsnprintf(ptr, ECS_CAST(size_t, len), fmt, args)
-#define ecs_os_strcpy(str1, str2) strcpy_s(str1, INT_MAX, str2)
+#define ecs_os_strcpy(str1, str2) strcpy(str1, str2)
 #define ecs_os_strncpy(str1, str2, len) strncpy_s(str1, INT_MAX, str2, ECS_CAST(size_t, len))
 #else
 #define ecs_os_strcat(str1, str2) strcat(str1, str2)
@@ -2652,7 +2652,7 @@ void ecs_os_set_api_defaults(void);
 
 /* Files */
 #ifndef ECS_TARGET_POSIX
-#define ecs_os_fopen(result, file, mode) fopen_s(result, file, mode)
+#define ecs_os_fopen(result, file, mode) fopen(file, mode)
 #else
 #define ecs_os_fopen(result, file, mode) (*(result)) = fopen(file, mode)
 #endif

@@ -51,9 +51,11 @@ fn main() -> Result<()> {
     let toxoid_ecs_component_instance = toxoid_ecs_component.call_constructor(&mut store, &[])?;
     let _ = toxoid_ecs_component.call_write(&mut store, toxoid_ecs_component_instance, &[]);
     let bytes = toxoid_ecs_component.call_read(&mut store, 10);
+    let id = toxoid_ecs_component.call_get_id(&mut store);
 
     // Print the bytes
     println!("Read bytes: {:?}", bytes);
+    println!("ID: {:?}", id);
 
     Ok(())
 }

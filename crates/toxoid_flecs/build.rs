@@ -1,4 +1,4 @@
-use std::path::{PathBuf, Path};
+// use std::path::{PathBuf, Path};
 
 fn main() {
     // Tell cargo to invalidate the built crate whenever the sources change
@@ -13,22 +13,27 @@ fn main() {
     };
 
     // Bindgen
-    eprintln!("{}", target);
-    std::env::set_var("CC", "/c/Users/troye/dev/toxoid/toxoidv2_experiments/crates/toxoid_flecs/wasi-sdk-24.0-x86_64-windows/bin/clang");
-    std::env::set_var("CXX", "/c/Users/troye/dev/toxoid/toxoidv2_experiments/crates/toxoid_flecs/wasi-sdk-24.0-x86_64-windows/bin/clang++");
-    let bindings = bindgen::Builder::default()
-        .clang_arg("-DFLECS_CUSTOM_BUILD")
-        .clang_arg("-Lcrates/toxoid_flecs/wasi-sdk-24.0-x86_64-windows/share/wasi-sysroot/share/wasm32-wasip1")
-        .clang_arg("-fno-exceptions")
-        .header(Path::new("flecs.h").to_str().unwrap())
-        .generate()
-        .expect("Unable to generate bindings");
+    // let wasi_sdk_path = "C:/Users/troye/dev/toxoid/toxoidv2_experiments/crates/toxoid_flecs/wasi-sdk-24.0-x86_64-windows";
+    // let clang_path = format!("{}/bin/clang", wasi_sdk_path);
+    // let sysroot = format!("{}/share/wasi-sysroot", wasi_sdk_path);
 
-    let out_path = PathBuf::from("./src");
-    bindings
-        .write_to_file(out_path.join("bindings.rs"))
-        .expect("Couldn't write bindings!");
+    // Set environment variables for cc and cxx
+    // std::env::set_var("CC", &clang_path);
+    // std::env::set_var("CXX", &clang_path);
+    
+    // let bindings = bindgen::Builder::default()
+    //     // .clang_arg("-DFLECS_CUSTOM_BUILD")
+    //     // .clang_arg(format!("--sysroot={}", sysroot))
+    //     // .clang_arg("--target=wasm32-wasi")
+    //     // .clang_arg("-fno-exceptions")
+    //     .header(Path::new("flecs.h").to_str().unwrap())
+    //     .generate()
+    //     .expect("Unable to generate bindings");
 
+    // let out_path = PathBuf::from("./src");
+    // bindings
+    //     .write_to_file(out_path.join("bindings.rs"))
+    //     .expect("Couldn't write bindings!");
 
     // Set the target to WASI
     // let target = "wasm32-wasi";
@@ -46,4 +51,13 @@ fn main() {
         .include("flecs.h")
         .file("flecs.c")
         .compile("flecs_core");
+
+    // cc::Build::new()
+    //     .compiler(&clang_path)
+    //     .define("FLECS_CUSTOM_BUILD", None)
+    //     .include("flecs.h")
+    //     .file("flecs.c")
+    //     .flag(&format!("--sysroot={}", sysroot))
+    //     .flag("--target=wasm32-wasi")
+    //     .compile("flecs_core");
 }

@@ -1510,7 +1510,6 @@ dependencies = [
 name = "toxoid_wasm"
 version = "0.1.0"
 dependencies = [
- "toxoid_api",
  "wasmtime",
  "wasmtime-wasi",
 ]

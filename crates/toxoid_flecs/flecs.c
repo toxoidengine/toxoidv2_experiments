@@ -15100,7 +15100,7 @@ void ecs_os_fini(void) {
 #endif
 
 #if HAVE_EXECINFO
-#include <execinfo.h>
+// #include <execinfo.h>
 #define ECS_BT_BUF_SIZE 100
 
 void flecs_dump_backtrace(
@@ -15110,9 +15110,10 @@ void flecs_dump_backtrace(
     void *buffer[ECS_BT_BUF_SIZE];
     char **strings;
 
+    #ifndef __wasm32__
     nptrs = backtrace(buffer, ECS_BT_BUF_SIZE);
-
     strings = backtrace_symbols(buffer, nptrs);
+    #endif
     if (strings == NULL) {
         return;
     }
@@ -21302,7 +21303,7 @@ typedef SOCKET ecs_http_socket_t;
 #include <arpa/inet.h>
 #include <sys/socket.h>
 #include <sys/time.h>
-#include <netdb.h>
+// #include <netdb.h>
 #include <strings.h>
 #include <signal.h>
 #include <fcntl.h>

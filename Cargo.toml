@@ -2,5 +2,8 @@
 members = [
      "crates/toxoid_api", 
      "crates/toxoid_wasm",
-     "crates/toxoid_flecs", 
+     "crates/toxoid_flecs"
+]
+exclude = [
+     
 ]

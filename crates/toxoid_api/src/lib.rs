@@ -12,11 +12,14 @@ impl GuestComponent for Component {
 
     fn write(&self, bytes: Vec<u8>) {
         println!("Writing bytes: {:?}", bytes);
-        toxoid_flecs::init();
     }
 
     fn read(n: u32) -> Vec<u8> {
         vec![0; n as usize]
+    }
+
+    fn get_id() -> u64 {
+        toxoid_flecs::init()
     }
 }
 
