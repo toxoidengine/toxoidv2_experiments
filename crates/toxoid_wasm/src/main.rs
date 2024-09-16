@@ -1,3 +1,4 @@
+use exports::toxoid::api::ecs::ComponentDesc;
 use wasmtime::component::{bindgen, ResourceTable, Linker, Component};
 use wasmtime::{Engine, Result};
 use wasmtime_wasi::{WasiCtx, WasiView, WasiCtxBuilder};
@@ -48,13 +49,13 @@ fn main() -> Result<()> {
     let toxoid_world = ToxoidWorld::instantiate(&mut store, &component, &linker)?;
     let toxoid_ecs_interface = toxoid_world.toxoid_api_ecs();
     let toxoid_ecs_component = toxoid_ecs_interface.component();
-    let toxoid_ecs_component_instance = toxoid_ecs_component.call_constructor(&mut store, &[])?;
-    let _ = toxoid_ecs_component.call_write(&mut store, toxoid_ecs_component_instance, &[]);
-    let bytes = toxoid_ecs_component.call_read(&mut store, 10);
-    let id = toxoid_ecs_component.call_get_id(&mut store);
+    let component = toxoid_ecs_component.call_constructor(&mut store, &ComponentDesc{ 
+        name: "test".to_string(), 
+        member_names: vec![], 
+        member_types: vec![] 
+    })?;
+    let id = toxoid_ecs_component.call_get_id(&mut store, component)?;
 
-    // Print the bytes
-    println!("Read bytes: {:?}", bytes);
     println!("ID: {:?}", id);
 
     Ok(())
