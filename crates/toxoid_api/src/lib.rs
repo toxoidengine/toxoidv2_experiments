@@ -1,10 +1,13 @@
-#[allow(warnings)]
+#![allow(non_camel_case_types)]
+#![allow(warnings)]
+
 mod bindings;
 use bindings::exports::toxoid::api::ecs::{GuestComponent, Guest, ComponentDesc};
 use toxoid_flecs::bindings::{ecs_entity_desc_t, ecs_entity_init, ecs_init};
 use std::mem::MaybeUninit;
 
 type ecs_entity_t = u64;
+
 struct ToxoidApi;
 // struct World;
 struct Component { 
