@@ -5,9 +5,16 @@
 #![allow(non_snake_case)]
 #![allow(deref_nullptr)]
 #![allow(improper_ctypes)]
+
+#[cfg(target_arch = "wasm32")]
 pub mod bindings {
-    include!("./bindings.rs");
+    include!("./bindings_x86.rs");
 }
+#[cfg(not(target_arch = "wasm32"))]
+pub mod bindings {
+    include!("./bindings_x64.rs");
+}
+
 use bindings::*;
 
 pub fn init() -> u64 {

@@ -10,6 +10,120 @@ pub mod exports {
                 #[doc(hidden)]
                 static __FORCE_SECTION_REF: fn() = super::super::super::super::__link_custom_section_describing_imports;
                 use super::super::super::super::_rt;
+                pub type EcsEntityT = u64;
+                #[repr(u8)]
+                #[derive(Clone, Copy, Eq, PartialEq)]
+                pub enum MemberType {
+                    U8T,
+                    U16T,
+                    U32T,
+                    U64T,
+                    I8T,
+                    I16T,
+                    I32T,
+                    I64T,
+                    F32T,
+                    F64T,
+                    BoolT,
+                    StringT,
+                    ArrayT,
+                    U32arrayT,
+                    F32arrayT,
+                }
+                impl ::core::fmt::Debug for MemberType {
+                    fn fmt(
+                        &self,
+                        f: &mut ::core::fmt::Formatter<'_>,
+                    ) -> ::core::fmt::Result {
+                        match self {
+                            MemberType::U8T => f.debug_tuple("MemberType::U8T").finish(),
+                            MemberType::U16T => {
+                                f.debug_tuple("MemberType::U16T").finish()
+                            }
+                            MemberType::U32T => {
+                                f.debug_tuple("MemberType::U32T").finish()
+                            }
+                            MemberType::U64T => {
+                                f.debug_tuple("MemberType::U64T").finish()
+                            }
+                            MemberType::I8T => f.debug_tuple("MemberType::I8T").finish(),
+                            MemberType::I16T => {
+                                f.debug_tuple("MemberType::I16T").finish()
+                            }
+                            MemberType::I32T => {
+                                f.debug_tuple("MemberType::I32T").finish()
+                            }
+                            MemberType::I64T => {
+                                f.debug_tuple("MemberType::I64T").finish()
+                            }
+                            MemberType::F32T => {
+                                f.debug_tuple("MemberType::F32T").finish()
+                            }
+                            MemberType::F64T => {
+                                f.debug_tuple("MemberType::F64T").finish()
+                            }
+                            MemberType::BoolT => {
+                                f.debug_tuple("MemberType::BoolT").finish()
+                            }
+                            MemberType::StringT => {
+                                f.debug_tuple("MemberType::StringT").finish()
+                            }
+                            MemberType::ArrayT => {
+                                f.debug_tuple("MemberType::ArrayT").finish()
+                            }
+                            MemberType::U32arrayT => {
+                                f.debug_tuple("MemberType::U32arrayT").finish()
+                            }
+                            MemberType::F32arrayT => {
+                                f.debug_tuple("MemberType::F32arrayT").finish()
+                            }
+                        }
+                    }
+                }
+                impl MemberType {
+                    #[doc(hidden)]
+                    pub unsafe fn _lift(val: u8) -> MemberType {
+                        if !cfg!(debug_assertions) {
+                            return ::core::mem::transmute(val);
+                        }
+                        match val {
+                            0 => MemberType::U8T,
+                            1 => MemberType::U16T,
+                            2 => MemberType::U32T,
+                            3 => MemberType::U64T,
+                            4 => MemberType::I8T,
+                            5 => MemberType::I16T,
+                            6 => MemberType::I32T,
+                            7 => MemberType::I64T,
+                            8 => MemberType::F32T,
+                            9 => MemberType::F64T,
+                            10 => MemberType::BoolT,
+                            11 => MemberType::StringT,
+                            12 => MemberType::ArrayT,
+                            13 => MemberType::U32arrayT,
+                            14 => MemberType::F32arrayT,
+                            _ => panic!("invalid enum discriminant"),
+                        }
+                    }
+                }
+                #[derive(Clone)]
+                pub struct ComponentDesc {
+                    pub name: _rt::String,
+                    pub member_names: _rt::Vec<_rt::String>,
+                    pub member_types: _rt::Vec<u8>,
+                }
+                impl ::core::fmt::Debug for ComponentDesc {
+                    fn fmt(
+                        &self,
+                        f: &mut ::core::fmt::Formatter<'_>,
+                    ) -> ::core::fmt::Result {
+                        f.debug_struct("ComponentDesc")
+                            .field("name", &self.name)
+                            .field("member-names", &self.member_names)
+                            .field("member-types", &self.member_types)
+                            .finish()
+                    }
+                }
                 #[derive(Debug)]
                 #[repr(transparent)]
                 pub struct Component {
@@ -134,35 +248,388 @@ pub mod exports {
                 pub unsafe fn _export_constructor_component_cabi<T: GuestComponent>(
                     arg0: *mut u8,
                     arg1: usize,
+                    arg2: *mut u8,
+                    arg3: usize,
+                    arg4: *mut u8,
+                    arg5: usize,
                 ) -> i32 {
                     #[cfg(target_arch = "wasm32")] _rt::run_ctors_once();
                     let len0 = arg1;
-                    let result1 = Component::new(
-                        T::new(_rt::Vec::from_raw_parts(arg0.cast(), len0, len0)),
+                    let bytes0 = _rt::Vec::from_raw_parts(arg0.cast(), len0, len0);
+                    let base4 = arg2;
+                    let len4 = arg3;
+                    let mut result4 = _rt::Vec::with_capacity(len4);
+                    for i in 0..len4 {
+                        let base = base4.add(i * 8);
+                        let e4 = {
+                            let l1 = *base.add(0).cast::<*mut u8>();
+                            let l2 = *base.add(4).cast::<usize>();
+                            let len3 = l2;
+                            let bytes3 = _rt::Vec::from_raw_parts(l1.cast(), len3, len3);
+                            _rt::string_lift(bytes3)
+                        };
+                        result4.push(e4);
+                    }
+                    _rt::cabi_dealloc(base4, len4 * 8, 4);
+                    let len5 = arg5;
+                    let result6 = Component::new(
+                        T::new(ComponentDesc {
+                            name: _rt::string_lift(bytes0),
+                            member_names: result4,
+                            member_types: _rt::Vec::from_raw_parts(
+                                arg4.cast(),
+                                len5,
+                                len5,
+                            ),
+                        }),
                     );
-                    (result1).take_handle() as i32
+                    (result6).take_handle() as i32
                 }
                 #[doc(hidden)]
                 #[allow(non_snake_case)]
-                pub unsafe fn _export_method_component_write_cabi<T: GuestComponent>(
-                    arg0: *mut u8,
-                    arg1: *mut u8,
-                    arg2: usize,
-                ) {
+                pub unsafe fn _export_method_component_set_member_u8_cabi<
+                    T: GuestComponent,
+                >(arg0: *mut u8, arg1: i32, arg2: i32) {
                     #[cfg(target_arch = "wasm32")] _rt::run_ctors_once();
-                    let len0 = arg2;
-                    T::write(
+                    T::set_member_u8(
                         ComponentBorrow::lift(arg0 as u32 as usize).get(),
-                        _rt::Vec::from_raw_parts(arg1.cast(), len0, len0),
+                        arg1 as u32,
+                        arg2 as u8,
                     );
                 }
                 #[doc(hidden)]
                 #[allow(non_snake_case)]
-                pub unsafe fn _export_static_component_read_cabi<T: GuestComponent>(
-                    arg0: i32,
-                ) -> *mut u8 {
+                pub unsafe fn _export_method_component_set_member_u16_cabi<
+                    T: GuestComponent,
+                >(arg0: *mut u8, arg1: i32, arg2: i32) {
                     #[cfg(target_arch = "wasm32")] _rt::run_ctors_once();
-                    let result0 = T::read(arg0 as u32);
+                    T::set_member_u16(
+                        ComponentBorrow::lift(arg0 as u32 as usize).get(),
+                        arg1 as u32,
+                        arg2 as u16,
+                    );
+                }
+                #[doc(hidden)]
+                #[allow(non_snake_case)]
+                pub unsafe fn _export_method_component_set_member_u32_cabi<
+                    T: GuestComponent,
+                >(arg0: *mut u8, arg1: i32, arg2: i32) {
+                    #[cfg(target_arch = "wasm32")] _rt::run_ctors_once();
+                    T::set_member_u32(
+                        ComponentBorrow::lift(arg0 as u32 as usize).get(),
+                        arg1 as u32,
+                        arg2 as u32,
+                    );
+                }
+                #[doc(hidden)]
+                #[allow(non_snake_case)]
+                pub unsafe fn _export_method_component_set_member_u64_cabi<
+                    T: GuestComponent,
+                >(arg0: *mut u8, arg1: i32, arg2: i64) {
+                    #[cfg(target_arch = "wasm32")] _rt::run_ctors_once();
+                    T::set_member_u64(
+                        ComponentBorrow::lift(arg0 as u32 as usize).get(),
+                        arg1 as u32,
+                        arg2 as u64,
+                    );
+                }
+                #[doc(hidden)]
+                #[allow(non_snake_case)]
+                pub unsafe fn _export_method_component_set_member_i8_cabi<
+                    T: GuestComponent,
+                >(arg0: *mut u8, arg1: i32, arg2: i32) {
+                    #[cfg(target_arch = "wasm32")] _rt::run_ctors_once();
+                    T::set_member_i8(
+                        ComponentBorrow::lift(arg0 as u32 as usize).get(),
+                        arg1 as u32,
+                        arg2 as i8,
+                    );
+                }
+                #[doc(hidden)]
+                #[allow(non_snake_case)]
+                pub unsafe fn _export_method_component_set_member_i16_cabi<
+                    T: GuestComponent,
+                >(arg0: *mut u8, arg1: i32, arg2: i32) {
+                    #[cfg(target_arch = "wasm32")] _rt::run_ctors_once();
+                    T::set_member_i16(
+                        ComponentBorrow::lift(arg0 as u32 as usize).get(),
+                        arg1 as u32,
+                        arg2 as i16,
+                    );
+                }
+                #[doc(hidden)]
+                #[allow(non_snake_case)]
+                pub unsafe fn _export_method_component_set_member_i32_cabi<
+                    T: GuestComponent,
+                >(arg0: *mut u8, arg1: i32, arg2: i32) {
+                    #[cfg(target_arch = "wasm32")] _rt::run_ctors_once();
+                    T::set_member_i32(
+                        ComponentBorrow::lift(arg0 as u32 as usize).get(),
+                        arg1 as u32,
+                        arg2,
+                    );
+                }
+                #[doc(hidden)]
+                #[allow(non_snake_case)]
+                pub unsafe fn _export_method_component_set_member_i64_cabi<
+                    T: GuestComponent,
+                >(arg0: *mut u8, arg1: i32, arg2: i64) {
+                    #[cfg(target_arch = "wasm32")] _rt::run_ctors_once();
+                    T::set_member_i64(
+                        ComponentBorrow::lift(arg0 as u32 as usize).get(),
+                        arg1 as u32,
+                        arg2,
+                    );
+                }
+                #[doc(hidden)]
+                #[allow(non_snake_case)]
+                pub unsafe fn _export_method_component_set_member_f32_cabi<
+                    T: GuestComponent,
+                >(arg0: *mut u8, arg1: i32, arg2: f32) {
+                    #[cfg(target_arch = "wasm32")] _rt::run_ctors_once();
+                    T::set_member_f32(
+                        ComponentBorrow::lift(arg0 as u32 as usize).get(),
+                        arg1 as u32,
+                        arg2,
+                    );
+                }
+                #[doc(hidden)]
+                #[allow(non_snake_case)]
+                pub unsafe fn _export_method_component_set_member_f64_cabi<
+                    T: GuestComponent,
+                >(arg0: *mut u8, arg1: i32, arg2: f64) {
+                    #[cfg(target_arch = "wasm32")] _rt::run_ctors_once();
+                    T::set_member_f64(
+                        ComponentBorrow::lift(arg0 as u32 as usize).get(),
+                        arg1 as u32,
+                        arg2,
+                    );
+                }
+                #[doc(hidden)]
+                #[allow(non_snake_case)]
+                pub unsafe fn _export_method_component_set_member_bool_cabi<
+                    T: GuestComponent,
+                >(arg0: *mut u8, arg1: i32, arg2: i32) {
+                    #[cfg(target_arch = "wasm32")] _rt::run_ctors_once();
+                    T::set_member_bool(
+                        ComponentBorrow::lift(arg0 as u32 as usize).get(),
+                        arg1 as u32,
+                        _rt::bool_lift(arg2 as u8),
+                    );
+                }
+                #[doc(hidden)]
+                #[allow(non_snake_case)]
+                pub unsafe fn _export_method_component_set_member_string_cabi<
+                    T: GuestComponent,
+                >(arg0: *mut u8, arg1: i32, arg2: *mut u8, arg3: usize) {
+                    #[cfg(target_arch = "wasm32")] _rt::run_ctors_once();
+                    let len0 = arg3;
+                    let bytes0 = _rt::Vec::from_raw_parts(arg2.cast(), len0, len0);
+                    T::set_member_string(
+                        ComponentBorrow::lift(arg0 as u32 as usize).get(),
+                        arg1 as u32,
+                        _rt::string_lift(bytes0),
+                    );
+                }
+                #[doc(hidden)]
+                #[allow(non_snake_case)]
+                pub unsafe fn _export_method_component_set_member_u32array_cabi<
+                    T: GuestComponent,
+                >(arg0: *mut u8, arg1: i32, arg2: *mut u8, arg3: usize) {
+                    #[cfg(target_arch = "wasm32")] _rt::run_ctors_once();
+                    let len0 = arg3;
+                    T::set_member_u32array(
+                        ComponentBorrow::lift(arg0 as u32 as usize).get(),
+                        arg1 as u32,
+                        _rt::Vec::from_raw_parts(arg2.cast(), len0, len0),
+                    );
+                }
+                #[doc(hidden)]
+                #[allow(non_snake_case)]
+                pub unsafe fn _export_method_component_set_member_f32array_cabi<
+                    T: GuestComponent,
+                >(arg0: *mut u8, arg1: i32, arg2: *mut u8, arg3: usize) {
+                    #[cfg(target_arch = "wasm32")] _rt::run_ctors_once();
+                    let len0 = arg3;
+                    T::set_member_f32array(
+                        ComponentBorrow::lift(arg0 as u32 as usize).get(),
+                        arg1 as u32,
+                        _rt::Vec::from_raw_parts(arg2.cast(), len0, len0),
+                    );
+                }
+                #[doc(hidden)]
+                #[allow(non_snake_case)]
+                pub unsafe fn _export_method_component_get_member_u8_cabi<
+                    T: GuestComponent,
+                >(arg0: *mut u8, arg1: i32) -> i32 {
+                    #[cfg(target_arch = "wasm32")] _rt::run_ctors_once();
+                    let result0 = T::get_member_u8(
+                        ComponentBorrow::lift(arg0 as u32 as usize).get(),
+                        arg1 as u32,
+                    );
+                    _rt::as_i32(result0)
+                }
+                #[doc(hidden)]
+                #[allow(non_snake_case)]
+                pub unsafe fn _export_method_component_get_member_u16_cabi<
+                    T: GuestComponent,
+                >(arg0: *mut u8, arg1: i32) -> i32 {
+                    #[cfg(target_arch = "wasm32")] _rt::run_ctors_once();
+                    let result0 = T::get_member_u16(
+                        ComponentBorrow::lift(arg0 as u32 as usize).get(),
+                        arg1 as u32,
+                    );
+                    _rt::as_i32(result0)
+                }
+                #[doc(hidden)]
+                #[allow(non_snake_case)]
+                pub unsafe fn _export_method_component_get_member_u32_cabi<
+                    T: GuestComponent,
+                >(arg0: *mut u8, arg1: i32) -> i32 {
+                    #[cfg(target_arch = "wasm32")] _rt::run_ctors_once();
+                    let result0 = T::get_member_u32(
+                        ComponentBorrow::lift(arg0 as u32 as usize).get(),
+                        arg1 as u32,
+                    );
+                    _rt::as_i32(result0)
+                }
+                #[doc(hidden)]
+                #[allow(non_snake_case)]
+                pub unsafe fn _export_method_component_get_member_u64_cabi<
+                    T: GuestComponent,
+                >(arg0: *mut u8, arg1: i32) -> i64 {
+                    #[cfg(target_arch = "wasm32")] _rt::run_ctors_once();
+                    let result0 = T::get_member_u64(
+                        ComponentBorrow::lift(arg0 as u32 as usize).get(),
+                        arg1 as u32,
+                    );
+                    _rt::as_i64(result0)
+                }
+                #[doc(hidden)]
+                #[allow(non_snake_case)]
+                pub unsafe fn _export_method_component_get_member_i8_cabi<
+                    T: GuestComponent,
+                >(arg0: *mut u8, arg1: i32) -> i32 {
+                    #[cfg(target_arch = "wasm32")] _rt::run_ctors_once();
+                    let result0 = T::get_member_i8(
+                        ComponentBorrow::lift(arg0 as u32 as usize).get(),
+                        arg1 as u32,
+                    );
+                    _rt::as_i32(result0)
+                }
+                #[doc(hidden)]
+                #[allow(non_snake_case)]
+                pub unsafe fn _export_method_component_get_member_i16_cabi<
+                    T: GuestComponent,
+                >(arg0: *mut u8, arg1: i32) -> i32 {
+                    #[cfg(target_arch = "wasm32")] _rt::run_ctors_once();
+                    let result0 = T::get_member_i16(
+                        ComponentBorrow::lift(arg0 as u32 as usize).get(),
+                        arg1 as u32,
+                    );
+                    _rt::as_i32(result0)
+                }
+                #[doc(hidden)]
+                #[allow(non_snake_case)]
+                pub unsafe fn _export_method_component_get_member_i32_cabi<
+                    T: GuestComponent,
+                >(arg0: *mut u8, arg1: i32) -> i32 {
+                    #[cfg(target_arch = "wasm32")] _rt::run_ctors_once();
+                    let result0 = T::get_member_i32(
+                        ComponentBorrow::lift(arg0 as u32 as usize).get(),
+                        arg1 as u32,
+                    );
+                    _rt::as_i32(result0)
+                }
+                #[doc(hidden)]
+                #[allow(non_snake_case)]
+                pub unsafe fn _export_method_component_get_member_i64_cabi<
+                    T: GuestComponent,
+                >(arg0: *mut u8, arg1: i32) -> i64 {
+                    #[cfg(target_arch = "wasm32")] _rt::run_ctors_once();
+                    let result0 = T::get_member_i64(
+                        ComponentBorrow::lift(arg0 as u32 as usize).get(),
+                        arg1 as u32,
+                    );
+                    _rt::as_i64(result0)
+                }
+                #[doc(hidden)]
+                #[allow(non_snake_case)]
+                pub unsafe fn _export_method_component_get_member_f32_cabi<
+                    T: GuestComponent,
+                >(arg0: *mut u8, arg1: i32) -> f32 {
+                    #[cfg(target_arch = "wasm32")] _rt::run_ctors_once();
+                    let result0 = T::get_member_f32(
+                        ComponentBorrow::lift(arg0 as u32 as usize).get(),
+                        arg1 as u32,
+                    );
+                    _rt::as_f32(result0)
+                }
+                #[doc(hidden)]
+                #[allow(non_snake_case)]
+                pub unsafe fn _export_method_component_get_member_f64_cabi<
+                    T: GuestComponent,
+                >(arg0: *mut u8, arg1: i32) -> f64 {
+                    #[cfg(target_arch = "wasm32")] _rt::run_ctors_once();
+                    let result0 = T::get_member_f64(
+                        ComponentBorrow::lift(arg0 as u32 as usize).get(),
+                        arg1 as u32,
+                    );
+                    _rt::as_f64(result0)
+                }
+                #[doc(hidden)]
+                #[allow(non_snake_case)]
+                pub unsafe fn _export_method_component_get_member_bool_cabi<
+                    T: GuestComponent,
+                >(arg0: *mut u8, arg1: i32) -> i32 {
+                    #[cfg(target_arch = "wasm32")] _rt::run_ctors_once();
+                    let result0 = T::get_member_bool(
+                        ComponentBorrow::lift(arg0 as u32 as usize).get(),
+                        arg1 as u32,
+                    );
+                    match result0 {
+                        true => 1,
+                        false => 0,
+                    }
+                }
+                #[doc(hidden)]
+                #[allow(non_snake_case)]
+                pub unsafe fn _export_method_component_get_member_string_cabi<
+                    T: GuestComponent,
+                >(arg0: *mut u8, arg1: i32) -> *mut u8 {
+                    #[cfg(target_arch = "wasm32")] _rt::run_ctors_once();
+                    let result0 = T::get_member_string(
+                        ComponentBorrow::lift(arg0 as u32 as usize).get(),
+                        arg1 as u32,
+                    );
+                    let ptr1 = _RET_AREA.0.as_mut_ptr().cast::<u8>();
+                    let vec2 = (result0.into_bytes()).into_boxed_slice();
+                    let ptr2 = vec2.as_ptr().cast::<u8>();
+                    let len2 = vec2.len();
+                    ::core::mem::forget(vec2);
+                    *ptr1.add(4).cast::<usize>() = len2;
+                    *ptr1.add(0).cast::<*mut u8>() = ptr2.cast_mut();
+                    ptr1
+                }
+                #[doc(hidden)]
+                #[allow(non_snake_case)]
+                pub unsafe fn __post_return_method_component_get_member_string<
+                    T: GuestComponent,
+                >(arg0: *mut u8) {
+                    let l0 = *arg0.add(0).cast::<*mut u8>();
+                    let l1 = *arg0.add(4).cast::<usize>();
+                    _rt::cabi_dealloc(l0, l1, 1);
+                }
+                #[doc(hidden)]
+                #[allow(non_snake_case)]
+                pub unsafe fn _export_method_component_get_member_u32array_cabi<
+                    T: GuestComponent,
+                >(arg0: *mut u8, arg1: i32) -> *mut u8 {
+                    #[cfg(target_arch = "wasm32")] _rt::run_ctors_once();
+                    let result0 = T::get_member_u32array(
+                        ComponentBorrow::lift(arg0 as u32 as usize).get(),
+                        arg1 as u32,
+                    );
                     let ptr1 = _RET_AREA.0.as_mut_ptr().cast::<u8>();
                     let vec2 = (result0).into_boxed_slice();
                     let ptr2 = vec2.as_ptr().cast::<u8>();
@@ -174,17 +641,183 @@ pub mod exports {
                 }
                 #[doc(hidden)]
                 #[allow(non_snake_case)]
-                pub unsafe fn __post_return_static_component_read<T: GuestComponent>(
-                    arg0: *mut u8,
-                ) {
+                pub unsafe fn __post_return_method_component_get_member_u32array<
+                    T: GuestComponent,
+                >(arg0: *mut u8) {
                     let l0 = *arg0.add(0).cast::<*mut u8>();
                     let l1 = *arg0.add(4).cast::<usize>();
                     let base2 = l0;
                     let len2 = l1;
-                    _rt::cabi_dealloc(base2, len2 * 1, 1);
+                    _rt::cabi_dealloc(base2, len2 * 4, 4);
+                }
+                #[doc(hidden)]
+                #[allow(non_snake_case)]
+                pub unsafe fn _export_method_component_get_member_f32array_cabi<
+                    T: GuestComponent,
+                >(arg0: *mut u8, arg1: i32) -> *mut u8 {
+                    #[cfg(target_arch = "wasm32")] _rt::run_ctors_once();
+                    let result0 = T::get_member_f32array(
+                        ComponentBorrow::lift(arg0 as u32 as usize).get(),
+                        arg1 as u32,
+                    );
+                    let ptr1 = _RET_AREA.0.as_mut_ptr().cast::<u8>();
+                    let vec2 = (result0).into_boxed_slice();
+                    let ptr2 = vec2.as_ptr().cast::<u8>();
+                    let len2 = vec2.len();
+                    ::core::mem::forget(vec2);
+                    *ptr1.add(4).cast::<usize>() = len2;
+                    *ptr1.add(0).cast::<*mut u8>() = ptr2.cast_mut();
+                    ptr1
+                }
+                #[doc(hidden)]
+                #[allow(non_snake_case)]
+                pub unsafe fn __post_return_method_component_get_member_f32array<
+                    T: GuestComponent,
+                >(arg0: *mut u8) {
+                    let l0 = *arg0.add(0).cast::<*mut u8>();
+                    let l1 = *arg0.add(4).cast::<usize>();
+                    let base2 = l0;
+                    let len2 = l1;
+                    _rt::cabi_dealloc(base2, len2 * 4, 4);
+                }
+                #[doc(hidden)]
+                #[allow(non_snake_case)]
+                pub unsafe fn _export_component_get_cabi<T: Guest>(
+                    arg0: *mut u8,
+                    arg1: usize,
+                ) -> i64 {
+                    #[cfg(target_arch = "wasm32")] _rt::run_ctors_once();
+                    let len0 = arg1;
+                    let bytes0 = _rt::Vec::from_raw_parts(arg0.cast(), len0, len0);
+                    let result1 = T::component_get(_rt::string_lift(bytes0));
+                    _rt::as_i64(result1)
+                }
+                #[doc(hidden)]
+                #[allow(non_snake_case)]
+                pub unsafe fn _export_tag_create_cabi<T: Guest>(
+                    arg0: *mut u8,
+                    arg1: usize,
+                ) -> i64 {
+                    #[cfg(target_arch = "wasm32")] _rt::run_ctors_once();
+                    let len0 = arg1;
+                    let bytes0 = _rt::Vec::from_raw_parts(arg0.cast(), len0, len0);
+                    let result1 = T::tag_create(_rt::string_lift(bytes0));
+                    _rt::as_i64(result1)
+                }
+                #[doc(hidden)]
+                #[allow(non_snake_case)]
+                pub unsafe fn _export_prefab_create_cabi<T: Guest>() -> i64 {
+                    #[cfg(target_arch = "wasm32")] _rt::run_ctors_once();
+                    let result0 = T::prefab_create();
+                    _rt::as_i64(result0)
+                }
+                #[doc(hidden)]
+                #[allow(non_snake_case)]
+                pub unsafe fn _export_prefab_instance_cabi<T: Guest>(arg0: i64) -> i64 {
+                    #[cfg(target_arch = "wasm32")] _rt::run_ctors_once();
+                    let result0 = T::prefab_instance(arg0 as u64);
+                    _rt::as_i64(result0)
+                }
+                #[doc(hidden)]
+                #[allow(non_snake_case)]
+                pub unsafe fn _export_entity_create_cabi<T: Guest>() -> i64 {
+                    #[cfg(target_arch = "wasm32")] _rt::run_ctors_once();
+                    let result0 = T::entity_create();
+                    _rt::as_i64(result0)
+                }
+                #[doc(hidden)]
+                #[allow(non_snake_case)]
+                pub unsafe fn _export_singleton_add_cabi<T: Guest>(arg0: i64) {
+                    #[cfg(target_arch = "wasm32")] _rt::run_ctors_once();
+                    T::singleton_add(arg0 as u64);
+                }
+                #[doc(hidden)]
+                #[allow(non_snake_case)]
+                pub unsafe fn _export_singleton_get_cabi<T: Guest>(arg0: i64) -> i32 {
+                    #[cfg(target_arch = "wasm32")] _rt::run_ctors_once();
+                    let result0 = T::singleton_get(arg0 as u64);
+                    (result0).take_handle() as i32
+                }
+                #[doc(hidden)]
+                #[allow(non_snake_case)]
+                pub unsafe fn _export_singleton_remove_cabi<T: Guest>(arg0: i64) {
+                    #[cfg(target_arch = "wasm32")] _rt::run_ctors_once();
+                    T::singleton_remove(arg0 as u64);
+                }
+                #[doc(hidden)]
+                #[allow(non_snake_case)]
+                pub unsafe fn _export_entity_get_component_cabi<T: Guest>(
+                    arg0: i64,
+                    arg1: i64,
+                ) -> i32 {
+                    #[cfg(target_arch = "wasm32")] _rt::run_ctors_once();
+                    let result0 = T::entity_get_component(arg0 as u64, arg1 as u64);
+                    (result0).take_handle() as i32
+                }
+                #[doc(hidden)]
+                #[allow(non_snake_case)]
+                pub unsafe fn _export_entity_set_component_cabi<T: Guest>(
+                    arg0: i64,
+                    arg1: i64,
+                    arg2: i32,
+                ) {
+                    #[cfg(target_arch = "wasm32")] _rt::run_ctors_once();
+                    T::entity_set_component(
+                        arg0 as u64,
+                        arg1 as u64,
+                        Component::from_handle(arg2 as u32),
+                    );
+                }
+                #[doc(hidden)]
+                #[allow(non_snake_case)]
+                pub unsafe fn _export_entity_remove_component_cabi<T: Guest>(
+                    arg0: i64,
+                    arg1: i64,
+                ) {
+                    #[cfg(target_arch = "wasm32")] _rt::run_ctors_once();
+                    T::entity_remove_component(arg0 as u64, arg1 as u64);
+                }
+                #[doc(hidden)]
+                #[allow(non_snake_case)]
+                pub unsafe fn _export_entity_has_component_cabi<T: Guest>(
+                    arg0: i64,
+                    arg1: i64,
+                ) -> i32 {
+                    #[cfg(target_arch = "wasm32")] _rt::run_ctors_once();
+                    let result0 = T::entity_has_component(arg0 as u64, arg1 as u64);
+                    match result0 {
+                        true => 1,
+                        false => 0,
+                    }
                 }
                 pub trait Guest {
                     type Component: GuestComponent;
+                    /// component-create: func(desc: component-desc) -> ecs-entity-t;
+                    fn component_get(name: _rt::String) -> EcsEntityT;
+                    fn tag_create(tag_name: _rt::String) -> EcsEntityT;
+                    fn prefab_create() -> EcsEntityT;
+                    fn prefab_instance(prefab: EcsEntityT) -> EcsEntityT;
+                    fn entity_create() -> EcsEntityT;
+                    fn singleton_add(component: EcsEntityT);
+                    fn singleton_get(component: EcsEntityT) -> Component;
+                    fn singleton_remove(component: EcsEntityT);
+                    fn entity_get_component(
+                        entity: EcsEntityT,
+                        component: EcsEntityT,
+                    ) -> Component;
+                    fn entity_set_component(
+                        entity: EcsEntityT,
+                        component: EcsEntityT,
+                        value: Component,
+                    );
+                    fn entity_remove_component(
+                        entity: EcsEntityT,
+                        component: EcsEntityT,
+                    );
+                    fn entity_has_component(
+                        entity: EcsEntityT,
+                        component: EcsEntityT,
+                    ) -> bool;
                 }
                 pub trait GuestComponent: 'static {
                     #[doc(hidden)]
@@ -227,34 +860,273 @@ pub mod exports {
                             unsafe { rep(handle) }
                         }
                     }
-                    fn new(init: _rt::Vec<u8>) -> Self;
-                    fn write(&self, bytes: _rt::Vec<u8>);
-                    fn read(n: u32) -> _rt::Vec<u8>;
+                    fn new(init: ComponentDesc) -> Self;
+                    fn set_member_u8(&self, offset: u32, value: u8);
+                    fn set_member_u16(&self, offset: u32, value: u16);
+                    fn set_member_u32(&self, offset: u32, value: u32);
+                    fn set_member_u64(&self, offset: u32, value: u64);
+                    fn set_member_i8(&self, offset: u32, value: i8);
+                    fn set_member_i16(&self, offset: u32, value: i16);
+                    fn set_member_i32(&self, offset: u32, value: i32);
+                    fn set_member_i64(&self, offset: u32, value: i64);
+                    fn set_member_f32(&self, offset: u32, value: f32);
+                    fn set_member_f64(&self, offset: u32, value: f64);
+                    fn set_member_bool(&self, offset: u32, value: bool);
+                    fn set_member_string(&self, offset: u32, value: _rt::String);
+                    fn set_member_u32array(&self, offset: u32, value: _rt::Vec<u32>);
+                    fn set_member_f32array(&self, offset: u32, value: _rt::Vec<f32>);
+                    fn get_member_u8(&self, offset: u32) -> u8;
+                    fn get_member_u16(&self, offset: u32) -> u16;
+                    fn get_member_u32(&self, offset: u32) -> u32;
+                    fn get_member_u64(&self, offset: u32) -> u64;
+                    fn get_member_i8(&self, offset: u32) -> i8;
+                    fn get_member_i16(&self, offset: u32) -> i16;
+                    fn get_member_i32(&self, offset: u32) -> i32;
+                    fn get_member_i64(&self, offset: u32) -> i64;
+                    fn get_member_f32(&self, offset: u32) -> f32;
+                    fn get_member_f64(&self, offset: u32) -> f64;
+                    fn get_member_bool(&self, offset: u32) -> bool;
+                    fn get_member_string(&self, offset: u32) -> _rt::String;
+                    fn get_member_u32array(&self, offset: u32) -> _rt::Vec<u32>;
+                    fn get_member_f32array(&self, offset: u32) -> _rt::Vec<f32>;
                 }
                 #[doc(hidden)]
                 macro_rules! __export_toxoid_api_ecs_cabi {
                     ($ty:ident with_types_in $($path_to_types:tt)*) => {
                         const _ : () = { #[export_name =
                         "toxoid:api/ecs#[constructor]component"] unsafe extern "C" fn
-                        export_constructor_component(arg0 : * mut u8, arg1 : usize,) ->
-                        i32 { $($path_to_types)*::
-                        _export_constructor_component_cabi::<<$ty as $($path_to_types)*::
-                        Guest >::Component > (arg0, arg1) } #[export_name =
-                        "toxoid:api/ecs#[method]component.write"] unsafe extern "C" fn
-                        export_method_component_write(arg0 : * mut u8, arg1 : * mut u8,
-                        arg2 : usize,) { $($path_to_types)*::
-                        _export_method_component_write_cabi::<<$ty as
+                        export_constructor_component(arg0 : * mut u8, arg1 : usize, arg2
+                        : * mut u8, arg3 : usize, arg4 : * mut u8, arg5 : usize,) -> i32
+                        { $($path_to_types)*:: _export_constructor_component_cabi::<<$ty
+                        as $($path_to_types)*:: Guest >::Component > (arg0, arg1, arg2,
+                        arg3, arg4, arg5) } #[export_name =
+                        "toxoid:api/ecs#[method]component.set-member-u8"] unsafe extern
+                        "C" fn export_method_component_set_member_u8(arg0 : * mut u8,
+                        arg1 : i32, arg2 : i32,) { $($path_to_types)*::
+                        _export_method_component_set_member_u8_cabi::<<$ty as
                         $($path_to_types)*:: Guest >::Component > (arg0, arg1, arg2) }
-                        #[export_name = "toxoid:api/ecs#[static]component.read"] unsafe
-                        extern "C" fn export_static_component_read(arg0 : i32,) -> * mut
-                        u8 { $($path_to_types)*::
-                        _export_static_component_read_cabi::<<$ty as $($path_to_types)*::
-                        Guest >::Component > (arg0) } #[export_name =
-                        "cabi_post_toxoid:api/ecs#[static]component.read"] unsafe extern
-                        "C" fn _post_return_static_component_read(arg0 : * mut u8,) {
-                        $($path_to_types)*:: __post_return_static_component_read::<<$ty
-                        as $($path_to_types)*:: Guest >::Component > (arg0) } const _ :
-                        () = { #[doc(hidden)] #[export_name =
+                        #[export_name =
+                        "toxoid:api/ecs#[method]component.set-member-u16"] unsafe extern
+                        "C" fn export_method_component_set_member_u16(arg0 : * mut u8,
+                        arg1 : i32, arg2 : i32,) { $($path_to_types)*::
+                        _export_method_component_set_member_u16_cabi::<<$ty as
+                        $($path_to_types)*:: Guest >::Component > (arg0, arg1, arg2) }
+                        #[export_name =
+                        "toxoid:api/ecs#[method]component.set-member-u32"] unsafe extern
+                        "C" fn export_method_component_set_member_u32(arg0 : * mut u8,
+                        arg1 : i32, arg2 : i32,) { $($path_to_types)*::
+                        _export_method_component_set_member_u32_cabi::<<$ty as
+                        $($path_to_types)*:: Guest >::Component > (arg0, arg1, arg2) }
+                        #[export_name =
+                        "toxoid:api/ecs#[method]component.set-member-u64"] unsafe extern
+                        "C" fn export_method_component_set_member_u64(arg0 : * mut u8,
+                        arg1 : i32, arg2 : i64,) { $($path_to_types)*::
+                        _export_method_component_set_member_u64_cabi::<<$ty as
+                        $($path_to_types)*:: Guest >::Component > (arg0, arg1, arg2) }
+                        #[export_name = "toxoid:api/ecs#[method]component.set-member-i8"]
+                        unsafe extern "C" fn export_method_component_set_member_i8(arg0 :
+                        * mut u8, arg1 : i32, arg2 : i32,) { $($path_to_types)*::
+                        _export_method_component_set_member_i8_cabi::<<$ty as
+                        $($path_to_types)*:: Guest >::Component > (arg0, arg1, arg2) }
+                        #[export_name =
+                        "toxoid:api/ecs#[method]component.set-member-i16"] unsafe extern
+                        "C" fn export_method_component_set_member_i16(arg0 : * mut u8,
+                        arg1 : i32, arg2 : i32,) { $($path_to_types)*::
+                        _export_method_component_set_member_i16_cabi::<<$ty as
+                        $($path_to_types)*:: Guest >::Component > (arg0, arg1, arg2) }
+                        #[export_name =
+                        "toxoid:api/ecs#[method]component.set-member-i32"] unsafe extern
+                        "C" fn export_method_component_set_member_i32(arg0 : * mut u8,
+                        arg1 : i32, arg2 : i32,) { $($path_to_types)*::
+                        _export_method_component_set_member_i32_cabi::<<$ty as
+                        $($path_to_types)*:: Guest >::Component > (arg0, arg1, arg2) }
+                        #[export_name =
+                        "toxoid:api/ecs#[method]component.set-member-i64"] unsafe extern
+                        "C" fn export_method_component_set_member_i64(arg0 : * mut u8,
+                        arg1 : i32, arg2 : i64,) { $($path_to_types)*::
+                        _export_method_component_set_member_i64_cabi::<<$ty as
+                        $($path_to_types)*:: Guest >::Component > (arg0, arg1, arg2) }
+                        #[export_name =
+                        "toxoid:api/ecs#[method]component.set-member-f32"] unsafe extern
+                        "C" fn export_method_component_set_member_f32(arg0 : * mut u8,
+                        arg1 : i32, arg2 : f32,) { $($path_to_types)*::
+                        _export_method_component_set_member_f32_cabi::<<$ty as
+                        $($path_to_types)*:: Guest >::Component > (arg0, arg1, arg2) }
+                        #[export_name =
+                        "toxoid:api/ecs#[method]component.set-member-f64"] unsafe extern
+                        "C" fn export_method_component_set_member_f64(arg0 : * mut u8,
+                        arg1 : i32, arg2 : f64,) { $($path_to_types)*::
+                        _export_method_component_set_member_f64_cabi::<<$ty as
+                        $($path_to_types)*:: Guest >::Component > (arg0, arg1, arg2) }
+                        #[export_name =
+                        "toxoid:api/ecs#[method]component.set-member-bool"] unsafe extern
+                        "C" fn export_method_component_set_member_bool(arg0 : * mut u8,
+                        arg1 : i32, arg2 : i32,) { $($path_to_types)*::
+                        _export_method_component_set_member_bool_cabi::<<$ty as
+                        $($path_to_types)*:: Guest >::Component > (arg0, arg1, arg2) }
+                        #[export_name =
+                        "toxoid:api/ecs#[method]component.set-member-string"] unsafe
+                        extern "C" fn export_method_component_set_member_string(arg0 : *
+                        mut u8, arg1 : i32, arg2 : * mut u8, arg3 : usize,) {
+                        $($path_to_types)*::
+                        _export_method_component_set_member_string_cabi::<<$ty as
+                        $($path_to_types)*:: Guest >::Component > (arg0, arg1, arg2,
+                        arg3) } #[export_name =
+                        "toxoid:api/ecs#[method]component.set-member-u32array"] unsafe
+                        extern "C" fn export_method_component_set_member_u32array(arg0 :
+                        * mut u8, arg1 : i32, arg2 : * mut u8, arg3 : usize,) {
+                        $($path_to_types)*::
+                        _export_method_component_set_member_u32array_cabi::<<$ty as
+                        $($path_to_types)*:: Guest >::Component > (arg0, arg1, arg2,
+                        arg3) } #[export_name =
+                        "toxoid:api/ecs#[method]component.set-member-f32array"] unsafe
+                        extern "C" fn export_method_component_set_member_f32array(arg0 :
+                        * mut u8, arg1 : i32, arg2 : * mut u8, arg3 : usize,) {
+                        $($path_to_types)*::
+                        _export_method_component_set_member_f32array_cabi::<<$ty as
+                        $($path_to_types)*:: Guest >::Component > (arg0, arg1, arg2,
+                        arg3) } #[export_name =
+                        "toxoid:api/ecs#[method]component.get-member-u8"] unsafe extern
+                        "C" fn export_method_component_get_member_u8(arg0 : * mut u8,
+                        arg1 : i32,) -> i32 { $($path_to_types)*::
+                        _export_method_component_get_member_u8_cabi::<<$ty as
+                        $($path_to_types)*:: Guest >::Component > (arg0, arg1) }
+                        #[export_name =
+                        "toxoid:api/ecs#[method]component.get-member-u16"] unsafe extern
+                        "C" fn export_method_component_get_member_u16(arg0 : * mut u8,
+                        arg1 : i32,) -> i32 { $($path_to_types)*::
+                        _export_method_component_get_member_u16_cabi::<<$ty as
+                        $($path_to_types)*:: Guest >::Component > (arg0, arg1) }
+                        #[export_name =
+                        "toxoid:api/ecs#[method]component.get-member-u32"] unsafe extern
+                        "C" fn export_method_component_get_member_u32(arg0 : * mut u8,
+                        arg1 : i32,) -> i32 { $($path_to_types)*::
+                        _export_method_component_get_member_u32_cabi::<<$ty as
+                        $($path_to_types)*:: Guest >::Component > (arg0, arg1) }
+                        #[export_name =
+                        "toxoid:api/ecs#[method]component.get-member-u64"] unsafe extern
+                        "C" fn export_method_component_get_member_u64(arg0 : * mut u8,
+                        arg1 : i32,) -> i64 { $($path_to_types)*::
+                        _export_method_component_get_member_u64_cabi::<<$ty as
+                        $($path_to_types)*:: Guest >::Component > (arg0, arg1) }
+                        #[export_name = "toxoid:api/ecs#[method]component.get-member-i8"]
+                        unsafe extern "C" fn export_method_component_get_member_i8(arg0 :
+                        * mut u8, arg1 : i32,) -> i32 { $($path_to_types)*::
+                        _export_method_component_get_member_i8_cabi::<<$ty as
+                        $($path_to_types)*:: Guest >::Component > (arg0, arg1) }
+                        #[export_name =
+                        "toxoid:api/ecs#[method]component.get-member-i16"] unsafe extern
+                        "C" fn export_method_component_get_member_i16(arg0 : * mut u8,
+                        arg1 : i32,) -> i32 { $($path_to_types)*::
+                        _export_method_component_get_member_i16_cabi::<<$ty as
+                        $($path_to_types)*:: Guest >::Component > (arg0, arg1) }
+                        #[export_name =
+                        "toxoid:api/ecs#[method]component.get-member-i32"] unsafe extern
+                        "C" fn export_method_component_get_member_i32(arg0 : * mut u8,
+                        arg1 : i32,) -> i32 { $($path_to_types)*::
+                        _export_method_component_get_member_i32_cabi::<<$ty as
+                        $($path_to_types)*:: Guest >::Component > (arg0, arg1) }
+                        #[export_name =
+                        "toxoid:api/ecs#[method]component.get-member-i64"] unsafe extern
+                        "C" fn export_method_component_get_member_i64(arg0 : * mut u8,
+                        arg1 : i32,) -> i64 { $($path_to_types)*::
+                        _export_method_component_get_member_i64_cabi::<<$ty as
+                        $($path_to_types)*:: Guest >::Component > (arg0, arg1) }
+                        #[export_name =
+                        "toxoid:api/ecs#[method]component.get-member-f32"] unsafe extern
+                        "C" fn export_method_component_get_member_f32(arg0 : * mut u8,
+                        arg1 : i32,) -> f32 { $($path_to_types)*::
+                        _export_method_component_get_member_f32_cabi::<<$ty as
+                        $($path_to_types)*:: Guest >::Component > (arg0, arg1) }
+                        #[export_name =
+                        "toxoid:api/ecs#[method]component.get-member-f64"] unsafe extern
+                        "C" fn export_method_component_get_member_f64(arg0 : * mut u8,
+                        arg1 : i32,) -> f64 { $($path_to_types)*::
+                        _export_method_component_get_member_f64_cabi::<<$ty as
+                        $($path_to_types)*:: Guest >::Component > (arg0, arg1) }
+                        #[export_name =
+                        "toxoid:api/ecs#[method]component.get-member-bool"] unsafe extern
+                        "C" fn export_method_component_get_member_bool(arg0 : * mut u8,
+                        arg1 : i32,) -> i32 { $($path_to_types)*::
+                        _export_method_component_get_member_bool_cabi::<<$ty as
+                        $($path_to_types)*:: Guest >::Component > (arg0, arg1) }
+                        #[export_name =
+                        "toxoid:api/ecs#[method]component.get-member-string"] unsafe
+                        extern "C" fn export_method_component_get_member_string(arg0 : *
+                        mut u8, arg1 : i32,) -> * mut u8 { $($path_to_types)*::
+                        _export_method_component_get_member_string_cabi::<<$ty as
+                        $($path_to_types)*:: Guest >::Component > (arg0, arg1) }
+                        #[export_name =
+                        "cabi_post_toxoid:api/ecs#[method]component.get-member-string"]
+                        unsafe extern "C" fn
+                        _post_return_method_component_get_member_string(arg0 : * mut u8,)
+                        { $($path_to_types)*::
+                        __post_return_method_component_get_member_string::<<$ty as
+                        $($path_to_types)*:: Guest >::Component > (arg0) } #[export_name
+                        = "toxoid:api/ecs#[method]component.get-member-u32array"] unsafe
+                        extern "C" fn export_method_component_get_member_u32array(arg0 :
+                        * mut u8, arg1 : i32,) -> * mut u8 { $($path_to_types)*::
+                        _export_method_component_get_member_u32array_cabi::<<$ty as
+                        $($path_to_types)*:: Guest >::Component > (arg0, arg1) }
+                        #[export_name =
+                        "cabi_post_toxoid:api/ecs#[method]component.get-member-u32array"]
+                        unsafe extern "C" fn
+                        _post_return_method_component_get_member_u32array(arg0 : * mut
+                        u8,) { $($path_to_types)*::
+                        __post_return_method_component_get_member_u32array::<<$ty as
+                        $($path_to_types)*:: Guest >::Component > (arg0) } #[export_name
+                        = "toxoid:api/ecs#[method]component.get-member-f32array"] unsafe
+                        extern "C" fn export_method_component_get_member_f32array(arg0 :
+                        * mut u8, arg1 : i32,) -> * mut u8 { $($path_to_types)*::
+                        _export_method_component_get_member_f32array_cabi::<<$ty as
+                        $($path_to_types)*:: Guest >::Component > (arg0, arg1) }
+                        #[export_name =
+                        "cabi_post_toxoid:api/ecs#[method]component.get-member-f32array"]
+                        unsafe extern "C" fn
+                        _post_return_method_component_get_member_f32array(arg0 : * mut
+                        u8,) { $($path_to_types)*::
+                        __post_return_method_component_get_member_f32array::<<$ty as
+                        $($path_to_types)*:: Guest >::Component > (arg0) } #[export_name
+                        = "toxoid:api/ecs#component-get"] unsafe extern "C" fn
+                        export_component_get(arg0 : * mut u8, arg1 : usize,) -> i64 {
+                        $($path_to_types)*:: _export_component_get_cabi::<$ty > (arg0,
+                        arg1) } #[export_name = "toxoid:api/ecs#tag-create"] unsafe
+                        extern "C" fn export_tag_create(arg0 : * mut u8, arg1 : usize,)
+                        -> i64 { $($path_to_types)*:: _export_tag_create_cabi::<$ty >
+                        (arg0, arg1) } #[export_name = "toxoid:api/ecs#prefab-create"]
+                        unsafe extern "C" fn export_prefab_create() -> i64 {
+                        $($path_to_types)*:: _export_prefab_create_cabi::<$ty > () }
+                        #[export_name = "toxoid:api/ecs#prefab-instance"] unsafe extern
+                        "C" fn export_prefab_instance(arg0 : i64,) -> i64 {
+                        $($path_to_types)*:: _export_prefab_instance_cabi::<$ty > (arg0)
+                        } #[export_name = "toxoid:api/ecs#entity-create"] unsafe extern
+                        "C" fn export_entity_create() -> i64 { $($path_to_types)*::
+                        _export_entity_create_cabi::<$ty > () } #[export_name =
+                        "toxoid:api/ecs#singleton-add"] unsafe extern "C" fn
+                        export_singleton_add(arg0 : i64,) { $($path_to_types)*::
+                        _export_singleton_add_cabi::<$ty > (arg0) } #[export_name =
+                        "toxoid:api/ecs#singleton-get"] unsafe extern "C" fn
+                        export_singleton_get(arg0 : i64,) -> i32 { $($path_to_types)*::
+                        _export_singleton_get_cabi::<$ty > (arg0) } #[export_name =
+                        "toxoid:api/ecs#singleton-remove"] unsafe extern "C" fn
+                        export_singleton_remove(arg0 : i64,) { $($path_to_types)*::
+                        _export_singleton_remove_cabi::<$ty > (arg0) } #[export_name =
+                        "toxoid:api/ecs#entity-get-component"] unsafe extern "C" fn
+                        export_entity_get_component(arg0 : i64, arg1 : i64,) -> i32 {
+                        $($path_to_types)*:: _export_entity_get_component_cabi::<$ty >
+                        (arg0, arg1) } #[export_name =
+                        "toxoid:api/ecs#entity-set-component"] unsafe extern "C" fn
+                        export_entity_set_component(arg0 : i64, arg1 : i64, arg2 : i32,)
+                        { $($path_to_types)*:: _export_entity_set_component_cabi::<$ty >
+                        (arg0, arg1, arg2) } #[export_name =
+                        "toxoid:api/ecs#entity-remove-component"] unsafe extern "C" fn
+                        export_entity_remove_component(arg0 : i64, arg1 : i64,) {
+                        $($path_to_types)*:: _export_entity_remove_component_cabi::<$ty >
+                        (arg0, arg1) } #[export_name =
+                        "toxoid:api/ecs#entity-has-component"] unsafe extern "C" fn
+                        export_entity_has_component(arg0 : i64, arg1 : i64,) -> i32 {
+                        $($path_to_types)*:: _export_entity_has_component_cabi::<$ty >
+                        (arg0, arg1) } const _ : () = { #[doc(hidden)] #[export_name =
                         "toxoid:api/ecs#[dtor]component"] #[allow(non_snake_case)] unsafe
                         extern "C" fn dtor(rep : * mut u8) { $($path_to_types)*::
                         Component::dtor::< <$ty as $($path_to_types)*:: Guest
@@ -273,6 +1145,8 @@ pub mod exports {
     }
 }
 mod _rt {
+    pub use alloc_crate::string::String;
+    pub use alloc_crate::vec::Vec;
     use core::fmt;
     use core::marker;
     use core::sync::atomic::{AtomicU32, Ordering::Relaxed};
@@ -352,13 +1226,146 @@ mod _rt {
     pub fn run_ctors_once() {
         wit_bindgen_rt::run_ctors_once();
     }
-    pub use alloc_crate::vec::Vec;
+    pub unsafe fn string_lift(bytes: Vec<u8>) -> String {
+        if cfg!(debug_assertions) {
+            String::from_utf8(bytes).unwrap()
+        } else {
+            String::from_utf8_unchecked(bytes)
+        }
+    }
     pub unsafe fn cabi_dealloc(ptr: *mut u8, size: usize, align: usize) {
         if size == 0 {
             return;
         }
         let layout = alloc::Layout::from_size_align_unchecked(size, align);
         alloc::dealloc(ptr, layout);
+    }
+    pub unsafe fn bool_lift(val: u8) -> bool {
+        if cfg!(debug_assertions) {
+            match val {
+                0 => false,
+                1 => true,
+                _ => panic!("invalid bool discriminant"),
+            }
+        } else {
+            val != 0
+        }
+    }
+    pub fn as_i32<T: AsI32>(t: T) -> i32 {
+        t.as_i32()
+    }
+    pub trait AsI32 {
+        fn as_i32(self) -> i32;
+    }
+    impl<'a, T: Copy + AsI32> AsI32 for &'a T {
+        fn as_i32(self) -> i32 {
+            (*self).as_i32()
+        }
+    }
+    impl AsI32 for i32 {
+        #[inline]
+        fn as_i32(self) -> i32 {
+            self as i32
+        }
+    }
+    impl AsI32 for u32 {
+        #[inline]
+        fn as_i32(self) -> i32 {
+            self as i32
+        }
+    }
+    impl AsI32 for i16 {
+        #[inline]
+        fn as_i32(self) -> i32 {
+            self as i32
+        }
+    }
+    impl AsI32 for u16 {
+        #[inline]
+        fn as_i32(self) -> i32 {
+            self as i32
+        }
+    }
+    impl AsI32 for i8 {
+        #[inline]
+        fn as_i32(self) -> i32 {
+            self as i32
+        }
+    }
+    impl AsI32 for u8 {
+        #[inline]
+        fn as_i32(self) -> i32 {
+            self as i32
+        }
+    }
+    impl AsI32 for char {
+        #[inline]
+        fn as_i32(self) -> i32 {
+            self as i32
+        }
+    }
+    impl AsI32 for usize {
+        #[inline]
+        fn as_i32(self) -> i32 {
+            self as i32
+        }
+    }
+    pub fn as_i64<T: AsI64>(t: T) -> i64 {
+        t.as_i64()
+    }
+    pub trait AsI64 {
+        fn as_i64(self) -> i64;
+    }
+    impl<'a, T: Copy + AsI64> AsI64 for &'a T {
+        fn as_i64(self) -> i64 {
+            (*self).as_i64()
+        }
+    }
+    impl AsI64 for i64 {
+        #[inline]
+        fn as_i64(self) -> i64 {
+            self as i64
+        }
+    }
+    impl AsI64 for u64 {
+        #[inline]
+        fn as_i64(self) -> i64 {
+            self as i64
+        }
+    }
+    pub fn as_f32<T: AsF32>(t: T) -> f32 {
+        t.as_f32()
+    }
+    pub trait AsF32 {
+        fn as_f32(self) -> f32;
+    }
+    impl<'a, T: Copy + AsF32> AsF32 for &'a T {
+        fn as_f32(self) -> f32 {
+            (*self).as_f32()
+        }
+    }
+    impl AsF32 for f32 {
+        #[inline]
+        fn as_f32(self) -> f32 {
+            self as f32
+        }
+    }
+    pub fn as_f64<T: AsF64>(t: T) -> f64 {
+        t.as_f64()
+    }
+    pub trait AsF64 {
+        fn as_f64(self) -> f64;
+    }
+    impl<'a, T: Copy + AsF64> AsF64 for &'a T {
+        fn as_f64(self) -> f64 {
+            (*self).as_f64()
+        }
+    }
+    impl AsF64 for f64 {
+        #[inline]
+        fn as_f64(self) -> f64 {
+            self as f64
+        }
     }
     extern crate alloc as alloc_crate;
     pub use alloc_crate::alloc;
@@ -396,15 +1403,58 @@ pub(crate) use __export_toxoid_world_impl as export;
 #[cfg(target_arch = "wasm32")]
 #[link_section = "component-type:wit-bindgen:0.30.0:toxoid-world:encoded world"]
 #[doc(hidden)]
-pub static __WIT_BINDGEN_COMPONENT_TYPE: [u8; 350] = *b"\
-\0asm\x0d\0\x01\0\0\x19\x16wit-component-encoding\x04\0\x07\xdb\x01\x01A\x02\x01\
-A\x02\x01B\x0c\x01r\x01\x04names\x04\0\x06entity\x03\0\0\x04\0\x09component\x03\x01\
-\x01p}\x01i\x02\x01@\x01\x04init\x03\0\x04\x04\0\x16[constructor]component\x01\x05\
-\x01h\x02\x01@\x02\x04self\x06\x05bytes\x03\x01\0\x04\0\x17[method]component.wri\
-te\x01\x07\x01@\x01\x01ny\0\x03\x04\0\x16[static]component.read\x01\x08\x04\x01\x0e\
-toxoid:api/ecs\x05\0\x04\x01\x17toxoid:api/toxoid-world\x04\0\x0b\x12\x01\0\x0ct\
-oxoid-world\x03\0\0\0G\x09producers\x01\x0cprocessed-by\x02\x0dwit-component\x07\
-0.215.0\x10wit-bindgen-rust\x060.30.0";
+pub static __WIT_BINDGEN_COMPONENT_TYPE: [u8; 2576] = *b"\
+\0asm\x0d\0\x01\0\0\x19\x16wit-component-encoding\x04\0\x07\x8d\x13\x01A\x02\x01\
+A\x02\x01B]\x01w\x04\0\x0cecs-entity-t\x03\0\0\x01m\x0f\x04u8-t\x05u16-t\x05u32-\
+t\x05u64-t\x04i8-t\x05i16-t\x05i32-t\x05i64-t\x05f32-t\x05f64-t\x06bool-t\x08str\
+ing-t\x07array-t\x0au32array-t\x0af32array-t\x04\0\x0bmember-type\x03\0\x02\x01p\
+s\x01p}\x01r\x03\x04names\x0cmember-names\x04\x0cmember-types\x05\x04\0\x0ecompo\
+nent-desc\x03\0\x06\x04\0\x09component\x03\x01\x01i\x08\x01@\x01\x04init\x07\0\x09\
+\x04\0\x16[constructor]component\x01\x0a\x01h\x08\x01@\x03\x04self\x0b\x06offset\
+y\x05value}\x01\0\x04\0\x1f[method]component.set-member-u8\x01\x0c\x01@\x03\x04s\
+elf\x0b\x06offsety\x05value{\x01\0\x04\0\x20[method]component.set-member-u16\x01\
+\x0d\x01@\x03\x04self\x0b\x06offsety\x05valuey\x01\0\x04\0\x20[method]component.\
+set-member-u32\x01\x0e\x01@\x03\x04self\x0b\x06offsety\x05valuew\x01\0\x04\0\x20\
+[method]component.set-member-u64\x01\x0f\x01@\x03\x04self\x0b\x06offsety\x05valu\
+e~\x01\0\x04\0\x1f[method]component.set-member-i8\x01\x10\x01@\x03\x04self\x0b\x06\
+offsety\x05value|\x01\0\x04\0\x20[method]component.set-member-i16\x01\x11\x01@\x03\
+\x04self\x0b\x06offsety\x05valuez\x01\0\x04\0\x20[method]component.set-member-i3\
+2\x01\x12\x01@\x03\x04self\x0b\x06offsety\x05valuex\x01\0\x04\0\x20[method]compo\
+nent.set-member-i64\x01\x13\x01@\x03\x04self\x0b\x06offsety\x05valuev\x01\0\x04\0\
+\x20[method]component.set-member-f32\x01\x14\x01@\x03\x04self\x0b\x06offsety\x05\
+valueu\x01\0\x04\0\x20[method]component.set-member-f64\x01\x15\x01@\x03\x04self\x0b\
+\x06offsety\x05value\x7f\x01\0\x04\0![method]component.set-member-bool\x01\x16\x01\
+@\x03\x04self\x0b\x06offsety\x05values\x01\0\x04\0#[method]component.set-member-\
+string\x01\x17\x01py\x01@\x03\x04self\x0b\x06offsety\x05value\x18\x01\0\x04\0%[m\
+ethod]component.set-member-u32array\x01\x19\x01pv\x01@\x03\x04self\x0b\x06offset\
+y\x05value\x1a\x01\0\x04\0%[method]component.set-member-f32array\x01\x1b\x01@\x02\
+\x04self\x0b\x06offsety\0}\x04\0\x1f[method]component.get-member-u8\x01\x1c\x01@\
+\x02\x04self\x0b\x06offsety\0{\x04\0\x20[method]component.get-member-u16\x01\x1d\
+\x01@\x02\x04self\x0b\x06offsety\0y\x04\0\x20[method]component.get-member-u32\x01\
+\x1e\x01@\x02\x04self\x0b\x06offsety\0w\x04\0\x20[method]component.get-member-u6\
+4\x01\x1f\x01@\x02\x04self\x0b\x06offsety\0~\x04\0\x1f[method]component.get-memb\
+er-i8\x01\x20\x01@\x02\x04self\x0b\x06offsety\0|\x04\0\x20[method]component.get-\
+member-i16\x01!\x01@\x02\x04self\x0b\x06offsety\0z\x04\0\x20[method]component.ge\
+t-member-i32\x01\"\x01@\x02\x04self\x0b\x06offsety\0x\x04\0\x20[method]component\
+.get-member-i64\x01#\x01@\x02\x04self\x0b\x06offsety\0v\x04\0\x20[method]compone\
+nt.get-member-f32\x01$\x01@\x02\x04self\x0b\x06offsety\0u\x04\0\x20[method]compo\
+nent.get-member-f64\x01%\x01@\x02\x04self\x0b\x06offsety\0\x7f\x04\0![method]com\
+ponent.get-member-bool\x01&\x01@\x02\x04self\x0b\x06offsety\0s\x04\0#[method]com\
+ponent.get-member-string\x01'\x01@\x02\x04self\x0b\x06offsety\0\x18\x04\0%[metho\
+d]component.get-member-u32array\x01(\x01@\x02\x04self\x0b\x06offsety\0\x1a\x04\0\
+%[method]component.get-member-f32array\x01)\x01@\x01\x04names\0\x01\x04\0\x0dcom\
+ponent-get\x01*\x01@\x01\x08tag-names\0\x01\x04\0\x0atag-create\x01+\x01@\0\0\x01\
+\x04\0\x0dprefab-create\x01,\x01@\x01\x06prefab\x01\0\x01\x04\0\x0fprefab-instan\
+ce\x01-\x04\0\x0dentity-create\x01,\x01@\x01\x09component\x01\x01\0\x04\0\x0dsin\
+gleton-add\x01.\x01@\x01\x09component\x01\0\x09\x04\0\x0dsingleton-get\x01/\x04\0\
+\x10singleton-remove\x01.\x01@\x02\x06entity\x01\x09component\x01\0\x09\x04\0\x14\
+entity-get-component\x010\x01@\x03\x06entity\x01\x09component\x01\x05value\x09\x01\
+\0\x04\0\x14entity-set-component\x011\x01@\x02\x06entity\x01\x09component\x01\x01\
+\0\x04\0\x17entity-remove-component\x012\x01@\x02\x06entity\x01\x09component\x01\
+\0\x7f\x04\0\x14entity-has-component\x013\x04\x01\x0etoxoid:api/ecs\x05\0\x04\x01\
+\x17toxoid:api/toxoid-world\x04\0\x0b\x12\x01\0\x0ctoxoid-world\x03\0\0\0G\x09pr\
+oducers\x01\x0cprocessed-by\x02\x0dwit-component\x070.215.0\x10wit-bindgen-rust\x06\
+0.30.0";
 #[inline(never)]
 #[doc(hidden)]
 pub fn __link_custom_section_describing_imports() {

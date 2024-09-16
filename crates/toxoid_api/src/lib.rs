@@ -1,30 +1,30 @@
 #[allow(warnings)]
 mod bindings;
 use bindings::exports::toxoid::api::ecs::{GuestComponent, Guest};
+use toxoid_flecs::ecs_entity_t;
 
 struct ToxoidApi;
+// struct World;
 struct Component;
+
+// impl GuestWorld for World {
+//     fn new() -> World {
+//         World::new()
+//     }
+// }
 
 impl GuestComponent for Component {
     fn new(_init: Vec<u8>) -> Component {
         Component
     }
-
-    fn write(&self, bytes: Vec<u8>) {
-        println!("Writing bytes: {:?}", bytes);
-    }
-
-    fn read(n: u32) -> Vec<u8> {
-        vec![0; n as usize]
-    }
-
-    fn get_id() -> u64 {
-        toxoid_flecs::init()
-    }
 }
 
 impl Guest for ToxoidApi {
     type Component = Component;
+
+    fn component_get(name: String) -> ecs_entity_t {
+        toxoid_flecs::component_get(name.as_ptr())
+    }
 }
 
 bindings::export!(ToxoidApi with_types_in bindings);
