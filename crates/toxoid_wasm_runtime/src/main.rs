@@ -71,9 +71,10 @@ impl toxoid_component::component::ecs::HostComponent for StoreState {
         0
     }
 
-    fn drop(&mut self, _component: Resource<toxoid_component::component::ecs::Component>) {
+    fn drop(&mut self, _component: Resource<toxoid_component::component::ecs::Component>) -> Result<(), wasmtime::Error> {
         // Drop the WASI context
         // self.ctx.drop();
+        Ok(())
     }
 }
 
