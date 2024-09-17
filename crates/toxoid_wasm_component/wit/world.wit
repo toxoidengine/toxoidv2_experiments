@@ -1,4 +1,4 @@
-package toxoid:api;
+package toxoid-component:component;
 
 interface ecs {
     type ecs-entity-t = u64;
@@ -75,6 +75,7 @@ interface ecs {
     // entity-has-component: func(entity: ecs-entity-t, component: ecs-entity-t) -> bool;
 }
 
-world toxoid-api-world {
-    export ecs;
+world toxoid-component-world {
+    import ecs;
+    export init: func() -> u64;
 }

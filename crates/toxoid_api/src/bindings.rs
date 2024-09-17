@@ -510,7 +510,7 @@ mod _rt {
 /// ```
 #[allow(unused_macros)]
 #[doc(hidden)]
-macro_rules! __export_toxoid_world_impl {
+macro_rules! __export_toxoid_api_world_impl {
     ($ty:ident) => {
         self::export!($ty with_types_in self);
     };
@@ -521,22 +521,22 @@ macro_rules! __export_toxoid_world_impl {
     };
 }
 #[doc(inline)]
-pub(crate) use __export_toxoid_world_impl as export;
+pub(crate) use __export_toxoid_api_world_impl as export;
 #[cfg(target_arch = "wasm32")]
-#[link_section = "component-type:wit-bindgen:0.30.0:toxoid-world:encoded world"]
+#[link_section = "component-type:wit-bindgen:0.30.0:toxoid-api-world:encoded world"]
 #[doc(hidden)]
-pub static __WIT_BINDGEN_COMPONENT_TYPE: [u8; 492] = *b"\
-\0asm\x0d\0\x01\0\0\x19\x16wit-component-encoding\x04\0\x07\xe9\x02\x01A\x02\x01\
+pub static __WIT_BINDGEN_COMPONENT_TYPE: [u8; 500] = *b"\
+\0asm\x0d\0\x01\0\0\x19\x16wit-component-encoding\x04\0\x07\xed\x02\x01A\x02\x01\
 A\x02\x01B\x0f\x01w\x04\0\x0cecs-entity-t\x03\0\0\x01m\x0f\x04u8-t\x05u16-t\x05u\
 32-t\x05u64-t\x04i8-t\x05i16-t\x05i32-t\x05i64-t\x05f32-t\x05f64-t\x06bool-t\x08\
 string-t\x07array-t\x0au32array-t\x0af32array-t\x04\0\x0bmember-type\x03\0\x02\x01\
 ps\x01p}\x01r\x03\x04names\x0cmember-names\x04\x0cmember-types\x05\x04\0\x0ecomp\
 onent-desc\x03\0\x06\x04\0\x09component\x03\x01\x01i\x08\x01@\x01\x04init\x07\0\x09\
 \x04\0\x16[constructor]component\x01\x0a\x01h\x08\x01@\x01\x04self\x0b\0\x01\x04\
-\0\x18[method]component.get-id\x01\x0c\x04\x01\x0etoxoid:api/ecs\x05\0\x04\x01\x17\
-toxoid:api/toxoid-world\x04\0\x0b\x12\x01\0\x0ctoxoid-world\x03\0\0\0G\x09produc\
-ers\x01\x0cprocessed-by\x02\x0dwit-component\x070.215.0\x10wit-bindgen-rust\x060\
-.30.0";
+\0\x18[method]component.get-id\x01\x0c\x04\x01\x0etoxoid:api/ecs\x05\0\x04\x01\x1b\
+toxoid:api/toxoid-api-world\x04\0\x0b\x16\x01\0\x10toxoid-api-world\x03\0\0\0G\x09\
+producers\x01\x0cprocessed-by\x02\x0dwit-component\x070.215.0\x10wit-bindgen-rus\
+t\x060.30.0";
 #[inline(never)]
 #[doc(hidden)]
 pub fn __link_custom_section_describing_imports() {

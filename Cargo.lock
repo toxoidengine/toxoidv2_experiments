@@ -1507,7 +1507,14 @@ dependencies = [
 ]
 
 [[package]]
-name = "toxoid_wasm"
+name = "toxoid_wasm_component"
+version = "0.1.0"
+dependencies = [
+ "wit-bindgen-rt",
+]
+
+[[package]]
+name = "toxoid_wasm_runtime"
 version = "0.1.0"
 dependencies = [
  "wasmtime",

@@ -1,8 +1,9 @@
 [workspace]
 members = [
      "crates/toxoid_api", 
-     "crates/toxoid_wasm",
-     "crates/toxoid_flecs"
+     "crates/toxoid_flecs", 
+     "crates/toxoid_wasm_runtime",
+     "crates/toxoid_wasm_component"
 ]
 exclude = [
      

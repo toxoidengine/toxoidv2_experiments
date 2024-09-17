@@ -5,13 +5,15 @@ mod bindings;
 use bindings::exports::toxoid::api::ecs::{GuestComponent, Guest, ComponentDesc};
 use toxoid_flecs::bindings::{ecs_entity_desc_t, ecs_entity_init, ecs_init};
 use std::mem::MaybeUninit;
+use core::ffi::c_void;
 
 type ecs_entity_t = u64;
 
 struct ToxoidApi;
 // struct World;
 struct Component { 
-    id: ecs_entity_t 
+    id: ecs_entity_t,
+    ptr: *const c_void
 }
 
 // impl GuestWorld for World {
@@ -28,7 +30,8 @@ impl GuestComponent for Component {
             let world = ecs_init();
             let component_entity: ecs_entity_t = ecs_entity_init(world, &ent_desc);
             Component { 
-                id: component_entity 
+                id: component_entity ,
+                ptr: std::ptr::null_mut()
             }
         }
     }
