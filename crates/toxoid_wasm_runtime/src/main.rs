@@ -1,9 +1,3 @@
-use exports::toxoid;
-use exports::toxoid::api::ecs::ComponentDesc;
-use wasmtime::component::{bindgen, Component, Linker, Resource, ResourceTable};
-use wasmtime::{Engine, Result};
-use wasmtime_wasi::{WasiCtx, WasiView, WasiCtxBuilder};
-
 // Bindgen the WASM runtime based component instance bindings based on WIT.
 bindgen!({
     world: "toxoid-api-world",
@@ -15,6 +9,10 @@ bindgen!({
     path: "../toxoid_wasm_component/wit",
 });
 
+use exports::toxoid::api::ecs::ComponentDesc;
+use wasmtime::component::{bindgen, Component, Linker, Resource, ResourceTable};
+use wasmtime::{Engine, Result};
+use wasmtime_wasi::{WasiCtx, WasiView, WasiCtxBuilder};
 
 // StoreState is the state of the WASM store.
 struct StoreState {
@@ -30,7 +28,7 @@ impl WasiView for StoreState {
 }
 
 impl toxoid_component::component::ecs::HostComponent for StoreState {
-    fn new(&mut self, desc: toxoid_component::component::ecs::ComponentDesc) -> Resource<toxoid_component::component::ecs::Component> {
+    fn new(&mut self, _desc: toxoid_component::component::ecs::ComponentDesc) -> Resource<toxoid_component::component::ecs::Component> {
         // Instantiate the engine and store
         let engine = Engine::default();
         // Create WASM Component Linker
@@ -57,7 +55,7 @@ impl toxoid_component::component::ecs::HostComponent for StoreState {
         let toxoid_world = ToxoidApiWorld::instantiate(&mut store, &component, &linker).unwrap();
         let toxoid_ecs_interface = toxoid_world.toxoid_api_ecs();
         let toxoid_ecs_component = toxoid_ecs_interface.component();
-        let component = toxoid_ecs_component.call_constructor(&mut store, &ComponentDesc{ 
+        let _component = toxoid_ecs_component.call_constructor(&mut store, &ComponentDesc{ 
             name: "test".to_string(), 
             member_names: vec![], 
             member_types: vec![] 
