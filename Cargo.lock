@@ -1517,6 +1517,7 @@ dependencies = [
 name = "toxoid_wasm_runtime"
 version = "0.1.0"
 dependencies = [
+ "once_cell",
  "wasmtime",
  "wasmtime-wasi",
 ]

@@ -11,8 +11,9 @@ bindgen!({
 
 use exports::toxoid::api::ecs::ComponentDesc;
 use wasmtime::component::{bindgen, Component, Linker, Resource, ResourceTable};
-use wasmtime::{Engine, Result};
+use wasmtime::{Engine, Result, Store};
 use wasmtime_wasi::{WasiCtx, WasiView, WasiCtxBuilder};
+use once_cell::sync::Lazy;
 
 // StoreState is the state of the WASM store.
 struct StoreState {
@@ -27,42 +28,30 @@ impl WasiView for StoreState {
     fn table(&mut self) -> &mut ResourceTable { &mut self.table }
 }
 
+impl toxoid_component::component::ecs::Host for StoreState {}
+
 impl toxoid_component::component::ecs::HostComponent for StoreState {
     fn new(&mut self, _desc: toxoid_component::component::ecs::ComponentDesc) -> Resource<toxoid_component::component::ecs::Component> {
-        // Instantiate the engine and store
-        let engine = Engine::default();
-        // Create WASM Component Linker
-        let mut linker = Linker::<StoreState>::new(&engine);
-        // Add WASI imports to the linker
-        wasmtime_wasi::add_to_linker_sync(&mut linker).unwrap();
-        // Create WASI Context
-        let mut builder = WasiCtxBuilder::new();
-        // Create WASM Store
-        let mut store = wasmtime::Store::new(
-            &engine,
-            StoreState {
-                ctx: builder.build(),
-                table: ResourceTable::new(),
-            },
-        );
-        
+        let engine = &*ENGINE; // Ensure ENGINE is initialized
+        let linker = &*LINKER; // Ensure LINKER is initialized
+        let store = unsafe { &mut *STORE }; // Ensure STORE is initialized
         // Load the component from disk
         let bytes = std::fs::read("toxoid_api.wasm").unwrap();
         // Create WASM Component
         let component = Component::new(&engine, bytes).unwrap();
-
+        
         // Instantiate the WASM component
-        let toxoid_world = ToxoidApiWorld::instantiate(&mut store, &component, &linker).unwrap();
+        let toxoid_world = ToxoidApiWorld::instantiate(&mut *store, &component, &linker).unwrap();
         let toxoid_ecs_interface = toxoid_world.toxoid_api_ecs();
         let toxoid_ecs_component = toxoid_ecs_interface.component();
-        let _component = toxoid_ecs_component.call_constructor(&mut store, &ComponentDesc{ 
+        let component = toxoid_ecs_component.call_constructor(&mut *store, &ComponentDesc{ 
             name: "test".to_string(), 
             member_names: vec![], 
             member_types: vec![] 
         }).unwrap();
 
-        let resource: Resource<toxoid_component::component::ecs::Component>= Resource::new_borrow(0);
-        resource
+        let id = self.table.push::<toxoid_component::component::ecs::Component>(component).unwrap();
+        id
     }
 
     fn get_id(&mut self, _component: Resource<toxoid_component::component::ecs::Component>) -> u64 {
@@ -76,39 +65,50 @@ impl toxoid_component::component::ecs::HostComponent for StoreState {
     }
 }
 
-fn main() -> Result<()> {
-    // Instantiate the engine and store
-    let engine = Engine::default();
-    // Create WASM Component Linker
-    let mut linker = Linker::<StoreState>::new(&engine);
-    // Add WASI imports to the linker
-    wasmtime_wasi::add_to_linker_sync(&mut linker)?;
-    // Create WASI Context
-    let mut builder = WasiCtxBuilder::new();
-    // Create WASM Store
-    let mut store = wasmtime::Store::new(
-        &engine,
+// Instantiate the WASM engine
+static ENGINE: Lazy<Engine> = Lazy::new(Engine::default);
+
+// Create WASM Component Linker
+static LINKER: Lazy<Linker<StoreState>> = Lazy::new(|| {
+    let engine = &*ENGINE; // Ensure ENGINE is initialized
+    let mut linker = Linker::<StoreState>::new(engine);
+    wasmtime_wasi::add_to_linker_sync(&mut linker).unwrap();
+    linker
+});
+
+// Create WASM Store
+static mut STORE: Lazy<Store<StoreState>> = Lazy::new(|| {
+    let engine = &*ENGINE; // Ensure ENGINE is initialized
+    Store::new(
+        engine,
         StoreState {
-            ctx: builder.build(),
+            ctx: WasiCtxBuilder::new().build(),
             table: ResourceTable::new(),
-        },
-    );
-    
+        }
+    )
+});
+
+fn main() -> Result<()> {
+    // Get WASM engine, linker and store
+    let engine = &*ENGINE; // Ensure ENGINE is initialized
+    let linker = &*LINKER; // Ensure LINKER is initialized
+    let store = unsafe { &mut *STORE }; // Ensure STORE is initialized
+
     // Load the component from disk
     let bytes = std::fs::read("toxoid_api.wasm")?;
     // Create WASM Component
     let component = Component::new(&engine, bytes)?;
 
     // Instantiate the WASM component
-    let toxoid_world = ToxoidApiWorld::instantiate(&mut store, &component, &linker)?;
+    let toxoid_world = ToxoidApiWorld::instantiate(&mut *store, &component, &linker)?;
     let toxoid_ecs_interface = toxoid_world.toxoid_api_ecs();
     let toxoid_ecs_component = toxoid_ecs_interface.component();
-    let component = toxoid_ecs_component.call_constructor(&mut store, &ComponentDesc{ 
+    let component = toxoid_ecs_component.call_constructor(&mut *store, &ComponentDesc{ 
         name: "test".to_string(), 
         member_names: vec![], 
         member_types: vec![] 
     })?;
-    let id = toxoid_ecs_component.call_get_id(&mut store, component)?;
+    let id = toxoid_ecs_component.call_get_id(&mut *store, component)?;
 
     println!("ID: {:?}", id);
 
@@ -116,8 +116,8 @@ fn main() -> Result<()> {
     let bytes = std::fs::read("toxoid_wasm_component.wasm")?;
     // Create WASM Component
     let component = Component::new(&engine, bytes)?;
-    let toxoid_component_world = ToxoidComponentWorld::instantiate(&mut store, &component, &linker)?;
-    toxoid_component_world.call_init(&mut store)?;
+    let toxoid_component_world = ToxoidComponentWorld::instantiate(&mut *store, &component, &linker)?;
+    toxoid_component_world.call_init(&mut *store)?;
 
     Ok(())
 }
