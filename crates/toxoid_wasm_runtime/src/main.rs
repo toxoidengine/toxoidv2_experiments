@@ -65,15 +65,18 @@ impl toxoid_component::component::ecs::HostComponent for StoreState {
             })
             .unwrap();
 
+        let component_id = toxoid_ecs_component.call_get_id(&mut *store, component).unwrap();
+
         let id = self
             .table
-            .push::<MyComponent>(MyComponent { id: 0 })
+            .push::<MyComponent>(MyComponent { id: component_id })
             .unwrap();
         id
     }
 
-    fn get_id(&mut self, _component: Resource<toxoid_component::component::ecs::Component>) -> u64 {
-        0
+    fn get_id(&mut self, component: Resource<toxoid_component::component::ecs::Component>) -> u64 {
+        let component = self.table.get(&component).unwrap();
+        component.id
     }
 
     fn drop(&mut self, _component: Resource<toxoid_component::component::ecs::Component>) -> Result<(), wasmtime::Error> {
@@ -136,7 +139,9 @@ fn main() -> Result<()> {
     // Create WASM Component
     let component = Component::new(&engine, bytes)?;
     let toxoid_component_world = ToxoidComponentWorld::instantiate(&mut *store, &component, &linker)?;
-    toxoid_component_world.call_init(&mut *store)?;
+    let guest_id =toxoid_component_world.call_init(&mut *store)?;
+
+    println!("Guest ID: {:?}", guest_id);
 
     Ok(())
 }
