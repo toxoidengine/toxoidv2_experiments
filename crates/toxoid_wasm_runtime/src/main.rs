@@ -7,6 +7,11 @@ bindgen!({
 bindgen!({
     world: "toxoid-component-world",
     path: "../toxoid_wasm_component/wit",
+    with: {
+        // Specify that our host resource is going to point to the `MyComponent`
+        // which is defined just below this macro.
+        "toxoid-component:component/ecs/component": MyComponent,
+    },
 });
 
 use exports::toxoid::api::ecs::ComponentDesc;
@@ -14,6 +19,14 @@ use wasmtime::component::{bindgen, Component, Linker, Resource, ResourceTable};
 use wasmtime::{Engine, Result, Store};
 use wasmtime_wasi::{WasiCtx, WasiView, WasiCtxBuilder};
 use once_cell::sync::Lazy;
+
+/// A sample host-defined type which contains arbitrary host-defined data.
+///
+/// In this case this is relatively simple but there's no restrictions on what
+/// this type can hold other than that it must be `'static + Send`.
+pub struct MyComponent {
+    id: u64,
+}
 
 // StoreState is the state of the WASM store.
 struct StoreState {
@@ -31,7 +44,7 @@ impl WasiView for StoreState {
 impl toxoid_component::component::ecs::Host for StoreState {}
 
 impl toxoid_component::component::ecs::HostComponent for StoreState {
-    fn new(&mut self, _desc: toxoid_component::component::ecs::ComponentDesc) -> Resource<toxoid_component::component::ecs::Component> {
+    fn new(&mut self, _desc: toxoid_component::component::ecs::ComponentDesc) -> Resource<MyComponent> {
         let engine = &*ENGINE; // Ensure ENGINE is initialized
         let linker = &*LINKER; // Ensure LINKER is initialized
         let store = unsafe { &mut *STORE }; // Ensure STORE is initialized
@@ -44,13 +57,18 @@ impl toxoid_component::component::ecs::HostComponent for StoreState {
         let toxoid_world = ToxoidApiWorld::instantiate(&mut *store, &component, &linker).unwrap();
         let toxoid_ecs_interface = toxoid_world.toxoid_api_ecs();
         let toxoid_ecs_component = toxoid_ecs_interface.component();
-        let component = toxoid_ecs_component.call_constructor(&mut *store, &ComponentDesc{ 
-            name: "test".to_string(), 
-            member_names: vec![], 
-            member_types: vec![] 
-        }).unwrap();
+        let component = toxoid_ecs_component
+            .call_constructor(&mut *store, &ComponentDesc{ 
+                name: "test".to_string(),
+                member_names: vec![],
+                member_types: vec![]
+            })
+            .unwrap();
 
-        let id = self.table.push::<toxoid_component::component::ecs::Component>(component).unwrap();
+        let id = self
+            .table
+            .push::<MyComponent>(MyComponent { id: 0 })
+            .unwrap();
         id
     }
 
@@ -73,6 +91,7 @@ static LINKER: Lazy<Linker<StoreState>> = Lazy::new(|| {
     let engine = &*ENGINE; // Ensure ENGINE is initialized
     let mut linker = Linker::<StoreState>::new(engine);
     wasmtime_wasi::add_to_linker_sync(&mut linker).unwrap();
+    ToxoidComponentWorld::add_to_linker(&mut linker, |store_state| store_state).unwrap();
     linker
 });
 
