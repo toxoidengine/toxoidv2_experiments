@@ -50,9 +50,12 @@ impl toxoid_component::component::ecs::Host for StoreState {}
 
 impl toxoid_component::component::ecs::HostComponent for StoreState {
     fn new(&mut self, _desc: toxoid_component::component::ecs::ComponentDesc) -> Resource<ComponentProxy> {
+        
         let engine = &*ENGINE; // Ensure ENGINE is initialized
         let linker = &*LINKER; // Ensure LINKER is initialized
         let store = unsafe { &mut *STORE }; // Ensure STORE is initialized
+
+        // TODO: Move these to be statically initialized
         // Load the component from disk
         let bytes = std::fs::read("toxoid_api.wasm").unwrap();
         // Create WASM Component
@@ -91,9 +94,8 @@ impl toxoid_component::component::ecs::HostComponent for StoreState {
         component.id
     }
 
-    fn drop(&mut self, _component: Resource<toxoid_component::component::ecs::Component>) -> Result<(), wasmtime::Error> {
-        // Drop the WASI context
-        // self.ctx.drop();
+    fn drop(&mut self, component: Resource<toxoid_component::component::ecs::Component>) -> Result<(), wasmtime::Error> {
+        self.table.delete::<ComponentProxy>(component).unwrap();
         Ok(())
     }
 }
