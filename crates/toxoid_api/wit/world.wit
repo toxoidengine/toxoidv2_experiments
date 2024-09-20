@@ -60,6 +60,31 @@ interface ecs {
         // get-member-f32array: func(offset: u32) -> list<f32>;
     }
 
+    // resource tag {
+    //     constructor(name: string);
+    //     // get-id: func() -> ecs-entity-t;
+    // }
+
+    // record query-desc {
+    //     name: string
+    // }
+
+    // resource query {
+    //     constructor(desc: query-desc);
+    //     build: func();
+    // }
+
+    // record system-desc {
+    //     name: string,
+    //     query: query
+    // }
+
+    // resource system {
+    //     constructor(desc: system-desc);
+    //     build: func();
+    //     run: func();
+    // }
+
     // component-create: func(desc: component-desc) -> ecs-entity-t;
     // component-get: func(name: string) -> ecs-entity-t;
     // tag-create: func(tag-name: string) -> ecs-entity-t;

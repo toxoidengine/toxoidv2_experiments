@@ -50,7 +50,6 @@ impl toxoid_component::component::ecs::Host for StoreState {}
 
 impl toxoid_component::component::ecs::HostComponent for StoreState {
     fn new(&mut self, _desc: toxoid_component::component::ecs::ComponentDesc) -> Resource<ComponentProxy> {
-        
         let engine = &*ENGINE; // Ensure ENGINE is initialized
         let linker = &*LINKER; // Ensure LINKER is initialized
         let store = unsafe { &mut *STORE }; // Ensure STORE is initialized
@@ -153,7 +152,7 @@ fn main() -> Result<()> {
     // Create WASM Component
     let component = Component::new(&engine, bytes)?;
     let toxoid_component_world = ToxoidComponentWorld::instantiate(&mut *store, &component, &linker)?;
-    let guest_id =toxoid_component_world.call_init(&mut *store)?;
+    let guest_id = toxoid_component_world.call_init(&mut *store)?;
 
     println!("Guest ID: {:?}", guest_id);
 

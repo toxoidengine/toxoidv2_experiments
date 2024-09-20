@@ -39,6 +39,13 @@ impl GuestComponent for Component {
     fn get_id(&self) -> ecs_entity_t {
         self.id
     }
+
+    // fn set_member_u8(&self, offset: u32, value: u8) {
+    //     unsafe {
+    //         let ptr = self.ptr as *mut u8;
+    //         ptr.add(offset as usize).write(value);
+    //     }
+    // }
 }
 
 impl Guest for ToxoidApi {
