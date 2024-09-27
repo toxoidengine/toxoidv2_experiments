@@ -6,10 +6,10 @@ use bindings::{toxoid_component::component::ecs::{Component, ComponentDesc}, Gue
 struct ToxoidWasmComponent;
 
 impl Guest for ToxoidWasmComponent {
-    fn init() -> u64 {
+    fn init(name: String) -> u64 {
         let component = Component::new(&ComponentDesc {
-            name: "Component".to_string(),
-            member_names: vec!["name".to_string()],
+            name: name,
+            member_names: vec![],
             member_types: vec![],
         });
         // println!("{:?}", component.get_id());

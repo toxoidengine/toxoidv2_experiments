@@ -3,10 +3,10 @@
 
 mod bindings;
 use bindings::exports::toxoid::api::ecs::{GuestComponent, Guest, ComponentDesc};
-use toxoid_flecs::bindings::{ecs_entity_desc_t, ecs_entity_init, ecs_init};
+use toxoid_flecs::bindings::{ecs_entity_desc_t, ecs_entity_init, ecs_init, ecs_world_t};
 use std::mem::MaybeUninit;
 use core::ffi::c_void;
-
+use once_cell::sync::Lazy;
 type ecs_entity_t = u64;
 
 struct ToxoidApi;
@@ -15,6 +15,14 @@ struct Component {
     id: ecs_entity_t,
     ptr: *const c_void
 }
+
+pub struct EcsWorldPtr(*mut ecs_world_t);
+unsafe impl Send for EcsWorldPtr {}
+unsafe impl Sync for EcsWorldPtr {}
+
+static WORLD: Lazy<EcsWorldPtr> = Lazy::new(|| 
+    EcsWorldPtr(unsafe { ecs_init() })
+);
 
 // impl GuestWorld for World {
 //     fn new() -> World {
@@ -27,10 +35,9 @@ impl GuestComponent for Component {
         unsafe {
             let mut ent_desc: ecs_entity_desc_t = MaybeUninit::zeroed().assume_init();
             ent_desc.name = desc.name.as_ptr() as *const i8;
-            let world = ecs_init();
-            let component_entity: ecs_entity_t = ecs_entity_init(world, &ent_desc);
+            let component_entity: ecs_entity_t = ecs_entity_init(WORLD.0, &ent_desc);
             Component { 
-                id: component_entity ,
+                id: component_entity,
                 ptr: std::ptr::null_mut()
             }
         }

@@ -1,18 +1,21 @@
 #[doc(hidden)]
 #[allow(non_snake_case)]
-pub unsafe fn _export_init_cabi<T: Guest>() -> i64 {
+pub unsafe fn _export_init_cabi<T: Guest>(arg0: *mut u8, arg1: usize) -> i64 {
     #[cfg(target_arch = "wasm32")] _rt::run_ctors_once();
-    let result0 = T::init();
-    _rt::as_i64(result0)
+    let len0 = arg1;
+    let bytes0 = _rt::Vec::from_raw_parts(arg0.cast(), len0, len0);
+    let result1 = T::init(_rt::string_lift(bytes0));
+    _rt::as_i64(result1)
 }
 pub trait Guest {
-    fn init() -> u64;
+    fn init(name: _rt::String) -> u64;
 }
 #[doc(hidden)]
 macro_rules! __export_world_toxoid_component_world_cabi {
     ($ty:ident with_types_in $($path_to_types:tt)*) => {
-        const _ : () = { #[export_name = "init"] unsafe extern "C" fn export_init() ->
-        i64 { $($path_to_types)*:: _export_init_cabi::<$ty > () } };
+        const _ : () = { #[export_name = "init"] unsafe extern "C" fn export_init(arg0 :
+        * mut u8, arg1 : usize,) -> i64 { $($path_to_types)*:: _export_init_cabi::<$ty >
+        (arg0, arg1) } };
     };
 }
 #[doc(hidden)]
@@ -343,6 +346,13 @@ mod _rt {
     pub fn run_ctors_once() {
         wit_bindgen_rt::run_ctors_once();
     }
+    pub unsafe fn string_lift(bytes: Vec<u8>) -> String {
+        if cfg!(debug_assertions) {
+            String::from_utf8(bytes).unwrap()
+        } else {
+            String::from_utf8_unchecked(bytes)
+        }
+    }
     pub fn as_i64<T: AsI64>(t: T) -> i64 {
         t.as_i64()
     }
@@ -400,8 +410,8 @@ pub(crate) use __export_toxoid_component_world_impl as export;
 #[cfg(target_arch = "wasm32")]
 #[link_section = "component-type:wit-bindgen:0.30.0:toxoid-component-world:encoded world"]
 #[doc(hidden)]
-pub static __WIT_BINDGEN_COMPONENT_TYPE: [u8; 558] = *b"\
-\0asm\x0d\0\x01\0\0\x19\x16wit-component-encoding\x04\0\x07\xa1\x03\x01A\x02\x01\
+pub static __WIT_BINDGEN_COMPONENT_TYPE: [u8; 564] = *b"\
+\0asm\x0d\0\x01\0\0\x19\x16wit-component-encoding\x04\0\x07\xa7\x03\x01A\x02\x01\
 A\x04\x01B\x0f\x01w\x04\0\x0cecs-entity-t\x03\0\0\x01m\x0f\x04u8-t\x05u16-t\x05u\
 32-t\x05u64-t\x04i8-t\x05i16-t\x05i32-t\x05i64-t\x05f32-t\x05f64-t\x06bool-t\x08\
 string-t\x07array-t\x0au32array-t\x0af32array-t\x04\0\x0bmember-type\x03\0\x02\x01\
@@ -409,10 +419,10 @@ ps\x01p}\x01r\x03\x04names\x0cmember-names\x04\x0cmember-types\x05\x04\0\x0ecomp
 onent-desc\x03\0\x06\x04\0\x09component\x03\x01\x01i\x08\x01@\x01\x04init\x07\0\x09\
 \x04\0\x16[constructor]component\x01\x0a\x01h\x08\x01@\x01\x04self\x0b\0\x01\x04\
 \0\x18[method]component.get-id\x01\x0c\x03\x01\x1etoxoid-component:component/ecs\
-\x05\0\x01@\0\0w\x04\0\x04init\x01\x01\x04\x011toxoid-component:component/toxoid\
--component-world\x04\0\x0b\x1c\x01\0\x16toxoid-component-world\x03\0\0\0G\x09pro\
-ducers\x01\x0cprocessed-by\x02\x0dwit-component\x070.215.0\x10wit-bindgen-rust\x06\
-0.30.0";
+\x05\0\x01@\x01\x04names\0w\x04\0\x04init\x01\x01\x04\x011toxoid-component:compo\
+nent/toxoid-component-world\x04\0\x0b\x1c\x01\0\x16toxoid-component-world\x03\0\0\
+\0G\x09producers\x01\x0cprocessed-by\x02\x0dwit-component\x070.215.0\x10wit-bind\
+gen-rust\x060.30.0";
 #[inline(never)]
 #[doc(hidden)]
 pub fn __link_custom_section_describing_imports() {
