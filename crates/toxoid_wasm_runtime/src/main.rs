@@ -118,6 +118,7 @@ static mut STORE: Lazy<Store<StoreState>> = Lazy::new(|| {
     )
 });
 
+// Create TOXOID API
 static TOXOID_API: Lazy<ToxoidApiWorld> = Lazy::new(|| {
     let engine = &*ENGINE; // Ensure ENGINE is initialized
     let linker = &*LINKER; // Ensure LINKER is initialized
