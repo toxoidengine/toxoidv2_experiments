@@ -3,8 +3,10 @@ members = [
      "crates/toxoid_api", 
      "crates/toxoid_flecs", 
      "crates/toxoid_wasm_runtime",
-     "crates/toxoid_wasm_component"
-, "crates/notan_example"]
+     "crates/toxoid_wasm_component", 
+     "crates/notan_example", 
+     "crates_2/toxoid_cli"
+]
 exclude = [
      
 ]
