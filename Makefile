@@ -21,3 +21,9 @@ run:
 	make build-wasi
 	make build-component
 	cd crates/toxoid_wasm_runtime && cargo run
+
+build-em:
+	cd crates/toxoid_wasm_runtime && \
+	EMCC_CFLAGS="-sMODULARIZE=1 -sEXPORT_ES6=1 -sFORCE_FILESYSTEM=1 -sERROR_ON_UNDEFINED_SYMBOLS=0 -sALLOW_MEMORY_GROWTH=1 -sSTACK_SIZE=1mb -sNO_DISABLE_EXCEPTION_CATCHING -gsource-map" cargo build --target wasm32-unknown-emscripten
+	cp target/wasm32-unknown-emscripten/debug/toxoid_wasm_runtime.wasm dist/toxoid_wasm_runtime.wasm
+	cp target/wasm32-unknown-emscripten/debug/toxoid_wasm_runtime.js dist/toxoid_wasm_runtime.js
