@@ -1,0 +1,109 @@
+package toxoid:api;
+
+interface ecs {
+    type ecs-entity-t = u64;
+
+    enum member-type {
+        u8-t,
+        u16-t,
+        u32-t,
+        u64-t,
+        i8-t,
+        i16-t,
+        i32-t,
+        i64-t,
+        f32-t,
+        f64-t,
+        bool-t,
+        string-t,
+        array-t,
+        u32array-t,
+        f32array-t,
+    }
+    
+    record component-desc {
+        name: string,
+        member-names: list<string>,
+        member-types: list<u8>
+    }
+
+    resource entity {
+        constructor();
+    }
+
+    resource component {
+        constructor(init: component-desc);
+        get-id: func() -> ecs-entity-t;
+        set-member-u8: func(offset: u32, value: u8);
+        set-member-u16: func(offset: u32, value: u16);
+        set-member-u32: func(offset: u32, value: u32);
+        set-member-u64: func(offset: u32, value: u64);
+        set-member-i8: func(offset: u32, value: s8);
+        set-member-i16: func(offset: u32, value: s16);
+        set-member-i32: func(offset: u32, value: s32);
+        set-member-i64: func(offset: u32, value: s64);
+        set-member-f32: func(offset: u32, value: f32);
+        set-member-f64: func(offset: u32, value: f64);
+        set-member-bool: func(offset: u32, value: bool);
+        set-member-string: func(offset: u32, value: string);
+        set-member-u32array: func(offset: u32, value: list<u32>);
+        set-member-f32array: func(offset: u32, value: list<f32>);
+        get-member-u8: func(offset: u32) -> u8;
+        get-member-u16: func(offset: u32) -> u16;
+        get-member-u32: func(offset: u32) -> u32;
+        get-member-u64: func(offset: u32) -> u64;
+        get-member-i8: func(offset: u32) -> s8;
+        get-member-i16: func(offset: u32) -> s16;
+        get-member-i32: func(offset: u32) -> s32;
+        get-member-i64: func(offset: u32) -> s64;
+        get-member-f32: func(offset: u32) -> f32;
+        get-member-f64: func(offset: u32) -> f64;
+        get-member-bool: func(offset: u32) -> bool;
+        get-member-string: func(offset: u32) -> string;
+        get-member-u32array: func(offset: u32) -> list<u32>;
+        get-member-f32array: func(offset: u32) -> list<f32>;
+    }
+
+    // resource tag {
+    //     constructor(name: string);
+    //     // get-id: func() -> ecs-entity-t;
+    // }
+
+    // record query-desc {
+    //     name: string
+    // }
+
+    // resource query {
+    //     constructor(desc: query-desc);
+    //     build: func();
+    // }
+
+    // record system-desc {
+    //     name: string,
+    //     query: query
+    // }
+
+    // resource system {
+    //     constructor(desc: system-desc);
+    //     build: func();
+    //     run: func();
+    // }
+
+    // component-create: func(desc: component-desc) -> ecs-entity-t;
+    // component-get: func(name: string) -> ecs-entity-t;
+    // tag-create: func(tag-name: string) -> ecs-entity-t;
+    // prefab-create: func() -> ecs-entity-t;
+    // prefab-instance: func(prefab: ecs-entity-t) -> ecs-entity-t;
+    // entity-create: func() -> ecs-entity-t;
+    // singleton-add: func(component: ecs-entity-t);
+    // singleton-get: func(component: ecs-entity-t) -> component;
+    // singleton-remove: func(component: ecs-entity-t);
+    // entity-get-component: func(entity: ecs-entity-t, component: ecs-entity-t) -> component;
+    // entity-set-component: func(entity: ecs-entity-t, component: ecs-entity-t, value: component);
+    // entity-remove-component: func(entity: ecs-entity-t, component: ecs-entity-t);
+    // entity-has-component: func(entity: ecs-entity-t, component: ecs-entity-t) -> bool;
+}
+
+world toxoid-api-world {
+    export ecs;
+}

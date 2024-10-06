@@ -1,12 +1,12 @@
 [workspace]
-members = [
-     "crates/toxoid_api", 
-     "crates/toxoid_flecs", 
-     "crates/toxoid_wasm_runtime",
-     "crates/toxoid_wasm_component", 
-     "crates/notan_example", 
-     "crates_2/toxoid_cli"
+members = [      
+     "crates/toxoid_cli",
 ]
 exclude = [
-     
+     "crates_old/toxoid_api", 
+     "crates_old/toxoid_flecs", 
+     "crates_old/toxoid_wasm_runtime",
+     "crates_old/toxoid_wasm_component", 
+     "crates_old/notan_example",
+     "crates_old/native_component"
 ]

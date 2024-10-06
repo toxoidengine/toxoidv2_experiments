@@ -1,7 +1,7 @@
 #![allow(non_camel_case_types)]
 #![allow(warnings)]
 
-mod bindings;
+pub mod bindings;
 use bindings::exports::toxoid::api::ecs::{GuestComponent, Guest, ComponentDesc};
 use toxoid_flecs::bindings::{ecs_entity_desc_t, ecs_entity_init, ecs_init, ecs_world_t};
 use std::mem::MaybeUninit;
@@ -9,9 +9,9 @@ use core::ffi::c_void;
 use once_cell::sync::Lazy;
 type ecs_entity_t = u64;
 
-struct ToxoidApi;
+pub struct ToxoidApi;
 // struct World;
-struct Component { 
+pub struct Component { 
     id: ecs_entity_t,
     ptr: *const c_void
 }
@@ -63,4 +63,5 @@ impl Guest for ToxoidApi {
     // }
 }
 
+#[cfg(target_arch = "wasm32")]
 bindings::export!(ToxoidApi with_types_in bindings);

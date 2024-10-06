@@ -16,3 +16,11 @@ pub mod bindings {
 }
 
 use bindings::*;
+
+// pub fn init() -> u64 {
+//     unsafe {
+//         let world = ecs_init();
+//         let id = ecs_new(world);
+//         id
+//     }
+// }
