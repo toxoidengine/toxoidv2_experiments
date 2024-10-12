@@ -57,6 +57,7 @@ impl GuestComponent for Component {
 
 impl Guest for ToxoidApi {
     type Component = Component;
+    
 
     // fn component_get(name: String) -> ecs_entity_t {
     //     toxoid_flecs::component_get(name.as_ptr())
