@@ -2,7 +2,7 @@
 #![allow(warnings)]
 
 pub mod bindings;
-use bindings::exports::toxoid::api::ecs::{GuestComponent, Guest, ComponentDesc};
+use bindings::exports::toxoid::engine::ecs::{GuestComponent, Guest, ComponentDesc};
 use toxoid_flecs::bindings::{ecs_entity_desc_t, ecs_entity_init, ecs_init, ecs_world_t};
 use std::mem::MaybeUninit;
 use core::ffi::c_void;
@@ -57,8 +57,7 @@ impl GuestComponent for Component {
 
 impl Guest for ToxoidApi {
     type Component = Component;
-    
-
+    type 
     // fn component_get(name: String) -> ecs_entity_t {
     //     toxoid_flecs::component_get(name.as_ptr())
     // }

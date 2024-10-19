@@ -3,7 +3,7 @@ pub mod exports {
     #[allow(dead_code)]
     pub mod toxoid {
         #[allow(dead_code)]
-        pub mod api {
+        pub mod engine {
             #[allow(dead_code, clippy::all)]
             pub mod ecs {
                 #[used]
@@ -12,7 +12,7 @@ pub mod exports {
                 use super::super::super::super::_rt;
                 pub type EcsEntityT = u64;
                 #[repr(u8)]
-                #[derive(Clone, Copy, Eq, PartialEq)]
+                #[derive(Clone, Copy, Eq, Ord, PartialEq, PartialOrd)]
                 pub enum MemberType {
                     U8T,
                     U16T,
@@ -124,6 +124,9 @@ pub mod exports {
                             .finish()
                     }
                 }
+                /// resource entity {
+                /// constructor();
+                /// }
                 #[derive(Debug)]
                 #[repr(transparent)]
                 pub struct Component {
@@ -234,7 +237,7 @@ pub mod exports {
                         unreachable!();
                         #[cfg(target_arch = "wasm32")]
                         {
-                            #[link(wasm_import_module = "[export]toxoid:api/ecs")]
+                            #[link(wasm_import_module = "[export]toxoid:engine/ecs")]
                             extern "C" {
                                 #[link_name = "[resource-drop]component"]
                                 fn drop(_: u32);
@@ -312,7 +315,7 @@ pub mod exports {
                         }
                         #[cfg(target_arch = "wasm32")]
                         {
-                            #[link(wasm_import_module = "[export]toxoid:api/ecs")]
+                            #[link(wasm_import_module = "[export]toxoid:engine/ecs")]
                             extern "C" {
                                 #[link_name = "[resource-new]component"]
                                 fn new(_: *mut u8) -> u32;
@@ -332,7 +335,7 @@ pub mod exports {
                         }
                         #[cfg(target_arch = "wasm32")]
                         {
-                            #[link(wasm_import_module = "[export]toxoid:api/ecs")]
+                            #[link(wasm_import_module = "[export]toxoid:engine/ecs")]
                             extern "C" {
                                 #[link_name = "[resource-rep]component"]
                                 fn rep(_: u32) -> *mut u8;
@@ -344,28 +347,28 @@ pub mod exports {
                     fn get_id(&self) -> EcsEntityT;
                 }
                 #[doc(hidden)]
-                macro_rules! __export_toxoid_api_ecs_cabi {
+                macro_rules! __export_toxoid_engine_ecs_cabi {
                     ($ty:ident with_types_in $($path_to_types:tt)*) => {
                         const _ : () = { #[export_name =
-                        "toxoid:api/ecs#[constructor]component"] unsafe extern "C" fn
+                        "toxoid:engine/ecs#[constructor]component"] unsafe extern "C" fn
                         export_constructor_component(arg0 : * mut u8, arg1 : usize, arg2
                         : * mut u8, arg3 : usize, arg4 : * mut u8, arg5 : usize,) -> i32
                         { $($path_to_types)*:: _export_constructor_component_cabi::<<$ty
                         as $($path_to_types)*:: Guest >::Component > (arg0, arg1, arg2,
                         arg3, arg4, arg5) } #[export_name =
-                        "toxoid:api/ecs#[method]component.get-id"] unsafe extern "C" fn
-                        export_method_component_get_id(arg0 : * mut u8,) -> i64 {
+                        "toxoid:engine/ecs#[method]component.get-id"] unsafe extern "C"
+                        fn export_method_component_get_id(arg0 : * mut u8,) -> i64 {
                         $($path_to_types)*:: _export_method_component_get_id_cabi::<<$ty
                         as $($path_to_types)*:: Guest >::Component > (arg0) } const _ :
                         () = { #[doc(hidden)] #[export_name =
-                        "toxoid:api/ecs#[dtor]component"] #[allow(non_snake_case)] unsafe
-                        extern "C" fn dtor(rep : * mut u8) { $($path_to_types)*::
+                        "toxoid:engine/ecs#[dtor]component"] #[allow(non_snake_case)]
+                        unsafe extern "C" fn dtor(rep : * mut u8) { $($path_to_types)*::
                         Component::dtor::< <$ty as $($path_to_types)*:: Guest
                         >::Component > (rep) } }; };
                     };
                 }
                 #[doc(hidden)]
-                pub(crate) use __export_toxoid_api_ecs_cabi;
+                pub(crate) use __export_toxoid_engine_ecs_cabi;
             }
         }
     }
@@ -510,33 +513,33 @@ mod _rt {
 /// ```
 #[allow(unused_macros)]
 #[doc(hidden)]
-macro_rules! __export_toxoid_api_world_impl {
+macro_rules! __export_toxoid_engine_world_impl {
     ($ty:ident) => {
         self::export!($ty with_types_in self);
     };
     ($ty:ident with_types_in $($path_to_types_root:tt)*) => {
         $($path_to_types_root)*::
-        exports::toxoid::api::ecs::__export_toxoid_api_ecs_cabi!($ty with_types_in
-        $($path_to_types_root)*:: exports::toxoid::api::ecs);
+        exports::toxoid::engine::ecs::__export_toxoid_engine_ecs_cabi!($ty with_types_in
+        $($path_to_types_root)*:: exports::toxoid::engine::ecs);
     };
 }
 #[doc(inline)]
-pub(crate) use __export_toxoid_api_world_impl as export;
+pub(crate) use __export_toxoid_engine_world_impl as export;
 #[cfg(target_arch = "wasm32")]
-#[link_section = "component-type:wit-bindgen:0.30.0:toxoid-api-world:encoded world"]
+#[link_section = "component-type:wit-bindgen:0.31.0:toxoid:engine:toxoid-engine-world:encoded world"]
 #[doc(hidden)]
-pub static __WIT_BINDGEN_COMPONENT_TYPE: [u8; 500] = *b"\
-\0asm\x0d\0\x01\0\0\x19\x16wit-component-encoding\x04\0\x07\xed\x02\x01A\x02\x01\
+pub static __WIT_BINDGEN_COMPONENT_TYPE: [u8; 512] = *b"\
+\0asm\x0d\0\x01\0\0\x19\x16wit-component-encoding\x04\0\x07\xf6\x02\x01A\x02\x01\
 A\x02\x01B\x0f\x01w\x04\0\x0cecs-entity-t\x03\0\0\x01m\x0f\x04u8-t\x05u16-t\x05u\
 32-t\x05u64-t\x04i8-t\x05i16-t\x05i32-t\x05i64-t\x05f32-t\x05f64-t\x06bool-t\x08\
 string-t\x07array-t\x0au32array-t\x0af32array-t\x04\0\x0bmember-type\x03\0\x02\x01\
 ps\x01p}\x01r\x03\x04names\x0cmember-names\x04\x0cmember-types\x05\x04\0\x0ecomp\
 onent-desc\x03\0\x06\x04\0\x09component\x03\x01\x01i\x08\x01@\x01\x04init\x07\0\x09\
 \x04\0\x16[constructor]component\x01\x0a\x01h\x08\x01@\x01\x04self\x0b\0\x01\x04\
-\0\x18[method]component.get-id\x01\x0c\x04\x01\x0etoxoid:api/ecs\x05\0\x04\x01\x1b\
-toxoid:api/toxoid-api-world\x04\0\x0b\x16\x01\0\x10toxoid-api-world\x03\0\0\0G\x09\
-producers\x01\x0cprocessed-by\x02\x0dwit-component\x070.215.0\x10wit-bindgen-rus\
-t\x060.30.0";
+\0\x18[method]component.get-id\x01\x0c\x04\x01\x11toxoid:engine/ecs\x05\0\x04\x01\
+!toxoid:engine/toxoid-engine-world\x04\0\x0b\x19\x01\0\x13toxoid-engine-world\x03\
+\0\0\0G\x09producers\x01\x0cprocessed-by\x02\x0dwit-component\x070.216.0\x10wit-\
+bindgen-rust\x060.31.0";
 #[inline(never)]
 #[doc(hidden)]
 pub fn __link_custom_section_describing_imports() {
