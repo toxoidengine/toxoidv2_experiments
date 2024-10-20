@@ -3,7 +3,6 @@ bindgen!({
     path: "../toxoid_wasm_component/wit",
     with: {
         // Specify that our host resource is going to point to the `ComponentProxy`
-        // which is defined just below this macro.
         "toxoid-component:component/ecs/component": ComponentProxy,
     },
 });
@@ -63,6 +62,14 @@ impl toxoid_component::component::ecs::HostComponent for StoreState {
         Box::into_raw(component);
         id
     }
+
+    // fn set_member_u8(&mut self, component: Resource<toxoid_component::component::ecs::Component>, offset: u32, value: u8) -> Result<(), wasmtime::Error> {
+    //     let component_proxy = self.table.get(&component).unwrap() as &ComponentProxy;
+    //     let component = unsafe { Box::from_raw(component_proxy.resource) };
+    //     component.set_member_u8(offset, value);
+    //     Box::into_raw(component);
+    //     Ok(())
+    // }
 
     fn drop(&mut self, component: Resource<toxoid_component::component::ecs::Component>) -> Result<(), wasmtime::Error> {
         let component_proxy = self.table.get(&component).unwrap() as &ComponentProxy;
