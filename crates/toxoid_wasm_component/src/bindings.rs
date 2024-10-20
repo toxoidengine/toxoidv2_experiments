@@ -126,6 +126,10 @@ pub mod toxoid_component {
                         .finish()
                 }
             }
+            /// resource entity {
+            /// constructor(init: component-desc);
+            /// get-id: func() -> ecs-entity-t;
+            /// }
             #[derive(Debug)]
             #[repr(transparent)]
             pub struct Component {

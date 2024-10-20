@@ -27,9 +27,9 @@ interface ecs {
         member-types: list<u8>
     }
 
-    // resource entity {
-    //     constructor();
-    // }
+    record entity-desc {
+        name: option<string>
+    }
 
     resource component {
         constructor(init: component-desc);
@@ -62,6 +62,11 @@ interface ecs {
         // get-member-string: func(offset: u32) -> string;
         // get-member-u32array: func(offset: u32) -> list<u32>;
         // get-member-f32array: func(offset: u32) -> list<f32>;
+    }
+
+    resource entity {
+        constructor(init: entity-desc);
+        get-id: func() -> ecs-entity-t;
     }
 
     // resource tag {

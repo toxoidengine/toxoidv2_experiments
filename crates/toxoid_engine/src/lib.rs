@@ -2,7 +2,7 @@
 #![allow(warnings)]
 
 pub mod bindings;
-use bindings::exports::toxoid::engine::ecs::{GuestComponent, Guest, ComponentDesc};
+use bindings::exports::toxoid::engine::ecs::{ComponentDesc, EntityDesc, Guest, GuestComponent, GuestEntity};
 use toxoid_flecs::bindings::{ecs_entity_desc_t, ecs_entity_init, ecs_init, ecs_member_t, ecs_struct_desc_t, ecs_world_t, ecs_struct_init};
 use std::mem::MaybeUninit;
 use core::ffi::c_void;
@@ -15,6 +15,9 @@ pub struct ToxoidApi;
 pub struct Component { 
     id: ecs_entity_t,
     ptr: *const c_void
+}
+pub struct Entity { 
+    id: ecs_entity_t
 }
 
 pub struct EcsWorldPtr(*mut ecs_world_t);
@@ -30,13 +33,6 @@ static WORLD: Lazy<EcsWorldPtr> = Lazy::new(||
 //         World::new()
 //     }
 // }
-
-/// Converts a Rust `String` to a C string (`*const c_char`).
-/// Returns a `Result` to handle potential null byte errors in the input string.
-fn c_string(input: &str) -> Result<*const c_char, std::ffi::NulError> {
-    let c_string = std::ffi::CString::new(input)?;
-    Ok(c_string.as_ptr())
-}
 
 unsafe fn get_member_type(member_type: u8) -> ecs_entity_t {
     match member_type {
@@ -63,29 +59,26 @@ impl GuestComponent for Component {
             let mut ent_desc: ecs_entity_desc_t = MaybeUninit::zeroed().assume_init();
             ent_desc.name = desc.name.as_ptr() as *const i8;
             let component_entity: ecs_entity_t = ecs_entity_init(WORLD.0, &ent_desc);
-            println!("Component entity: {}", component_entity);
 
             // Create runtime component description
             let mut struct_desc: ecs_struct_desc_t = MaybeUninit::zeroed().assume_init();
             struct_desc.entity = component_entity;
             let member: ecs_member_t = MaybeUninit::zeroed().assume_init();
             struct_desc.members = [member; 32usize];
-
             
-            // // Iterate through member names
-            // for (index, member_name) in desc.member_names.iter().enumerate() {
-            //     let member_name = c_string(member_name).unwrap();
-            //     // Create component member
-            //     let mut member: ecs_member_t = MaybeUninit::zeroed().assume_init();
-            //     member.name = member_name;
-            //     // print!("Member name: {:?} \n", std::ffi::CStr::from_ptr(member_name).to_str().unwrap());
-            //     // member.type_ = get_member_type(desc.member_types[index]);
-            //     struct_desc.members[index] = member;
-            // }
+            // Iterate through member names
+            for (index, member_name) in desc.member_names.iter().enumerate() {
+                // Create component member
+                let mut member: ecs_member_t = MaybeUninit::zeroed().assume_init();
+                member.name = member_name.as_ptr() as *const i8;
+                member.type_ = get_member_type(desc.member_types[index]);
+                struct_desc.members[index] = member;
+            }
 
-            // // Initialize component
-            // let component = ecs_struct_init(WORLD.0, &struct_desc);
-            // println!("Component: {}", component);
+            // Initialize component
+            let component = ecs_struct_init(WORLD.0, &struct_desc);
+
+            // Return component 
             Component { 
                 id: component_entity,
                 ptr: std::ptr::null_mut()
@@ -105,8 +98,26 @@ impl GuestComponent for Component {
     // }
 }
 
+impl GuestEntity for Entity {
+    fn new(desc: EntityDesc) -> Entity {
+        unsafe {
+            let mut ent_desc: ecs_entity_desc_t = MaybeUninit::zeroed().assume_init();
+            if let Some(name) = desc.name {
+                ent_desc.name = name.as_ptr() as *const i8;
+            }
+            let entity = ecs_entity_init(WORLD.0, &ent_desc);
+            Entity { id: entity }
+        }
+    }
+    
+    fn get_id(&self) -> ecs_entity_t {
+        self.id
+    }
+}
+
 impl Guest for ToxoidApi {
     type Component = Component;
+    type Entity = Entity;
     // fn component_get(name: String) -> ecs_entity_t {
     //     toxoid_flecs::component_get(name.as_ptr())
     // }

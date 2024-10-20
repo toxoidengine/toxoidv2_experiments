@@ -27,6 +27,11 @@ interface ecs {
         member-types: list<u8>
     }
 
+    // resource entity {
+    //     constructor(init: component-desc);
+    //     get-id: func() -> ecs-entity-t;
+    // }
+
     resource component {
         constructor(init: component-desc);
         get-id: func() -> ecs-entity-t;
