@@ -468,6 +468,31 @@ pub mod exports {
                     );
                     _rt::as_i64(result0)
                 }
+                #[doc(hidden)]
+                #[allow(non_snake_case)]
+                pub unsafe fn _export_method_entity_get_component_cabi<T: GuestEntity>(
+                    arg0: *mut u8,
+                    arg1: i64,
+                ) -> i32 {
+                    #[cfg(target_arch = "wasm32")] _rt::run_ctors_once();
+                    let result0 = T::get_component(
+                        EntityBorrow::lift(arg0 as u32 as usize).get(),
+                        arg1 as u64,
+                    );
+                    (result0).take_handle() as i32
+                }
+                #[doc(hidden)]
+                #[allow(non_snake_case)]
+                pub unsafe fn _export_method_entity_add_component_cabi<T: GuestEntity>(
+                    arg0: *mut u8,
+                    arg1: i64,
+                ) {
+                    #[cfg(target_arch = "wasm32")] _rt::run_ctors_once();
+                    T::add_component(
+                        EntityBorrow::lift(arg0 as u32 as usize).get(),
+                        arg1 as u64,
+                    );
+                }
                 pub trait Guest {
                     type Component: GuestComponent;
                     type Entity: GuestEntity;
@@ -559,6 +584,8 @@ pub mod exports {
                     }
                     fn new(init: EntityDesc) -> Self;
                     fn get_id(&self) -> EcsEntityT;
+                    fn get_component(&self, component: EcsEntityT) -> Component;
+                    fn add_component(&self, component: EcsEntityT);
                 }
                 #[doc(hidden)]
                 macro_rules! __export_toxoid_engine_ecs_cabi {
@@ -582,8 +609,18 @@ pub mod exports {
                         "toxoid:engine/ecs#[method]entity.get-id"] unsafe extern "C" fn
                         export_method_entity_get_id(arg0 : * mut u8,) -> i64 {
                         $($path_to_types)*:: _export_method_entity_get_id_cabi::<<$ty as
-                        $($path_to_types)*:: Guest >::Entity > (arg0) } const _ : () = {
-                        #[doc(hidden)] #[export_name =
+                        $($path_to_types)*:: Guest >::Entity > (arg0) } #[export_name =
+                        "toxoid:engine/ecs#[method]entity.get-component"] unsafe extern
+                        "C" fn export_method_entity_get_component(arg0 : * mut u8, arg1 :
+                        i64,) -> i32 { $($path_to_types)*::
+                        _export_method_entity_get_component_cabi::<<$ty as
+                        $($path_to_types)*:: Guest >::Entity > (arg0, arg1) }
+                        #[export_name = "toxoid:engine/ecs#[method]entity.add-component"]
+                        unsafe extern "C" fn export_method_entity_add_component(arg0 : *
+                        mut u8, arg1 : i64,) { $($path_to_types)*::
+                        _export_method_entity_add_component_cabi::<<$ty as
+                        $($path_to_types)*:: Guest >::Entity > (arg0, arg1) } const _ :
+                        () = { #[doc(hidden)] #[export_name =
                         "toxoid:engine/ecs#[dtor]component"] #[allow(non_snake_case)]
                         unsafe extern "C" fn dtor(rep : * mut u8) { $($path_to_types)*::
                         Component::dtor::< <$ty as $($path_to_types)*:: Guest
@@ -762,9 +799,9 @@ pub(crate) use __export_toxoid_engine_world_impl as export;
 #[cfg(target_arch = "wasm32")]
 #[link_section = "component-type:wit-bindgen:0.31.0:toxoid:engine:toxoid-engine-world:encoded world"]
 #[doc(hidden)]
-pub static __WIT_BINDGEN_COMPONENT_TYPE: [u8; 630] = *b"\
-\0asm\x0d\0\x01\0\0\x19\x16wit-component-encoding\x04\0\x07\xec\x03\x01A\x02\x01\
-A\x02\x01B\x19\x01w\x04\0\x0cecs-entity-t\x03\0\0\x01m\x0f\x04u8-t\x05u16-t\x05u\
+pub static __WIT_BINDGEN_COMPONENT_TYPE: [u8; 740] = *b"\
+\0asm\x0d\0\x01\0\0\x19\x16wit-component-encoding\x04\0\x07\xda\x04\x01A\x02\x01\
+A\x02\x01B\x1d\x01w\x04\0\x0cecs-entity-t\x03\0\0\x01m\x0f\x04u8-t\x05u16-t\x05u\
 32-t\x05u64-t\x04i8-t\x05i16-t\x05i32-t\x05i64-t\x05f32-t\x05f64-t\x06bool-t\x08\
 string-t\x07array-t\x0au32array-t\x0af32array-t\x04\0\x0bmember-type\x03\0\x02\x01\
 ps\x01p}\x01r\x03\x04names\x0cmember-names\x04\x0cmember-types\x05\x04\0\x0ecomp\
@@ -773,10 +810,12 @@ onent-desc\x03\0\x06\x01ks\x01r\x01\x04name\x08\x04\0\x0bentity-desc\x03\0\x09\x
 \x04\0\x16[constructor]component\x01\x0e\x01h\x0b\x01@\x01\x04self\x0f\0\x01\x04\
 \0\x18[method]component.get-id\x01\x10\x01i\x0c\x01@\x01\x04init\x0a\0\x11\x04\0\
 \x13[constructor]entity\x01\x12\x01h\x0c\x01@\x01\x04self\x13\0\x01\x04\0\x15[me\
-thod]entity.get-id\x01\x14\x04\x01\x11toxoid:engine/ecs\x05\0\x04\x01!toxoid:eng\
-ine/toxoid-engine-world\x04\0\x0b\x19\x01\0\x13toxoid-engine-world\x03\0\0\0G\x09\
-producers\x01\x0cprocessed-by\x02\x0dwit-component\x070.216.0\x10wit-bindgen-rus\
-t\x060.31.0";
+thod]entity.get-id\x01\x14\x01@\x02\x04self\x13\x09component\x01\0\x0d\x04\0\x1c\
+[method]entity.get-component\x01\x15\x01@\x02\x04self\x13\x09component\x01\x01\0\
+\x04\0\x1c[method]entity.add-component\x01\x16\x04\x01\x11toxoid:engine/ecs\x05\0\
+\x04\x01!toxoid:engine/toxoid-engine-world\x04\0\x0b\x19\x01\0\x13toxoid-engine-\
+world\x03\0\0\0G\x09producers\x01\x0cprocessed-by\x02\x0dwit-component\x070.216.\
+0\x10wit-bindgen-rust\x060.31.0";
 #[inline(never)]
 #[doc(hidden)]
 pub fn __link_custom_section_describing_imports() {

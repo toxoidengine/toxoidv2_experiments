@@ -3,7 +3,7 @@
 
 pub mod bindings;
 use bindings::exports::toxoid::engine::ecs::{ComponentDesc, EntityDesc, Guest, GuestComponent, GuestEntity};
-use toxoid_flecs::bindings::{ecs_entity_desc_t, ecs_entity_init, ecs_init, ecs_member_t, ecs_struct_desc_t, ecs_world_t, ecs_struct_init};
+use toxoid_flecs::bindings::{ecs_add_id, ecs_entity_desc_t, ecs_entity_init, ecs_get_mut_id, ecs_init, ecs_member_t, ecs_struct_desc_t, ecs_struct_init, ecs_world_t};
 use std::mem::MaybeUninit;
 use core::ffi::c_void;
 use once_cell::sync::Lazy;
@@ -13,8 +13,8 @@ use core::ffi::c_char;
 pub struct ToxoidApi;
 // struct World;
 pub struct Component { 
-    id: ecs_entity_t,
-    ptr: *const c_void
+    pub id: ecs_entity_t,
+    pub ptr: *const c_void
 }
 pub struct Entity { 
     id: ecs_entity_t
@@ -112,6 +112,19 @@ impl GuestEntity for Entity {
     
     fn get_id(&self) -> ecs_entity_t {
         self.id
+    }
+
+    fn add_component(&self, component: ecs_entity_t) {
+        unsafe {
+            ecs_add_id(WORLD.0, self.id, component);
+        }
+    }
+
+    fn get_component(&self, component: ecs_entity_t) -> bindings::exports::toxoid::engine::ecs::Component {
+        unsafe {
+            let ptr = ecs_get_mut_id(WORLD.0, self.id, component);
+            bindings::exports::toxoid::engine::ecs::Component::new(Component { id: component, ptr })
+        }
     }
 }
 

@@ -27,10 +27,9 @@ interface ecs {
         member-types: list<u8>
     }
 
-    // resource entity {
-    //     constructor(init: component-desc);
-    //     get-id: func() -> ecs-entity-t;
-    // }
+    record entity-desc {
+        name: option<string>
+    }
 
     resource component {
         constructor(init: component-desc);
@@ -64,20 +63,14 @@ interface ecs {
         // get-member-u32array: func(offset: u32) -> list<u32>;
         // get-member-f32array: func(offset: u32) -> list<f32>;
     }
-
-    // component-create: func(desc: component-desc) -> ecs-entity-t;
-    // component-get: func(name: string) -> ecs-entity-t;
-    // tag-create: func(tag-name: string) -> ecs-entity-t;
-    // prefab-create: func() -> ecs-entity-t;
-    // prefab-instance: func(prefab: ecs-entity-t) -> ecs-entity-t;
-    // entity-create: func() -> ecs-entity-t;
-    // singleton-add: func(component: ecs-entity-t);
-    // singleton-get: func(component: ecs-entity-t) -> component;
-    // singleton-remove: func(component: ecs-entity-t);
-    // entity-get-component: func(entity: ecs-entity-t, component: ecs-entity-t) -> component;
-    // entity-set-component: func(entity: ecs-entity-t, component: ecs-entity-t, value: component);
-    // entity-remove-component: func(entity: ecs-entity-t, component: ecs-entity-t);
-    // entity-has-component: func(entity: ecs-entity-t, component: ecs-entity-t) -> bool;
+    
+    resource entity {
+        constructor(init: entity-desc);
+        get-id: func() -> ecs-entity-t;
+        get-component: func(component: ecs-entity-t) -> component;
+        add-component: func(component: ecs-entity-t);
+        // remove-component: func(component: ecs-entity-t);
+    }
 }
 
 world toxoid-component-world {

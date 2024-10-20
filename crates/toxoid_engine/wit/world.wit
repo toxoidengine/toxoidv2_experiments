@@ -67,6 +67,9 @@ interface ecs {
     resource entity {
         constructor(init: entity-desc);
         get-id: func() -> ecs-entity-t;
+        get-component: func(component: ecs-entity-t) -> component;
+        add-component: func(component: ecs-entity-t);
+        // remove-component: func(component: ecs-entity-t);
     }
 
     // resource tag {
