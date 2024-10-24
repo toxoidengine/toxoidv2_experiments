@@ -95,6 +95,7 @@ impl toxoid_component::component::ecs::HostEntity for StoreState {
                 ptr: boxed_component_ptr
             })
             .expect("Failed to push component to table");
+        println!("Component ID: {:?}", id);
         id
     }
 
@@ -111,9 +112,9 @@ impl toxoid_component::component::ecs::HostEntity for StoreState {
     }
 
     fn drop(&mut self, entity: Resource<toxoid_component::component::ecs::Entity>) -> Result<(), wasmtime::Error> {
-        let entity_proxy = self.table.get(&entity).unwrap() as &EntityProxy;
-        drop(unsafe { Box::from_raw(entity_proxy.ptr) });
-        self.table.delete::<EntityProxy>(entity).unwrap();
+        // let entity_proxy = self.table.get(&entity).unwrap() as &EntityProxy;
+        // drop(unsafe { Box::from_raw(entity_proxy.ptr) });
+        // self.table.delete::<EntityProxy>(entity).unwrap();
         Ok(())
     }
 }
@@ -149,9 +150,9 @@ impl toxoid_component::component::ecs::HostComponentType for StoreState {
     }
 
     fn drop(&mut self, component: Resource<toxoid_component::component::ecs::ComponentType>) -> Result<(), wasmtime::Error> {
-        let component_proxy = self.table.get(&component).unwrap() as &ComponentTypeProxy;
-        drop(unsafe { Box::from_raw(component_proxy.ptr) });
-        self.table.delete::<ComponentTypeProxy>(component).unwrap();
+        // let component_proxy = self.table.get(&component).unwrap() as &ComponentTypeProxy;
+        // drop(unsafe { Box::from_raw(component_proxy.ptr) });
+        // self.table.delete::<ComponentTypeProxy>(component).unwrap();
         Ok(())
     }
 
@@ -182,9 +183,9 @@ impl toxoid_component::component::ecs::HostComponent for StoreState {
     // }
 
     fn drop(&mut self, component: Resource<toxoid_component::component::ecs::Component>) -> Result<(), wasmtime::Error> {
-        let component_proxy = self.table.get(&component).unwrap() as &ComponentProxy;
-        drop(unsafe { Box::from_raw(component_proxy.ptr) });
-        self.table.delete::<ComponentProxy>(component).unwrap();
+        // let component_proxy = self.table.get(&component).unwrap() as &ComponentProxy;
+        // drop(unsafe { Box::from_raw(component_proxy.ptr) });
+        // self.table.delete::<ComponentProxy>(component).unwrap();
         Ok(())
     }
 }
