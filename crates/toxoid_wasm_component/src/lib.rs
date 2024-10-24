@@ -17,8 +17,9 @@ impl Guest for ToxoidWasmComponent {
         let entity = Entity::new(&EntityDesc {
             name: Some("Test entity".to_string())
         });
-        // entity.add_component(component.get_id());
-        // let _ = entity.get_component(component.get_id());
+        entity.add_component(component.get_id());
+        entity.get_component(component.get_id());
+
         component.get_id()
     }
 }

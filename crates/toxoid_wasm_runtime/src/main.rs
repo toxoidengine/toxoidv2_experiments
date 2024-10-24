@@ -62,19 +62,24 @@ impl toxoid_component::component::ecs::HostEntity for StoreState {
     }
 
     fn get_id(&mut self, entity: Resource<toxoid_component::component::ecs::Entity>) -> u64 {
-        // let entity_proxy = self.table.get(&entity).unwrap() as &EntityProxy;
-        // let entity = unsafe { Box::from_raw(entity_proxy.ptr) };
-        // let id = entity.get_id();
-        // Box::into_raw(entity);
-        // id
-        0
+        let entity_proxy = self.table.get(&entity).unwrap() as &EntityProxy;
+        let entity = unsafe { Box::from_raw(entity_proxy.ptr) };
+        let id = entity.get_id();
+        Box::into_raw(entity);
+        id
     }
 
     #[cfg(not(feature = "wasm"))]
     fn get_component(&mut self, entity: Resource<toxoid_component::component::ecs::Entity>, component: toxoid_component::component::ecs::EcsEntityT) -> Resource<ComponentProxy> {
-        let entity_proxy = self.table.get(&entity).unwrap() as &EntityProxy;
+        // Safely retrieve the entity proxy
+        let entity_proxy = self.table.get(&entity).expect("Entity not found in table") as &EntityProxy;
+
+        // Get entity
         let entity = unsafe { Box::from_raw(entity_proxy.ptr) };
+        
+        // Retrieve the component
         let component = entity.get_component(component);
+        Box::into_raw(entity);
 
         // Create component
         let component = toxoid_engine::Component::new(component);
@@ -89,31 +94,13 @@ impl toxoid_component::component::ecs::HostEntity for StoreState {
             .push::<ComponentProxy>(ComponentProxy { 
                 ptr: boxed_component_ptr
             })
-            .unwrap();
+            .expect("Failed to push component to table");
         id
     }
 
     #[cfg(feature = "wasm")]
     fn get_component(&mut self, entity: Resource<toxoid_component::component::ecs::Entity>, component: toxoid_component::component::ecs::EcsEntityT) -> Resource<ComponentProxy> {
-        let entity_proxy = self.table.get(&entity).unwrap() as &EntityProxy;
-        let entity = unsafe { Box::from_raw(entity_proxy.ptr) };
-        let component = entity.get_component(component);
-
-        // Create component
-        let component = toxoid_engine::Component::new(component);
-
-        // Create boxed component
-        let boxed_component = Box::new(component);
-        let boxed_component_ptr = Box::into_raw(boxed_component);
-
-        // Push component to resource table
-        let id = self
-            .table
-            .push::<ComponentProxy>(ComponentProxy { 
-                ptr: boxed_component_ptr
-            })
-            .unwrap();
-        id
+        unimplemented!()
     }
 
     fn add_component(&mut self, entity: Resource<toxoid_component::component::ecs::Entity>, component: toxoid_component::component::ecs::EcsEntityT) -> () {
