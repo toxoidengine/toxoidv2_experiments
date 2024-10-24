@@ -135,9 +135,9 @@ impl toxoid_component::component::ecs::HostComponentType for StoreState {
     fn new(&mut self, desc: toxoid_component::component::ecs::ComponentDesc) -> Resource<ComponentTypeProxy> {
         // Create component
         let component = toxoid_engine::ComponentType::new(toxoid_engine::bindings::exports::toxoid::engine::ecs::ComponentDesc {
-            name: "".to_string(),
-            member_names: vec![],
-            member_types: vec![],
+            name: desc.name,
+            member_names: desc.member_names,
+            member_types: desc.member_types,
         });
         // Create boxed component
         let boxed_component = Box::new(component);
