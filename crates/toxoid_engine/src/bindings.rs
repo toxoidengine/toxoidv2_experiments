@@ -136,6 +136,128 @@ pub mod exports {
                         f.debug_struct("EntityDesc").field("name", &self.name).finish()
                     }
                 }
+                /// Convert to component-type instead and make component instances seperate
+                #[derive(Debug)]
+                #[repr(transparent)]
+                pub struct ComponentType {
+                    handle: _rt::Resource<ComponentType>,
+                }
+                type _ComponentTypeRep<T> = Option<T>;
+                impl ComponentType {
+                    /// Creates a new resource from the specified representation.
+                    ///
+                    /// This function will create a new resource handle by moving `val` onto
+                    /// the heap and then passing that heap pointer to the component model to
+                    /// create a handle. The owned handle is then returned as `ComponentType`.
+                    pub fn new<T: GuestComponentType>(val: T) -> Self {
+                        Self::type_guard::<T>();
+                        let val: _ComponentTypeRep<T> = Some(val);
+                        let ptr: *mut _ComponentTypeRep<T> = _rt::Box::into_raw(
+                            _rt::Box::new(val),
+                        );
+                        unsafe { Self::from_handle(T::_resource_new(ptr.cast())) }
+                    }
+                    /// Gets access to the underlying `T` which represents this resource.
+                    pub fn get<T: GuestComponentType>(&self) -> &T {
+                        let ptr = unsafe { &*self.as_ptr::<T>() };
+                        ptr.as_ref().unwrap()
+                    }
+                    /// Gets mutable access to the underlying `T` which represents this
+                    /// resource.
+                    pub fn get_mut<T: GuestComponentType>(&mut self) -> &mut T {
+                        let ptr = unsafe { &mut *self.as_ptr::<T>() };
+                        ptr.as_mut().unwrap()
+                    }
+                    /// Consumes this resource and returns the underlying `T`.
+                    pub fn into_inner<T: GuestComponentType>(self) -> T {
+                        let ptr = unsafe { &mut *self.as_ptr::<T>() };
+                        ptr.take().unwrap()
+                    }
+                    #[doc(hidden)]
+                    pub unsafe fn from_handle(handle: u32) -> Self {
+                        Self {
+                            handle: _rt::Resource::from_handle(handle),
+                        }
+                    }
+                    #[doc(hidden)]
+                    pub fn take_handle(&self) -> u32 {
+                        _rt::Resource::take_handle(&self.handle)
+                    }
+                    #[doc(hidden)]
+                    pub fn handle(&self) -> u32 {
+                        _rt::Resource::handle(&self.handle)
+                    }
+                    #[doc(hidden)]
+                    fn type_guard<T: 'static>() {
+                        use core::any::TypeId;
+                        static mut LAST_TYPE: Option<TypeId> = None;
+                        unsafe {
+                            assert!(! cfg!(target_feature = "atomics"));
+                            let id = TypeId::of::<T>();
+                            match LAST_TYPE {
+                                Some(ty) => {
+                                    assert!(
+                                        ty == id, "cannot use two types with this resource type"
+                                    )
+                                }
+                                None => LAST_TYPE = Some(id),
+                            }
+                        }
+                    }
+                    #[doc(hidden)]
+                    pub unsafe fn dtor<T: 'static>(handle: *mut u8) {
+                        Self::type_guard::<T>();
+                        let _ = _rt::Box::from_raw(handle as *mut _ComponentTypeRep<T>);
+                    }
+                    fn as_ptr<T: GuestComponentType>(
+                        &self,
+                    ) -> *mut _ComponentTypeRep<T> {
+                        ComponentType::type_guard::<T>();
+                        T::_resource_rep(self.handle()).cast()
+                    }
+                }
+                /// A borrowed version of [`ComponentType`] which represents a borrowed value
+                /// with the lifetime `'a`.
+                #[derive(Debug)]
+                #[repr(transparent)]
+                pub struct ComponentTypeBorrow<'a> {
+                    rep: *mut u8,
+                    _marker: core::marker::PhantomData<&'a ComponentType>,
+                }
+                impl<'a> ComponentTypeBorrow<'a> {
+                    #[doc(hidden)]
+                    pub unsafe fn lift(rep: usize) -> Self {
+                        Self {
+                            rep: rep as *mut u8,
+                            _marker: core::marker::PhantomData,
+                        }
+                    }
+                    /// Gets access to the underlying `T` in this resource.
+                    pub fn get<T: GuestComponentType>(&self) -> &T {
+                        let ptr = unsafe { &mut *self.as_ptr::<T>() };
+                        ptr.as_ref().unwrap()
+                    }
+                    fn as_ptr<T: 'static>(&self) -> *mut _ComponentTypeRep<T> {
+                        ComponentType::type_guard::<T>();
+                        self.rep.cast()
+                    }
+                }
+                unsafe impl _rt::WasmResource for ComponentType {
+                    #[inline]
+                    unsafe fn drop(_handle: u32) {
+                        #[cfg(not(target_arch = "wasm32"))]
+                        unreachable!();
+                        #[cfg(target_arch = "wasm32")]
+                        {
+                            #[link(wasm_import_module = "[export]toxoid:engine/ecs")]
+                            extern "C" {
+                                #[link_name = "[resource-drop]component-type"]
+                                fn drop(_: u32);
+                            }
+                            drop(_handle);
+                        }
+                    }
+                }
                 #[derive(Debug)]
                 #[repr(transparent)]
                 pub struct Component {
@@ -376,7 +498,9 @@ pub mod exports {
                 }
                 #[doc(hidden)]
                 #[allow(non_snake_case)]
-                pub unsafe fn _export_constructor_component_cabi<T: GuestComponent>(
+                pub unsafe fn _export_constructor_component_type_cabi<
+                    T: GuestComponentType,
+                >(
                     arg0: *mut u8,
                     arg1: usize,
                     arg2: *mut u8,
@@ -403,7 +527,7 @@ pub mod exports {
                     }
                     _rt::cabi_dealloc(base4, len4 * 8, 4);
                     let len5 = arg5;
-                    let result6 = Component::new(
+                    let result6 = ComponentType::new(
                         T::new(ComponentDesc {
                             name: _rt::string_lift(bytes0),
                             member_names: result4,
@@ -418,14 +542,23 @@ pub mod exports {
                 }
                 #[doc(hidden)]
                 #[allow(non_snake_case)]
-                pub unsafe fn _export_method_component_get_id_cabi<T: GuestComponent>(
-                    arg0: *mut u8,
-                ) -> i64 {
+                pub unsafe fn _export_method_component_type_get_id_cabi<
+                    T: GuestComponentType,
+                >(arg0: *mut u8) -> i64 {
                     #[cfg(target_arch = "wasm32")] _rt::run_ctors_once();
                     let result0 = T::get_id(
-                        ComponentBorrow::lift(arg0 as u32 as usize).get(),
+                        ComponentTypeBorrow::lift(arg0 as u32 as usize).get(),
                     );
                     _rt::as_i64(result0)
+                }
+                #[doc(hidden)]
+                #[allow(non_snake_case)]
+                pub unsafe fn _export_constructor_component_cabi<T: GuestComponent>(
+                    arg0: i64,
+                ) -> i32 {
+                    #[cfg(target_arch = "wasm32")] _rt::run_ctors_once();
+                    let result0 = Component::new(T::new(arg0));
+                    (result0).take_handle() as i32
                 }
                 #[doc(hidden)]
                 #[allow(non_snake_case)]
@@ -473,13 +606,13 @@ pub mod exports {
                 pub unsafe fn _export_method_entity_get_component_cabi<T: GuestEntity>(
                     arg0: *mut u8,
                     arg1: i64,
-                ) -> i32 {
+                ) -> i64 {
                     #[cfg(target_arch = "wasm32")] _rt::run_ctors_once();
                     let result0 = T::get_component(
                         EntityBorrow::lift(arg0 as u32 as usize).get(),
                         arg1 as u64,
                     );
-                    (result0).take_handle() as i32
+                    _rt::as_i64(result0)
                 }
                 #[doc(hidden)]
                 #[allow(non_snake_case)]
@@ -494,8 +627,53 @@ pub mod exports {
                     );
                 }
                 pub trait Guest {
+                    type ComponentType: GuestComponentType;
                     type Component: GuestComponent;
                     type Entity: GuestEntity;
+                }
+                pub trait GuestComponentType: 'static {
+                    #[doc(hidden)]
+                    unsafe fn _resource_new(val: *mut u8) -> u32
+                    where
+                        Self: Sized,
+                    {
+                        #[cfg(not(target_arch = "wasm32"))]
+                        {
+                            let _ = val;
+                            unreachable!();
+                        }
+                        #[cfg(target_arch = "wasm32")]
+                        {
+                            #[link(wasm_import_module = "[export]toxoid:engine/ecs")]
+                            extern "C" {
+                                #[link_name = "[resource-new]component-type"]
+                                fn new(_: *mut u8) -> u32;
+                            }
+                            new(val)
+                        }
+                    }
+                    #[doc(hidden)]
+                    fn _resource_rep(handle: u32) -> *mut u8
+                    where
+                        Self: Sized,
+                    {
+                        #[cfg(not(target_arch = "wasm32"))]
+                        {
+                            let _ = handle;
+                            unreachable!();
+                        }
+                        #[cfg(target_arch = "wasm32")]
+                        {
+                            #[link(wasm_import_module = "[export]toxoid:engine/ecs")]
+                            extern "C" {
+                                #[link_name = "[resource-rep]component-type"]
+                                fn rep(_: u32) -> *mut u8;
+                            }
+                            unsafe { rep(handle) }
+                        }
+                    }
+                    fn new(desc: ComponentDesc) -> Self;
+                    fn get_id(&self) -> EcsEntityT;
                 }
                 pub trait GuestComponent: 'static {
                     #[doc(hidden)]
@@ -538,8 +716,7 @@ pub mod exports {
                             unsafe { rep(handle) }
                         }
                     }
-                    fn new(init: ComponentDesc) -> Self;
-                    fn get_id(&self) -> EcsEntityT;
+                    fn new(ptr: i64) -> Self;
                 }
                 pub trait GuestEntity: 'static {
                     #[doc(hidden)]
@@ -582,28 +759,35 @@ pub mod exports {
                             unsafe { rep(handle) }
                         }
                     }
-                    fn new(init: EntityDesc) -> Self;
+                    fn new(desc: EntityDesc) -> Self;
                     fn get_id(&self) -> EcsEntityT;
-                    fn get_component(&self, component: EcsEntityT) -> Component;
+                    fn get_component(&self, component: EcsEntityT) -> i64;
                     fn add_component(&self, component: EcsEntityT);
                 }
                 #[doc(hidden)]
                 macro_rules! __export_toxoid_engine_ecs_cabi {
                     ($ty:ident with_types_in $($path_to_types:tt)*) => {
                         const _ : () = { #[export_name =
-                        "toxoid:engine/ecs#[constructor]component"] unsafe extern "C" fn
-                        export_constructor_component(arg0 : * mut u8, arg1 : usize, arg2
-                        : * mut u8, arg3 : usize, arg4 : * mut u8, arg5 : usize,) -> i32
-                        { $($path_to_types)*:: _export_constructor_component_cabi::<<$ty
-                        as $($path_to_types)*:: Guest >::Component > (arg0, arg1, arg2,
+                        "toxoid:engine/ecs#[constructor]component-type"] unsafe extern
+                        "C" fn export_constructor_component_type(arg0 : * mut u8, arg1 :
+                        usize, arg2 : * mut u8, arg3 : usize, arg4 : * mut u8, arg5 :
+                        usize,) -> i32 { $($path_to_types)*::
+                        _export_constructor_component_type_cabi::<<$ty as
+                        $($path_to_types)*:: Guest >::ComponentType > (arg0, arg1, arg2,
                         arg3, arg4, arg5) } #[export_name =
-                        "toxoid:engine/ecs#[method]component.get-id"] unsafe extern "C"
-                        fn export_method_component_get_id(arg0 : * mut u8,) -> i64 {
-                        $($path_to_types)*:: _export_method_component_get_id_cabi::<<$ty
-                        as $($path_to_types)*:: Guest >::Component > (arg0) }
-                        #[export_name = "toxoid:engine/ecs#[constructor]entity"] unsafe
-                        extern "C" fn export_constructor_entity(arg0 : i32, arg1 : * mut
-                        u8, arg2 : usize,) -> i32 { $($path_to_types)*::
+                        "toxoid:engine/ecs#[method]component-type.get-id"] unsafe extern
+                        "C" fn export_method_component_type_get_id(arg0 : * mut u8,) ->
+                        i64 { $($path_to_types)*::
+                        _export_method_component_type_get_id_cabi::<<$ty as
+                        $($path_to_types)*:: Guest >::ComponentType > (arg0) }
+                        #[export_name = "toxoid:engine/ecs#[constructor]component"]
+                        unsafe extern "C" fn export_constructor_component(arg0 : i64,) ->
+                        i32 { $($path_to_types)*::
+                        _export_constructor_component_cabi::<<$ty as $($path_to_types)*::
+                        Guest >::Component > (arg0) } #[export_name =
+                        "toxoid:engine/ecs#[constructor]entity"] unsafe extern "C" fn
+                        export_constructor_entity(arg0 : i32, arg1 : * mut u8, arg2 :
+                        usize,) -> i32 { $($path_to_types)*::
                         _export_constructor_entity_cabi::<<$ty as $($path_to_types)*::
                         Guest >::Entity > (arg0, arg1, arg2) } #[export_name =
                         "toxoid:engine/ecs#[method]entity.get-id"] unsafe extern "C" fn
@@ -612,7 +796,7 @@ pub mod exports {
                         $($path_to_types)*:: Guest >::Entity > (arg0) } #[export_name =
                         "toxoid:engine/ecs#[method]entity.get-component"] unsafe extern
                         "C" fn export_method_entity_get_component(arg0 : * mut u8, arg1 :
-                        i64,) -> i32 { $($path_to_types)*::
+                        i64,) -> i64 { $($path_to_types)*::
                         _export_method_entity_get_component_cabi::<<$ty as
                         $($path_to_types)*:: Guest >::Entity > (arg0, arg1) }
                         #[export_name = "toxoid:engine/ecs#[method]entity.add-component"]
@@ -621,6 +805,11 @@ pub mod exports {
                         _export_method_entity_add_component_cabi::<<$ty as
                         $($path_to_types)*:: Guest >::Entity > (arg0, arg1) } const _ :
                         () = { #[doc(hidden)] #[export_name =
+                        "toxoid:engine/ecs#[dtor]component-type"]
+                        #[allow(non_snake_case)] unsafe extern "C" fn dtor(rep : * mut
+                        u8) { $($path_to_types)*:: ComponentType::dtor::< <$ty as
+                        $($path_to_types)*:: Guest >::ComponentType > (rep) } }; const _
+                        : () = { #[doc(hidden)] #[export_name =
                         "toxoid:engine/ecs#[dtor]component"] #[allow(non_snake_case)]
                         unsafe extern "C" fn dtor(rep : * mut u8) { $($path_to_types)*::
                         Component::dtor::< <$ty as $($path_to_types)*:: Guest
@@ -799,23 +988,24 @@ pub(crate) use __export_toxoid_engine_world_impl as export;
 #[cfg(target_arch = "wasm32")]
 #[link_section = "component-type:wit-bindgen:0.31.0:toxoid:engine:toxoid-engine-world:encoded world"]
 #[doc(hidden)]
-pub static __WIT_BINDGEN_COMPONENT_TYPE: [u8; 740] = *b"\
-\0asm\x0d\0\x01\0\0\x19\x16wit-component-encoding\x04\0\x07\xda\x04\x01A\x02\x01\
-A\x02\x01B\x1d\x01w\x04\0\x0cecs-entity-t\x03\0\0\x01m\x0f\x04u8-t\x05u16-t\x05u\
-32-t\x05u64-t\x04i8-t\x05i16-t\x05i32-t\x05i64-t\x05f32-t\x05f64-t\x06bool-t\x08\
-string-t\x07array-t\x0au32array-t\x0af32array-t\x04\0\x0bmember-type\x03\0\x02\x01\
-ps\x01p}\x01r\x03\x04names\x0cmember-names\x04\x0cmember-types\x05\x04\0\x0ecomp\
-onent-desc\x03\0\x06\x01ks\x01r\x01\x04name\x08\x04\0\x0bentity-desc\x03\0\x09\x04\
-\0\x09component\x03\x01\x04\0\x06entity\x03\x01\x01i\x0b\x01@\x01\x04init\x07\0\x0d\
-\x04\0\x16[constructor]component\x01\x0e\x01h\x0b\x01@\x01\x04self\x0f\0\x01\x04\
-\0\x18[method]component.get-id\x01\x10\x01i\x0c\x01@\x01\x04init\x0a\0\x11\x04\0\
-\x13[constructor]entity\x01\x12\x01h\x0c\x01@\x01\x04self\x13\0\x01\x04\0\x15[me\
-thod]entity.get-id\x01\x14\x01@\x02\x04self\x13\x09component\x01\0\x0d\x04\0\x1c\
-[method]entity.get-component\x01\x15\x01@\x02\x04self\x13\x09component\x01\x01\0\
-\x04\0\x1c[method]entity.add-component\x01\x16\x04\x01\x11toxoid:engine/ecs\x05\0\
-\x04\x01!toxoid:engine/toxoid-engine-world\x04\0\x0b\x19\x01\0\x13toxoid-engine-\
-world\x03\0\0\0G\x09producers\x01\x0cprocessed-by\x02\x0dwit-component\x070.216.\
-0\x10wit-bindgen-rust\x060.31.0";
+pub static __WIT_BINDGEN_COMPONENT_TYPE: [u8; 809] = *b"\
+\0asm\x0d\0\x01\0\0\x19\x16wit-component-encoding\x04\0\x07\x9f\x05\x01A\x02\x01\
+A\x02\x01B!\x01w\x04\0\x0cecs-entity-t\x03\0\0\x01m\x0f\x04u8-t\x05u16-t\x05u32-\
+t\x05u64-t\x04i8-t\x05i16-t\x05i32-t\x05i64-t\x05f32-t\x05f64-t\x06bool-t\x08str\
+ing-t\x07array-t\x0au32array-t\x0af32array-t\x04\0\x0bmember-type\x03\0\x02\x01p\
+s\x01p}\x01r\x03\x04names\x0cmember-names\x04\x0cmember-types\x05\x04\0\x0ecompo\
+nent-desc\x03\0\x06\x01ks\x01r\x01\x04name\x08\x04\0\x0bentity-desc\x03\0\x09\x04\
+\0\x0ecomponent-type\x03\x01\x04\0\x09component\x03\x01\x04\0\x06entity\x03\x01\x01\
+i\x0b\x01@\x01\x04desc\x07\0\x0e\x04\0\x1b[constructor]component-type\x01\x0f\x01\
+h\x0b\x01@\x01\x04self\x10\0\x01\x04\0\x1d[method]component-type.get-id\x01\x11\x01\
+i\x0c\x01@\x01\x03ptrx\0\x12\x04\0\x16[constructor]component\x01\x13\x01i\x0d\x01\
+@\x01\x04desc\x0a\0\x14\x04\0\x13[constructor]entity\x01\x15\x01h\x0d\x01@\x01\x04\
+self\x16\0\x01\x04\0\x15[method]entity.get-id\x01\x17\x01@\x02\x04self\x16\x09co\
+mponent\x01\0x\x04\0\x1c[method]entity.get-component\x01\x18\x01@\x02\x04self\x16\
+\x09component\x01\x01\0\x04\0\x1c[method]entity.add-component\x01\x19\x04\x01\x11\
+toxoid:engine/ecs\x05\0\x04\x01!toxoid:engine/toxoid-engine-world\x04\0\x0b\x19\x01\
+\0\x13toxoid-engine-world\x03\0\0\0G\x09producers\x01\x0cprocessed-by\x02\x0dwit\
+-component\x070.216.0\x10wit-bindgen-rust\x060.31.0";
 #[inline(never)]
 #[doc(hidden)]
 pub fn __link_custom_section_describing_imports() {

@@ -38,9 +38,11 @@ interface ecs {
     }
 
     resource component {
-        
+        {% if wasm %}
+        constructor(resource-id: u32);
+        {% else %}
         constructor(ptr: s64);
-        
+        {% endif %}
         // set-member-u8: func(offset: u32, value: u8);
         // set-member-u16: func(offset: u32, value: u16);
         // set-member-u32: func(offset: u32, value: u32);
@@ -74,9 +76,11 @@ interface ecs {
     resource entity {
         constructor(desc: entity-desc);
         get-id: func() -> ecs-entity-t;
-        
+        {% if wasm %}
+        get-component: func(component: ecs-entity-t) -> component;
+        {% else %}
         get-component: func(component: ecs-entity-t) -> s64;
-        
+        {% endif %}
         add-component: func(component: ecs-entity-t);
         // remove-component: func(component: ecs-entity-t);
     }

@@ -140,6 +140,43 @@ pub mod toxoid_component {
             }
             #[derive(Debug)]
             #[repr(transparent)]
+            pub struct ComponentType {
+                handle: _rt::Resource<ComponentType>,
+            }
+            impl ComponentType {
+                #[doc(hidden)]
+                pub unsafe fn from_handle(handle: u32) -> Self {
+                    Self {
+                        handle: _rt::Resource::from_handle(handle),
+                    }
+                }
+                #[doc(hidden)]
+                pub fn take_handle(&self) -> u32 {
+                    _rt::Resource::take_handle(&self.handle)
+                }
+                #[doc(hidden)]
+                pub fn handle(&self) -> u32 {
+                    _rt::Resource::handle(&self.handle)
+                }
+            }
+            unsafe impl _rt::WasmResource for ComponentType {
+                #[inline]
+                unsafe fn drop(_handle: u32) {
+                    #[cfg(not(target_arch = "wasm32"))]
+                    unreachable!();
+                    #[cfg(target_arch = "wasm32")]
+                    {
+                        #[link(wasm_import_module = "toxoid-component:component/ecs")]
+                        extern "C" {
+                            #[link_name = "[resource-drop]component-type"]
+                            fn drop(_: u32);
+                        }
+                        drop(_handle);
+                    }
+                }
+            }
+            #[derive(Debug)]
+            #[repr(transparent)]
             pub struct Component {
                 handle: _rt::Resource<Component>,
             }
@@ -212,7 +249,7 @@ pub mod toxoid_component {
                     }
                 }
             }
-            impl Component {
+            impl ComponentType {
                 #[allow(unused_unsafe, clippy::all)]
                 pub fn new(init: &ComponentDesc) -> Self {
                     unsafe {
@@ -255,7 +292,7 @@ pub mod toxoid_component {
                         #[cfg(target_arch = "wasm32")]
                         #[link(wasm_import_module = "toxoid-component:component/ecs")]
                         extern "C" {
-                            #[link_name = "[constructor]component"]
+                            #[link_name = "[constructor]component-type"]
                             fn wit_import(
                                 _: *mut u8,
                                 _: usize,
@@ -287,18 +324,18 @@ pub mod toxoid_component {
                         if layout3.size() != 0 {
                             _rt::alloc::dealloc(result3.cast(), layout3);
                         }
-                        Component::from_handle(ret as u32)
+                        ComponentType::from_handle(ret as u32)
                     }
                 }
             }
-            impl Component {
+            impl ComponentType {
                 #[allow(unused_unsafe, clippy::all)]
                 pub fn get_id(&self) -> EcsEntityT {
                     unsafe {
                         #[cfg(target_arch = "wasm32")]
                         #[link(wasm_import_module = "toxoid-component:component/ecs")]
                         extern "C" {
-                            #[link_name = "[method]component.get-id"]
+                            #[link_name = "[method]component-type.get-id"]
                             fn wit_import(_: i32) -> i64;
                         }
                         #[cfg(not(target_arch = "wasm32"))]
@@ -547,24 +584,24 @@ pub(crate) use __export_toxoid_component_world_impl as export;
 #[cfg(target_arch = "wasm32")]
 #[link_section = "component-type:wit-bindgen:0.31.0:toxoid-component:component:toxoid-component-world:encoded world"]
 #[doc(hidden)]
-pub static __WIT_BINDGEN_COMPONENT_TYPE: [u8; 792] = *b"\
-\0asm\x0d\0\x01\0\0\x19\x16wit-component-encoding\x04\0\x07\x8b\x05\x01A\x02\x01\
-A\x04\x01B\x1d\x01w\x04\0\x0cecs-entity-t\x03\0\0\x01m\x0f\x04u8-t\x05u16-t\x05u\
+pub static __WIT_BINDGEN_COMPONENT_TYPE: [u8; 824] = *b"\
+\0asm\x0d\0\x01\0\0\x19\x16wit-component-encoding\x04\0\x07\xab\x05\x01A\x02\x01\
+A\x04\x01B\x1f\x01w\x04\0\x0cecs-entity-t\x03\0\0\x01m\x0f\x04u8-t\x05u16-t\x05u\
 32-t\x05u64-t\x04i8-t\x05i16-t\x05i32-t\x05i64-t\x05f32-t\x05f64-t\x06bool-t\x08\
 string-t\x07array-t\x0au32array-t\x0af32array-t\x04\0\x0bmember-type\x03\0\x02\x01\
 ps\x01p}\x01r\x03\x04names\x0cmember-names\x04\x0cmember-types\x05\x04\0\x0ecomp\
 onent-desc\x03\0\x06\x01ks\x01r\x01\x04name\x08\x04\0\x0bentity-desc\x03\0\x09\x04\
-\0\x09component\x03\x01\x04\0\x06entity\x03\x01\x01i\x0b\x01@\x01\x04init\x07\0\x0d\
-\x04\0\x16[constructor]component\x01\x0e\x01h\x0b\x01@\x01\x04self\x0f\0\x01\x04\
-\0\x18[method]component.get-id\x01\x10\x01i\x0c\x01@\x01\x04init\x0a\0\x11\x04\0\
-\x13[constructor]entity\x01\x12\x01h\x0c\x01@\x01\x04self\x13\0\x01\x04\0\x15[me\
-thod]entity.get-id\x01\x14\x01@\x02\x04self\x13\x09component\x01\0\x0d\x04\0\x1c\
-[method]entity.get-component\x01\x15\x01@\x02\x04self\x13\x09component\x01\x01\0\
-\x04\0\x1c[method]entity.add-component\x01\x16\x03\x01\x1etoxoid-component:compo\
-nent/ecs\x05\0\x01@\x01\x04names\0w\x04\0\x04init\x01\x01\x04\x011toxoid-compone\
-nt:component/toxoid-component-world\x04\0\x0b\x1c\x01\0\x16toxoid-component-worl\
-d\x03\0\0\0G\x09producers\x01\x0cprocessed-by\x02\x0dwit-component\x070.216.0\x10\
-wit-bindgen-rust\x060.31.0";
+\0\x0ecomponent-type\x03\x01\x04\0\x09component\x03\x01\x04\0\x06entity\x03\x01\x01\
+i\x0b\x01@\x01\x04init\x07\0\x0e\x04\0\x1b[constructor]component-type\x01\x0f\x01\
+h\x0b\x01@\x01\x04self\x10\0\x01\x04\0\x1d[method]component-type.get-id\x01\x11\x01\
+i\x0d\x01@\x01\x04init\x0a\0\x12\x04\0\x13[constructor]entity\x01\x13\x01h\x0d\x01\
+@\x01\x04self\x14\0\x01\x04\0\x15[method]entity.get-id\x01\x15\x01i\x0c\x01@\x02\
+\x04self\x14\x09component\x01\0\x16\x04\0\x1c[method]entity.get-component\x01\x17\
+\x01@\x02\x04self\x14\x09component\x01\x01\0\x04\0\x1c[method]entity.add-compone\
+nt\x01\x18\x03\x01\x1etoxoid-component:component/ecs\x05\0\x01@\x01\x04names\0w\x04\
+\0\x04init\x01\x01\x04\x011toxoid-component:component/toxoid-component-world\x04\
+\0\x0b\x1c\x01\0\x16toxoid-component-world\x03\0\0\0G\x09producers\x01\x0cproces\
+sed-by\x02\x0dwit-component\x070.216.0\x10wit-bindgen-rust\x060.31.0";
 #[inline(never)]
 #[doc(hidden)]
 pub fn __link_custom_section_describing_imports() {

@@ -2,7 +2,7 @@
 #![allow(warnings)]
 
 pub mod bindings;
-use bindings::exports::toxoid::engine::ecs::{ComponentDesc, EntityDesc, Guest, GuestComponent, GuestEntity};
+use bindings::exports::toxoid::engine::ecs::{ComponentDesc, GuestComponentType, EntityDesc, Guest, GuestComponent, GuestEntity};
 use toxoid_flecs::bindings::{ecs_add_id, ecs_entity_desc_t, ecs_entity_init, ecs_get_mut_id, ecs_init, ecs_member_t, ecs_struct_desc_t, ecs_struct_init, ecs_world_t};
 use std::mem::MaybeUninit;
 use core::ffi::c_void;
@@ -12,8 +12,10 @@ use core::ffi::c_char;
 
 pub struct ToxoidApi;
 // struct World;
-pub struct Component { 
-    pub id: ecs_entity_t,
+pub struct ComponentType { 
+    pub id: ecs_entity_t
+}
+pub struct Component {
     pub ptr: *const c_void
 }
 pub struct Entity { 
@@ -27,12 +29,6 @@ unsafe impl Sync for EcsWorldPtr {}
 static WORLD: Lazy<EcsWorldPtr> = Lazy::new(|| 
     EcsWorldPtr(unsafe { ecs_init() })
 );
-
-// impl GuestWorld for World {
-//     fn new() -> World {
-//         World::new()
-//     }
-// }
 
 unsafe fn get_member_type(member_type: u8) -> ecs_entity_t {
     match member_type {
@@ -52,8 +48,8 @@ unsafe fn get_member_type(member_type: u8) -> ecs_entity_t {
     }
 }
 
-impl GuestComponent for Component {
-    fn new(desc: ComponentDesc) -> Component {
+impl GuestComponentType for ComponentType {
+    fn new(desc: ComponentDesc) -> ComponentType {
         unsafe {
             // Create component entity
             let mut ent_desc: ecs_entity_desc_t = MaybeUninit::zeroed().assume_init();
@@ -79,9 +75,8 @@ impl GuestComponent for Component {
             let component = ecs_struct_init(WORLD.0, &struct_desc);
 
             // Return component 
-            Component { 
-                id: component_entity,
-                ptr: std::ptr::null_mut()
+            ComponentType { 
+                id: component_entity
             }
         }
     }
@@ -96,6 +91,18 @@ impl GuestComponent for Component {
     //         *member_ptr = value;
     //     }
     // }
+}
+
+impl GuestComponent for Component {
+    #[cfg(not(target_arch = "wasm32"))]
+    fn new(ptr: i64) -> Component {
+        Component { ptr: ptr as *const c_void }
+    }
+
+    #[cfg(target_arch = "wasm32")]
+    fn new(resource_id: u32) -> Component {
+        Component { ptr: resource_id as *const c_void }
+    }
 }
 
 impl GuestEntity for Entity {
@@ -120,6 +127,14 @@ impl GuestEntity for Entity {
         }
     }
 
+    #[cfg(not(target_arch = "wasm32"))]
+    fn get_component(&self, component: ecs_entity_t) -> i64 {
+        unsafe {
+            ecs_get_mut_id(WORLD.0, self.id, component) as i64
+        }
+    }
+
+    #[cfg(target_arch = "wasm32")]
     fn get_component(&self, component: ecs_entity_t) -> bindings::exports::toxoid::engine::ecs::Component {
         unsafe {
             let ptr = ecs_get_mut_id(WORLD.0, self.id, component);
@@ -129,11 +144,9 @@ impl GuestEntity for Entity {
 }
 
 impl Guest for ToxoidApi {
+    type ComponentType = ComponentType;
     type Component = Component;
     type Entity = Entity;
-    // fn component_get(name: String) -> ecs_entity_t {
-    //     toxoid_flecs::component_get(name.as_ptr())
-    // }
 }
 
 #[cfg(target_arch = "wasm32")]
