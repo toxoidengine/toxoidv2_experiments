@@ -32,6 +32,10 @@ interface ecs {
         name: option<string>
     }
 
+    record query-desc {
+        expr: string
+    }
+
     // Convert to component-type instead and make component instances seperate
     resource component-type {
         constructor(desc: component-desc);
@@ -85,6 +89,17 @@ interface ecs {
         add-component: func(component: ecs-entity-t);
         // remove-component: func(component: ecs-entity-t);
     }
+
+    resource query {
+        constructor(desc: query-desc);
+        expr: func(expr: string);
+        build: func();
+        iter: func();
+        next: func() -> bool;
+        count: func() -> s32;
+        // ptrs: func(component-query-index: u32) -> *mut *mut c_void;
+    }
+
 
     // resource tag {
     //     constructor(name: string);

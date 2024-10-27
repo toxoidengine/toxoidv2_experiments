@@ -2,13 +2,14 @@
 #![allow(warnings)]
 
 pub mod bindings;
-use bindings::exports::toxoid::engine::ecs::{ComponentDesc, GuestComponentType, EntityDesc, Guest, GuestComponent, GuestEntity};
-use toxoid_flecs::bindings::{ecs_add_id, ecs_entity_desc_t, ecs_entity_init, ecs_get_mut_id, ecs_init, ecs_member_t, ecs_struct_desc_t, ecs_struct_init, ecs_world_t};
-use std::mem::MaybeUninit;
+use bindings::exports::toxoid::engine::ecs::{self, ComponentDesc, EntityDesc, Guest, GuestComponent, GuestComponentType, GuestEntity, GuestQuery, QueryDesc};
+use toxoid_flecs::bindings::{ecs_add_id, ecs_entity_desc_t, ecs_entity_init, ecs_get_mut_id, ecs_init, ecs_iter_t, ecs_member_t, ecs_query_desc_t, ecs_query_init, ecs_query_next, ecs_query_t, ecs_struct_desc_t, ecs_struct_init, ecs_world_t};
+use std::{borrow::BorrowMut, mem::MaybeUninit};
 use core::ffi::c_void;
 use once_cell::sync::Lazy;
 type ecs_entity_t = u64;
 use core::ffi::c_char;
+use std::cell::RefCell;
 
 pub struct ToxoidApi;
 
@@ -24,7 +25,13 @@ pub struct Component {
 }
 
 pub struct Entity { 
-    id: ecs_entity_t
+    pub id: ecs_entity_t
+}
+
+pub struct Query {
+    pub desc: RefCell<ecs_query_desc_t>,
+    pub query: RefCell<ecs_query_t>,
+    pub iter: RefCell<ecs_iter_t>
 }
 
 pub struct EcsWorldPtr(*mut ecs_world_t);
@@ -373,10 +380,52 @@ impl GuestEntity for Entity {
     }
 }
 
+// impl GuestIter for Iter {
+//     fn new() -> Iter {
+//         Iter { ptr: std::ptr::null_mut() }
+//     }
+
+//     fn next(&self) -> bool {
+//         false
+//     }
+// }
+
+impl GuestQuery for Query {
+    fn new(desc: QueryDesc) -> Query {
+        let desc: ecs_query_desc_t = unsafe { MaybeUninit::zeroed().assume_init() };
+        Query { desc: RefCell::new(desc), query: unsafe { MaybeUninit::zeroed().assume_init() }, iter: unsafe { MaybeUninit::zeroed().assume_init() } }
+    }
+
+    fn expr(&self, expr: String) {
+        self.desc.borrow_mut().expr = expr.as_ptr() as *const i8;
+    }
+
+    fn build(&self) { 
+        *self.query.borrow_mut() = unsafe { 
+            *ecs_query_init(WORLD.0, &*self.desc.borrow_mut() as *const ecs_query_desc_t) 
+        };
+    }
+
+    fn iter(&self) {
+        use toxoid_flecs::bindings::ecs_query_iter;
+        *self.iter.borrow_mut() = unsafe { ecs_query_iter(WORLD.0, self.query.as_ptr()) };
+    }
+
+    fn next(&self) -> bool {
+        let iter = self.iter.borrow_mut();
+        unsafe { ecs_query_next(Box::into_raw(Box::new(*iter))) }
+    }
+
+    fn count(&self) -> i32 {
+        self.iter.borrow().count
+    }
+}
+
 impl Guest for ToxoidApi {
     type ComponentType = ComponentType;
     type Component = Component;
     type Entity = Entity;
+    type Query = Query;
 }
 
 #[cfg(target_arch = "wasm32")]

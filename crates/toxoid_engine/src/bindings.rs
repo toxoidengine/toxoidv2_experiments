@@ -141,6 +141,18 @@ pub mod exports {
                         f.debug_struct("EntityDesc").field("name", &self.name).finish()
                     }
                 }
+                #[derive(Clone)]
+                pub struct QueryDesc {
+                    pub expr: _rt::String,
+                }
+                impl ::core::fmt::Debug for QueryDesc {
+                    fn fmt(
+                        &self,
+                        f: &mut ::core::fmt::Formatter<'_>,
+                    ) -> ::core::fmt::Result {
+                        f.debug_struct("QueryDesc").field("expr", &self.expr).finish()
+                    }
+                }
                 /// Convert to component-type instead and make component instances seperate
                 #[derive(Debug)]
                 #[repr(transparent)]
@@ -495,6 +507,125 @@ pub mod exports {
                             #[link(wasm_import_module = "[export]toxoid:engine/ecs")]
                             extern "C" {
                                 #[link_name = "[resource-drop]entity"]
+                                fn drop(_: u32);
+                            }
+                            drop(_handle);
+                        }
+                    }
+                }
+                #[derive(Debug)]
+                #[repr(transparent)]
+                pub struct Query {
+                    handle: _rt::Resource<Query>,
+                }
+                type _QueryRep<T> = Option<T>;
+                impl Query {
+                    /// Creates a new resource from the specified representation.
+                    ///
+                    /// This function will create a new resource handle by moving `val` onto
+                    /// the heap and then passing that heap pointer to the component model to
+                    /// create a handle. The owned handle is then returned as `Query`.
+                    pub fn new<T: GuestQuery>(val: T) -> Self {
+                        Self::type_guard::<T>();
+                        let val: _QueryRep<T> = Some(val);
+                        let ptr: *mut _QueryRep<T> = _rt::Box::into_raw(
+                            _rt::Box::new(val),
+                        );
+                        unsafe { Self::from_handle(T::_resource_new(ptr.cast())) }
+                    }
+                    /// Gets access to the underlying `T` which represents this resource.
+                    pub fn get<T: GuestQuery>(&self) -> &T {
+                        let ptr = unsafe { &*self.as_ptr::<T>() };
+                        ptr.as_ref().unwrap()
+                    }
+                    /// Gets mutable access to the underlying `T` which represents this
+                    /// resource.
+                    pub fn get_mut<T: GuestQuery>(&mut self) -> &mut T {
+                        let ptr = unsafe { &mut *self.as_ptr::<T>() };
+                        ptr.as_mut().unwrap()
+                    }
+                    /// Consumes this resource and returns the underlying `T`.
+                    pub fn into_inner<T: GuestQuery>(self) -> T {
+                        let ptr = unsafe { &mut *self.as_ptr::<T>() };
+                        ptr.take().unwrap()
+                    }
+                    #[doc(hidden)]
+                    pub unsafe fn from_handle(handle: u32) -> Self {
+                        Self {
+                            handle: _rt::Resource::from_handle(handle),
+                        }
+                    }
+                    #[doc(hidden)]
+                    pub fn take_handle(&self) -> u32 {
+                        _rt::Resource::take_handle(&self.handle)
+                    }
+                    #[doc(hidden)]
+                    pub fn handle(&self) -> u32 {
+                        _rt::Resource::handle(&self.handle)
+                    }
+                    #[doc(hidden)]
+                    fn type_guard<T: 'static>() {
+                        use core::any::TypeId;
+                        static mut LAST_TYPE: Option<TypeId> = None;
+                        unsafe {
+                            assert!(! cfg!(target_feature = "atomics"));
+                            let id = TypeId::of::<T>();
+                            match LAST_TYPE {
+                                Some(ty) => {
+                                    assert!(
+                                        ty == id, "cannot use two types with this resource type"
+                                    )
+                                }
+                                None => LAST_TYPE = Some(id),
+                            }
+                        }
+                    }
+                    #[doc(hidden)]
+                    pub unsafe fn dtor<T: 'static>(handle: *mut u8) {
+                        Self::type_guard::<T>();
+                        let _ = _rt::Box::from_raw(handle as *mut _QueryRep<T>);
+                    }
+                    fn as_ptr<T: GuestQuery>(&self) -> *mut _QueryRep<T> {
+                        Query::type_guard::<T>();
+                        T::_resource_rep(self.handle()).cast()
+                    }
+                }
+                /// A borrowed version of [`Query`] which represents a borrowed value
+                /// with the lifetime `'a`.
+                #[derive(Debug)]
+                #[repr(transparent)]
+                pub struct QueryBorrow<'a> {
+                    rep: *mut u8,
+                    _marker: core::marker::PhantomData<&'a Query>,
+                }
+                impl<'a> QueryBorrow<'a> {
+                    #[doc(hidden)]
+                    pub unsafe fn lift(rep: usize) -> Self {
+                        Self {
+                            rep: rep as *mut u8,
+                            _marker: core::marker::PhantomData,
+                        }
+                    }
+                    /// Gets access to the underlying `T` in this resource.
+                    pub fn get<T: GuestQuery>(&self) -> &T {
+                        let ptr = unsafe { &mut *self.as_ptr::<T>() };
+                        ptr.as_ref().unwrap()
+                    }
+                    fn as_ptr<T: 'static>(&self) -> *mut _QueryRep<T> {
+                        Query::type_guard::<T>();
+                        self.rep.cast()
+                    }
+                }
+                unsafe impl _rt::WasmResource for Query {
+                    #[inline]
+                    unsafe fn drop(_handle: u32) {
+                        #[cfg(not(target_arch = "wasm32"))]
+                        unreachable!();
+                        #[cfg(target_arch = "wasm32")]
+                        {
+                            #[link(wasm_import_module = "[export]toxoid:engine/ecs")]
+                            extern "C" {
+                                #[link_name = "[resource-drop]query"]
                                 fn drop(_: u32);
                             }
                             drop(_handle);
@@ -1026,10 +1157,81 @@ pub mod exports {
                         arg1 as u64,
                     );
                 }
+                #[doc(hidden)]
+                #[allow(non_snake_case)]
+                pub unsafe fn _export_constructor_query_cabi<T: GuestQuery>(
+                    arg0: *mut u8,
+                    arg1: usize,
+                ) -> i32 {
+                    #[cfg(target_arch = "wasm32")] _rt::run_ctors_once();
+                    let len0 = arg1;
+                    let bytes0 = _rt::Vec::from_raw_parts(arg0.cast(), len0, len0);
+                    let result1 = Query::new(
+                        T::new(QueryDesc {
+                            expr: _rt::string_lift(bytes0),
+                        }),
+                    );
+                    (result1).take_handle() as i32
+                }
+                #[doc(hidden)]
+                #[allow(non_snake_case)]
+                pub unsafe fn _export_method_query_expr_cabi<T: GuestQuery>(
+                    arg0: *mut u8,
+                    arg1: *mut u8,
+                    arg2: usize,
+                ) {
+                    #[cfg(target_arch = "wasm32")] _rt::run_ctors_once();
+                    let len0 = arg2;
+                    let bytes0 = _rt::Vec::from_raw_parts(arg1.cast(), len0, len0);
+                    T::expr(
+                        QueryBorrow::lift(arg0 as u32 as usize).get(),
+                        _rt::string_lift(bytes0),
+                    );
+                }
+                #[doc(hidden)]
+                #[allow(non_snake_case)]
+                pub unsafe fn _export_method_query_build_cabi<T: GuestQuery>(
+                    arg0: *mut u8,
+                ) {
+                    #[cfg(target_arch = "wasm32")] _rt::run_ctors_once();
+                    T::build(QueryBorrow::lift(arg0 as u32 as usize).get());
+                }
+                #[doc(hidden)]
+                #[allow(non_snake_case)]
+                pub unsafe fn _export_method_query_iter_cabi<T: GuestQuery>(
+                    arg0: *mut u8,
+                ) {
+                    #[cfg(target_arch = "wasm32")] _rt::run_ctors_once();
+                    T::iter(QueryBorrow::lift(arg0 as u32 as usize).get());
+                }
+                #[doc(hidden)]
+                #[allow(non_snake_case)]
+                pub unsafe fn _export_method_query_next_cabi<T: GuestQuery>(
+                    arg0: *mut u8,
+                ) -> i32 {
+                    #[cfg(target_arch = "wasm32")] _rt::run_ctors_once();
+                    let result0 = T::next(QueryBorrow::lift(arg0 as u32 as usize).get());
+                    match result0 {
+                        true => 1,
+                        false => 0,
+                    }
+                }
+                #[doc(hidden)]
+                #[allow(non_snake_case)]
+                pub unsafe fn _export_method_query_count_cabi<T: GuestQuery>(
+                    arg0: *mut u8,
+                ) -> i32 {
+                    #[cfg(target_arch = "wasm32")] _rt::run_ctors_once();
+                    let result0 = T::count(
+                        QueryBorrow::lift(arg0 as u32 as usize).get(),
+                    );
+                    _rt::as_i32(result0)
+                }
                 pub trait Guest {
                     type ComponentType: GuestComponentType;
                     type Component: GuestComponent;
                     type Entity: GuestEntity;
+                    type Query: GuestQuery;
                 }
                 pub trait GuestComponentType: 'static {
                     #[doc(hidden)]
@@ -1191,6 +1393,54 @@ pub mod exports {
                     fn get_id(&self) -> EcsEntityT;
                     fn get_component(&self, component: EcsEntityT) -> i64;
                     fn add_component(&self, component: EcsEntityT);
+                }
+                pub trait GuestQuery: 'static {
+                    #[doc(hidden)]
+                    unsafe fn _resource_new(val: *mut u8) -> u32
+                    where
+                        Self: Sized,
+                    {
+                        #[cfg(not(target_arch = "wasm32"))]
+                        {
+                            let _ = val;
+                            unreachable!();
+                        }
+                        #[cfg(target_arch = "wasm32")]
+                        {
+                            #[link(wasm_import_module = "[export]toxoid:engine/ecs")]
+                            extern "C" {
+                                #[link_name = "[resource-new]query"]
+                                fn new(_: *mut u8) -> u32;
+                            }
+                            new(val)
+                        }
+                    }
+                    #[doc(hidden)]
+                    fn _resource_rep(handle: u32) -> *mut u8
+                    where
+                        Self: Sized,
+                    {
+                        #[cfg(not(target_arch = "wasm32"))]
+                        {
+                            let _ = handle;
+                            unreachable!();
+                        }
+                        #[cfg(target_arch = "wasm32")]
+                        {
+                            #[link(wasm_import_module = "[export]toxoid:engine/ecs")]
+                            extern "C" {
+                                #[link_name = "[resource-rep]query"]
+                                fn rep(_: u32) -> *mut u8;
+                            }
+                            unsafe { rep(handle) }
+                        }
+                    }
+                    fn new(desc: QueryDesc) -> Self;
+                    fn expr(&self, expr: _rt::String);
+                    fn build(&self);
+                    fn iter(&self);
+                    fn next(&self) -> bool;
+                    fn count(&self) -> i32;
                 }
                 #[doc(hidden)]
                 macro_rules! __export_toxoid_engine_ecs_cabi {
@@ -1420,8 +1670,34 @@ pub mod exports {
                         unsafe extern "C" fn export_method_entity_add_component(arg0 : *
                         mut u8, arg1 : i64,) { $($path_to_types)*::
                         _export_method_entity_add_component_cabi::<<$ty as
-                        $($path_to_types)*:: Guest >::Entity > (arg0, arg1) } const _ :
-                        () = { #[doc(hidden)] #[export_name =
+                        $($path_to_types)*:: Guest >::Entity > (arg0, arg1) }
+                        #[export_name = "toxoid:engine/ecs#[constructor]query"] unsafe
+                        extern "C" fn export_constructor_query(arg0 : * mut u8, arg1 :
+                        usize,) -> i32 { $($path_to_types)*::
+                        _export_constructor_query_cabi::<<$ty as $($path_to_types)*::
+                        Guest >::Query > (arg0, arg1) } #[export_name =
+                        "toxoid:engine/ecs#[method]query.expr"] unsafe extern "C" fn
+                        export_method_query_expr(arg0 : * mut u8, arg1 : * mut u8, arg2 :
+                        usize,) { $($path_to_types)*::
+                        _export_method_query_expr_cabi::<<$ty as $($path_to_types)*::
+                        Guest >::Query > (arg0, arg1, arg2) } #[export_name =
+                        "toxoid:engine/ecs#[method]query.build"] unsafe extern "C" fn
+                        export_method_query_build(arg0 : * mut u8,) {
+                        $($path_to_types)*:: _export_method_query_build_cabi::<<$ty as
+                        $($path_to_types)*:: Guest >::Query > (arg0) } #[export_name =
+                        "toxoid:engine/ecs#[method]query.iter"] unsafe extern "C" fn
+                        export_method_query_iter(arg0 : * mut u8,) { $($path_to_types)*::
+                        _export_method_query_iter_cabi::<<$ty as $($path_to_types)*::
+                        Guest >::Query > (arg0) } #[export_name =
+                        "toxoid:engine/ecs#[method]query.next"] unsafe extern "C" fn
+                        export_method_query_next(arg0 : * mut u8,) -> i32 {
+                        $($path_to_types)*:: _export_method_query_next_cabi::<<$ty as
+                        $($path_to_types)*:: Guest >::Query > (arg0) } #[export_name =
+                        "toxoid:engine/ecs#[method]query.count"] unsafe extern "C" fn
+                        export_method_query_count(arg0 : * mut u8,) -> i32 {
+                        $($path_to_types)*:: _export_method_query_count_cabi::<<$ty as
+                        $($path_to_types)*:: Guest >::Query > (arg0) } const _ : () = {
+                        #[doc(hidden)] #[export_name =
                         "toxoid:engine/ecs#[dtor]component-type"]
                         #[allow(non_snake_case)] unsafe extern "C" fn dtor(rep : * mut
                         u8) { $($path_to_types)*:: ComponentType::dtor::< <$ty as
@@ -1434,7 +1710,11 @@ pub mod exports {
                         #[export_name = "toxoid:engine/ecs#[dtor]entity"]
                         #[allow(non_snake_case)] unsafe extern "C" fn dtor(rep : * mut
                         u8) { $($path_to_types)*:: Entity::dtor::< <$ty as
-                        $($path_to_types)*:: Guest >::Entity > (rep) } }; };
+                        $($path_to_types)*:: Guest >::Entity > (rep) } }; const _ : () =
+                        { #[doc(hidden)] #[export_name = "toxoid:engine/ecs#[dtor]query"]
+                        #[allow(non_snake_case)] unsafe extern "C" fn dtor(rep : * mut
+                        u8) { $($path_to_types)*:: Query::dtor::< <$ty as
+                        $($path_to_types)*:: Guest >::Query > (rep) } }; };
                     };
                 }
                 #[doc(hidden)]
@@ -1714,56 +1994,61 @@ pub(crate) use __export_toxoid_engine_world_impl as export;
 #[cfg(target_arch = "wasm32")]
 #[link_section = "component-type:wit-bindgen:0.31.0:toxoid:engine:toxoid-engine-world:encoded world"]
 #[doc(hidden)]
-pub static __WIT_BINDGEN_COMPONENT_TYPE: [u8; 2518] = *b"\
-\0asm\x0d\0\x01\0\0\x19\x16wit-component-encoding\x04\0\x07\xcc\x12\x01A\x02\x01\
-A\x02\x01B\\\x01w\x04\0\x0cecs-entity-t\x03\0\0\x01m\x10\x04u8-t\x05u16-t\x05u32\
--t\x05u64-t\x04i8-t\x05i16-t\x05i32-t\x05i64-t\x05f32-t\x05f64-t\x06bool-t\x08st\
-ring-t\x07array-t\x0au32array-t\x0af32array-t\x09pointer-t\x04\0\x0bmember-type\x03\
+pub static __WIT_BINDGEN_COMPONENT_TYPE: [u8; 2760] = *b"\
+\0asm\x0d\0\x01\0\0\x19\x16wit-component-encoding\x04\0\x07\xbe\x14\x01A\x02\x01\
+A\x02\x01Bl\x01w\x04\0\x0cecs-entity-t\x03\0\0\x01m\x10\x04u8-t\x05u16-t\x05u32-\
+t\x05u64-t\x04i8-t\x05i16-t\x05i32-t\x05i64-t\x05f32-t\x05f64-t\x06bool-t\x08str\
+ing-t\x07array-t\x0au32array-t\x0af32array-t\x09pointer-t\x04\0\x0bmember-type\x03\
 \0\x02\x01ps\x01p}\x01r\x03\x04names\x0cmember-names\x04\x0cmember-types\x05\x04\
 \0\x0ecomponent-desc\x03\0\x06\x01ks\x01r\x01\x04name\x08\x04\0\x0bentity-desc\x03\
-\0\x09\x04\0\x0ecomponent-type\x03\x01\x04\0\x09component\x03\x01\x04\0\x06entit\
-y\x03\x01\x01i\x0b\x01@\x01\x04desc\x07\0\x0e\x04\0\x1b[constructor]component-ty\
-pe\x01\x0f\x01h\x0b\x01@\x01\x04self\x10\0\x01\x04\0\x1d[method]component-type.g\
-et-id\x01\x11\x01i\x0c\x01@\x01\x03ptrx\0\x12\x04\0\x16[constructor]component\x01\
-\x13\x01h\x0c\x01@\x03\x04self\x14\x06offsety\x05value}\x01\0\x04\0\x1f[method]c\
-omponent.set-member-u8\x01\x15\x01@\x02\x04self\x14\x06offsety\0}\x04\0\x1f[meth\
-od]component.get-member-u8\x01\x16\x01@\x03\x04self\x14\x06offsety\x05value{\x01\
-\0\x04\0\x20[method]component.set-member-u16\x01\x17\x01@\x02\x04self\x14\x06off\
-sety\0{\x04\0\x20[method]component.get-member-u16\x01\x18\x01@\x03\x04self\x14\x06\
-offsety\x05valuey\x01\0\x04\0\x20[method]component.set-member-u32\x01\x19\x01@\x02\
-\x04self\x14\x06offsety\0y\x04\0\x20[method]component.get-member-u32\x01\x1a\x01\
-@\x03\x04self\x14\x06offsety\x05valuew\x01\0\x04\0\x20[method]component.set-memb\
-er-u64\x01\x1b\x01@\x02\x04self\x14\x06offsety\0w\x04\0\x20[method]component.get\
--member-u64\x01\x1c\x01@\x03\x04self\x14\x06offsety\x05value~\x01\0\x04\0\x1f[me\
-thod]component.set-member-i8\x01\x1d\x01@\x02\x04self\x14\x06offsety\0~\x04\0\x1f\
-[method]component.get-member-i8\x01\x1e\x01@\x03\x04self\x14\x06offsety\x05value\
-|\x01\0\x04\0\x20[method]component.set-member-i16\x01\x1f\x01@\x02\x04self\x14\x06\
-offsety\0|\x04\0\x20[method]component.get-member-i16\x01\x20\x01@\x03\x04self\x14\
-\x06offsety\x05valuez\x01\0\x04\0\x20[method]component.set-member-i32\x01!\x01@\x02\
-\x04self\x14\x06offsety\0z\x04\0\x20[method]component.get-member-i32\x01\"\x01@\x03\
-\x04self\x14\x06offsety\x05valuex\x01\0\x04\0\x20[method]component.set-member-i6\
-4\x01#\x01@\x02\x04self\x14\x06offsety\0x\x04\0\x20[method]component.get-member-\
-i64\x01$\x01@\x03\x04self\x14\x06offsety\x05valuev\x01\0\x04\0\x20[method]compon\
-ent.set-member-f32\x01%\x01@\x02\x04self\x14\x06offsety\0v\x04\0\x20[method]comp\
-onent.get-member-f32\x01&\x01@\x03\x04self\x14\x06offsety\x05valueu\x01\0\x04\0\x20\
-[method]component.set-member-f64\x01'\x01@\x02\x04self\x14\x06offsety\0u\x04\0\x20\
-[method]component.get-member-f64\x01(\x01@\x03\x04self\x14\x06offsety\x05value\x7f\
-\x01\0\x04\0![method]component.set-member-bool\x01)\x01@\x02\x04self\x14\x06offs\
-ety\0\x7f\x04\0![method]component.get-member-bool\x01*\x01@\x03\x04self\x14\x06o\
-ffsety\x05values\x01\0\x04\0#[method]component.set-member-string\x01+\x01@\x02\x04\
-self\x14\x06offsety\0s\x04\0#[method]component.get-member-string\x01,\x01py\x01@\
-\x03\x04self\x14\x06offsety\x05value-\x01\0\x04\0%[method]component.set-member-u\
-32array\x01.\x01@\x02\x04self\x14\x06offsety\0-\x04\0%[method]component.get-memb\
-er-u32array\x01/\x01pv\x01@\x03\x04self\x14\x06offsety\x05value0\x01\0\x04\0%[me\
-thod]component.set-member-f32array\x011\x01@\x02\x04self\x14\x06offsety\00\x04\0\
-%[method]component.get-member-f32array\x012\x01i\x0d\x01@\x01\x04desc\x0a\03\x04\
-\0\x13[constructor]entity\x014\x01h\x0d\x01@\x01\x04self5\0\x01\x04\0\x15[method\
-]entity.get-id\x016\x01@\x02\x04self5\x09component\x01\0x\x04\0\x1c[method]entit\
-y.get-component\x017\x01@\x02\x04self5\x09component\x01\x01\0\x04\0\x1c[method]e\
-ntity.add-component\x018\x04\x01\x11toxoid:engine/ecs\x05\0\x04\x01!toxoid:engin\
-e/toxoid-engine-world\x04\0\x0b\x19\x01\0\x13toxoid-engine-world\x03\0\0\0G\x09p\
-roducers\x01\x0cprocessed-by\x02\x0dwit-component\x070.216.0\x10wit-bindgen-rust\
-\x060.31.0";
+\0\x09\x01r\x01\x04exprs\x04\0\x0aquery-desc\x03\0\x0b\x04\0\x0ecomponent-type\x03\
+\x01\x04\0\x09component\x03\x01\x04\0\x06entity\x03\x01\x04\0\x05query\x03\x01\x01\
+i\x0d\x01@\x01\x04desc\x07\0\x11\x04\0\x1b[constructor]component-type\x01\x12\x01\
+h\x0d\x01@\x01\x04self\x13\0\x01\x04\0\x1d[method]component-type.get-id\x01\x14\x01\
+i\x0e\x01@\x01\x03ptrx\0\x15\x04\0\x16[constructor]component\x01\x16\x01h\x0e\x01\
+@\x03\x04self\x17\x06offsety\x05value}\x01\0\x04\0\x1f[method]component.set-memb\
+er-u8\x01\x18\x01@\x02\x04self\x17\x06offsety\0}\x04\0\x1f[method]component.get-\
+member-u8\x01\x19\x01@\x03\x04self\x17\x06offsety\x05value{\x01\0\x04\0\x20[meth\
+od]component.set-member-u16\x01\x1a\x01@\x02\x04self\x17\x06offsety\0{\x04\0\x20\
+[method]component.get-member-u16\x01\x1b\x01@\x03\x04self\x17\x06offsety\x05valu\
+ey\x01\0\x04\0\x20[method]component.set-member-u32\x01\x1c\x01@\x02\x04self\x17\x06\
+offsety\0y\x04\0\x20[method]component.get-member-u32\x01\x1d\x01@\x03\x04self\x17\
+\x06offsety\x05valuew\x01\0\x04\0\x20[method]component.set-member-u64\x01\x1e\x01\
+@\x02\x04self\x17\x06offsety\0w\x04\0\x20[method]component.get-member-u64\x01\x1f\
+\x01@\x03\x04self\x17\x06offsety\x05value~\x01\0\x04\0\x1f[method]component.set-\
+member-i8\x01\x20\x01@\x02\x04self\x17\x06offsety\0~\x04\0\x1f[method]component.\
+get-member-i8\x01!\x01@\x03\x04self\x17\x06offsety\x05value|\x01\0\x04\0\x20[met\
+hod]component.set-member-i16\x01\"\x01@\x02\x04self\x17\x06offsety\0|\x04\0\x20[\
+method]component.get-member-i16\x01#\x01@\x03\x04self\x17\x06offsety\x05valuez\x01\
+\0\x04\0\x20[method]component.set-member-i32\x01$\x01@\x02\x04self\x17\x06offset\
+y\0z\x04\0\x20[method]component.get-member-i32\x01%\x01@\x03\x04self\x17\x06offs\
+ety\x05valuex\x01\0\x04\0\x20[method]component.set-member-i64\x01&\x01@\x02\x04s\
+elf\x17\x06offsety\0x\x04\0\x20[method]component.get-member-i64\x01'\x01@\x03\x04\
+self\x17\x06offsety\x05valuev\x01\0\x04\0\x20[method]component.set-member-f32\x01\
+(\x01@\x02\x04self\x17\x06offsety\0v\x04\0\x20[method]component.get-member-f32\x01\
+)\x01@\x03\x04self\x17\x06offsety\x05valueu\x01\0\x04\0\x20[method]component.set\
+-member-f64\x01*\x01@\x02\x04self\x17\x06offsety\0u\x04\0\x20[method]component.g\
+et-member-f64\x01+\x01@\x03\x04self\x17\x06offsety\x05value\x7f\x01\0\x04\0![met\
+hod]component.set-member-bool\x01,\x01@\x02\x04self\x17\x06offsety\0\x7f\x04\0![\
+method]component.get-member-bool\x01-\x01@\x03\x04self\x17\x06offsety\x05values\x01\
+\0\x04\0#[method]component.set-member-string\x01.\x01@\x02\x04self\x17\x06offset\
+y\0s\x04\0#[method]component.get-member-string\x01/\x01py\x01@\x03\x04self\x17\x06\
+offsety\x05value0\x01\0\x04\0%[method]component.set-member-u32array\x011\x01@\x02\
+\x04self\x17\x06offsety\00\x04\0%[method]component.get-member-u32array\x012\x01p\
+v\x01@\x03\x04self\x17\x06offsety\x05value3\x01\0\x04\0%[method]component.set-me\
+mber-f32array\x014\x01@\x02\x04self\x17\x06offsety\03\x04\0%[method]component.ge\
+t-member-f32array\x015\x01i\x0f\x01@\x01\x04desc\x0a\06\x04\0\x13[constructor]en\
+tity\x017\x01h\x0f\x01@\x01\x04self8\0\x01\x04\0\x15[method]entity.get-id\x019\x01\
+@\x02\x04self8\x09component\x01\0x\x04\0\x1c[method]entity.get-component\x01:\x01\
+@\x02\x04self8\x09component\x01\x01\0\x04\0\x1c[method]entity.add-component\x01;\
+\x01i\x10\x01@\x01\x04desc\x0c\0<\x04\0\x12[constructor]query\x01=\x01h\x10\x01@\
+\x02\x04self>\x04exprs\x01\0\x04\0\x12[method]query.expr\x01?\x01@\x01\x04self>\x01\
+\0\x04\0\x13[method]query.build\x01@\x04\0\x12[method]query.iter\x01@\x01@\x01\x04\
+self>\0\x7f\x04\0\x12[method]query.next\x01A\x01@\x01\x04self>\0z\x04\0\x13[meth\
+od]query.count\x01B\x04\x01\x11toxoid:engine/ecs\x05\0\x04\x01!toxoid:engine/tox\
+oid-engine-world\x04\0\x0b\x19\x01\0\x13toxoid-engine-world\x03\0\0\0G\x09produc\
+ers\x01\x0cprocessed-by\x02\x0dwit-component\x070.216.0\x10wit-bindgen-rust\x060\
+.31.0";
 #[inline(never)]
 #[doc(hidden)]
 pub fn __link_custom_section_describing_imports() {
