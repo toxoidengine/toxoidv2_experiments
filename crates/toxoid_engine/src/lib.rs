@@ -402,7 +402,7 @@ impl GuestQuery for Query {
 
     fn build(&self) { 
         *self.query.borrow_mut() = unsafe { 
-            *ecs_query_init(WORLD.0, &*self.desc.borrow_mut() as *const ecs_query_desc_t) 
+            *ecs_query_init(WORLD.0, self.desc.as_ptr()) 
         };
     }
 

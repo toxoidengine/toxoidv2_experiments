@@ -1,5 +1,5 @@
 // #[cfg(not(target_arch = "wasm32"))]
-use toxoid_engine::bindings::exports::toxoid::engine::ecs::{ComponentDesc, EntityDesc, GuestComponent, GuestComponentType, GuestEntity, GuestQuery, QueryDesc};
+use toxoid_engine::bindings::exports::toxoid::engine::ecs::{ComponentDesc, EntityDesc, GuestComponent, GuestComponentType, GuestEntity, GuestQuery, MemberType, QueryDesc};
 use toxoid_engine::{Component, ComponentType, Entity, Query};
 
 fn main() {
@@ -10,12 +10,10 @@ fn main() {
     //     member_types: vec![0],
     // });
     // println!("{:?}", component.get_id());
-
     let component = ComponentType::new(ComponentDesc {
         name: "Position".to_string(),
         member_names: vec!["x".to_string(), "y".to_string()],
-        // member_types: vec![MemberType::U32T as u8, MemberType::U32T as u8],
-        member_types: vec![0, 0],
+        member_types: vec![MemberType::U32T as u8, MemberType::U32T as u8],
     });
     println!("{:?}", component.get_id());
     let entity = Entity::new(EntityDesc {
