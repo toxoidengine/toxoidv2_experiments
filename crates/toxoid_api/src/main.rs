@@ -29,6 +29,7 @@ fn main() {
     println!("{:?}", value);
     let query = Query::new(QueryDesc { expr: "Position($this)".to_string() });
     query.build();
+    toxoid_engine::toxoid_progress(1.0);
     query.iter();
     query.next();
     let count = query.count();

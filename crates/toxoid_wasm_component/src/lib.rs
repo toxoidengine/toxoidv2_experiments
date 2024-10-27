@@ -1,6 +1,6 @@
 #[allow(warnings)]
 mod bindings;
-use bindings::{toxoid_component::component::ecs::{Component, ComponentDesc, ComponentType, Entity, EntityDesc, Query, QueryDesc}, Guest};
+use bindings::{toxoid_component::component::ecs::{Component, ComponentDesc, ComponentType, Entity, EntityDesc, MemberType, Query, QueryDesc}, Guest};
 // use bindings::toxoid_component::component::ecs::MemberType;
 
 struct ToxoidWasmComponent;
@@ -10,8 +10,8 @@ impl Guest for ToxoidWasmComponent {
         let component = ComponentType::new(&ComponentDesc {
             name: "Position".to_string(),
             member_names: vec!["x".to_string(), "y".to_string()],
-            // member_types: vec![MemberType::U32T as u8, MemberType::U32T as u8],
-            member_types: vec![0, 0],
+            member_types: vec![MemberType::U32T as u8, MemberType::U32T as u8],
+            // member_types: vec![0, 0],
         });
         let entity = Entity::new(&EntityDesc {
             name: Some(format!("Test entity {}", name))

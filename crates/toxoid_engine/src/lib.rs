@@ -3,7 +3,7 @@
 
 pub mod bindings;
 use bindings::exports::toxoid::engine::ecs::{self, ComponentDesc, EntityDesc, Guest, GuestComponent, GuestComponentType, GuestEntity, GuestQuery, QueryDesc};
-use toxoid_flecs::bindings::{ecs_add_id, ecs_entity_desc_t, ecs_entity_init, ecs_get_mut_id, ecs_init, ecs_iter_t, ecs_member_t, ecs_query_desc_t, ecs_query_init, ecs_query_next, ecs_query_t, ecs_struct_desc_t, ecs_struct_init, ecs_world_t};
+use toxoid_flecs::bindings::{ecs_add_id, ecs_entity_desc_t, ecs_entity_init, ecs_get_mut_id, ecs_init, ecs_iter_t, ecs_member_t, ecs_progress, ecs_query_desc_t, ecs_query_init, ecs_query_next, ecs_query_t, ecs_struct_desc_t, ecs_struct_init, ecs_world_t};
 use std::{borrow::BorrowMut, mem::MaybeUninit};
 use core::ffi::c_void;
 use once_cell::sync::Lazy;
@@ -58,6 +58,10 @@ enum FieldType {
 static WORLD: Lazy<EcsWorldPtr> = Lazy::new(|| 
     EcsWorldPtr(unsafe { ecs_init() })
 );
+
+pub fn toxoid_progress(fps: f32) -> bool {
+    unsafe { ecs_progress(WORLD.0, 1.0) }
+}
 
 unsafe fn get_member_type(member_type: u8) -> ecs_entity_t {
     match member_type {
