@@ -11,13 +11,18 @@ type ecs_entity_t = u64;
 use core::ffi::c_char;
 
 pub struct ToxoidApi;
+
 // struct World;
+
 pub struct ComponentType { 
     pub id: ecs_entity_t
 }
+
 pub struct Component {
-    pub ptr: *const c_void
+    pub ptr: *const c_void,
+    pub field_offsets: Vec<u8>
 }
+
 pub struct Entity { 
     id: ecs_entity_t
 }
@@ -25,6 +30,25 @@ pub struct Entity {
 pub struct EcsWorldPtr(*mut ecs_world_t);
 unsafe impl Send for EcsWorldPtr {}
 unsafe impl Sync for EcsWorldPtr {}
+
+#[repr(u8)]
+enum FieldType {
+    U8,
+    U16,
+    U32,
+    U64,
+    I8,
+    I16,
+    I32,
+    I64,
+    F32,
+    F64,
+    Bool,
+    String,
+    U32Array,
+    F32Array,
+    Pointer
+}
 
 static WORLD: Lazy<EcsWorldPtr> = Lazy::new(|| 
     EcsWorldPtr(unsafe { ecs_init() })
@@ -85,23 +109,229 @@ impl GuestComponentType for ComponentType {
         self.id
     }
 
-    // fn set_member_u8(&self, offset: u32, value: u8) {
-    //     unsafe {
-    //         let member_ptr = self.ptr.offset(offset as isize) as *mut u8;
-    //         *member_ptr = value;
-    //     }
-    // }
+    
 }
 
 impl GuestComponent for Component {
     #[cfg(not(target_arch = "wasm32"))]
     fn new(ptr: i64) -> Component {
-        Component { ptr: ptr as *const c_void }
+        Component { ptr: ptr as *const c_void, field_offsets: vec![] }
     }
 
     #[cfg(target_arch = "wasm32")]
     fn new(resource_id: u32) -> Component {
         Component { ptr: resource_id as *const c_void }
+    }
+
+    fn set_member_u8(&self, offset: u32, value: u8) {
+        unsafe {
+            let member_ptr = self.ptr.offset(offset as isize) as *mut u8;
+            *member_ptr = value;
+        }
+    }
+
+    fn get_member_u8(&self, offset: u32) -> u8 {
+        unsafe {
+            let member_ptr = self.ptr.offset(offset as isize) as *mut u8;
+            let member_value: u8 = *member_ptr;
+            member_value
+        }
+    }
+
+    fn set_member_u16(&self, offset: u32, value: u16) {
+        unsafe {
+            let member_ptr = self.ptr.offset(offset as isize) as *mut u16;
+            *member_ptr = value;
+        }
+    }
+
+    fn get_member_u16(&self, offset: u32) -> u16 {
+        unsafe {
+            let member_ptr = self.ptr.offset(offset as isize) as *mut u16;
+            let member_value: u16 = *member_ptr;
+            member_value
+        }
+    }
+
+    fn set_member_u32(&self, offset: u32, value: u32) {
+        unsafe {
+            let member_ptr = self.ptr.offset(offset as isize) as *mut u32;
+            *member_ptr = value;
+        }
+    }
+
+    fn get_member_u32(&self, offset: u32) -> u32 {
+        unsafe {
+            let member_ptr = self.ptr.offset(offset as isize) as *mut u32;
+            let member_value: u32 = *member_ptr;
+            member_value
+        }
+    }
+
+    fn set_member_u64(&self, offset: u32, value: u64) {
+        unsafe {
+            let member_ptr = self.ptr.offset(offset as isize) as *mut u64;
+            *member_ptr = value;
+        }
+    }
+
+    fn get_member_u64(&self, offset: u32) -> u64 {
+        unsafe {
+            let member_ptr = self.ptr.offset(offset as isize) as *mut u64;
+            let member_value: u64 = *member_ptr;
+            member_value
+        }
+    }
+
+    fn set_member_i8(&self, offset: u32, value: i8) {
+        unsafe {
+            let member_ptr = self.ptr.offset(offset as isize) as *mut i8;
+            *member_ptr = value;
+        }
+    }
+
+    fn get_member_i8(&self, offset: u32) -> i8 {
+        unsafe {
+            let member_ptr = self.ptr.offset(offset as isize) as *mut i8;
+            let member_value: i8 = *member_ptr;
+            member_value
+        }
+    }
+
+    fn set_member_i16(&self, offset: u32, value: i16) {
+        unsafe {
+            let member_ptr = self.ptr.offset(offset as isize) as *mut i16;
+            *member_ptr = value;
+        }
+    }
+
+    fn get_member_i16(&self, offset: u32) -> i16 {
+        unsafe {
+            let member_ptr = self.ptr.offset(offset as isize) as *mut i16;
+            let member_value: i16 = *member_ptr;
+            member_value
+        }
+    }
+
+    fn set_member_i32(&self, offset: u32, value: i32) {
+        unsafe {
+            let member_ptr = self.ptr.offset(offset as isize) as *mut i32;
+            *member_ptr = value;
+        }
+    }
+
+    fn get_member_i32(&self, offset: u32) -> i32 {
+        unsafe {
+            let member_ptr = self.ptr.offset(offset as isize) as *mut i32;
+            let member_value: i32 = *member_ptr;
+            member_value
+        }
+    }
+
+    fn set_member_i64(&self, offset: u32, value: i64) {
+        unsafe {
+            let member_ptr = self.ptr.offset(offset as isize) as *mut i64;
+            *member_ptr = value;
+        }
+    }
+
+    fn get_member_i64(&self, offset: u32) -> i64 {
+        unsafe {
+            let member_ptr = self.ptr.offset(offset as isize) as *mut i64;
+            let member_value: i64 = *member_ptr;
+            member_value
+        }
+    }   
+
+    fn set_member_f32(&self, offset: u32, value: f32) {
+        unsafe {
+            let member_ptr = self.ptr.offset(offset as isize) as *mut f32;
+            *member_ptr = value;
+        }
+    }
+
+    fn get_member_f32(&self, offset: u32) -> f32 {
+        unsafe {
+            let member_ptr = self.ptr.offset(offset as isize) as *mut f32;
+            let member_value: f32 = *member_ptr;
+            member_value
+        }
+    }
+
+    fn set_member_f64(&self, offset: u32, value: f64) {
+        unsafe {
+            let member_ptr = self.ptr.offset(offset as isize) as *mut f64;
+            *member_ptr = value;
+        }
+    }
+
+    fn get_member_f64(&self, offset: u32) -> f64 {
+        unsafe {
+            let member_ptr = self.ptr.offset(offset as isize) as *mut f64;
+            let member_value: f64 = *member_ptr;
+            member_value
+        }
+    }
+
+    fn set_member_bool(&self, offset: u32, value: bool) {
+        unsafe {
+            let member_ptr = self.ptr.offset(offset as isize) as *mut bool;
+            *member_ptr = value;
+        }
+    }
+
+
+    fn get_member_bool(&self, offset: u32) -> bool {
+        unsafe {
+            let member_ptr = self.ptr.offset(offset as isize) as *mut bool;
+            let member_value: bool = *member_ptr;
+            member_value
+        }
+    }
+
+    fn set_member_string(&self, offset: u32, value: String) {
+        unsafe {
+            let member_ptr = self.ptr.offset(offset as isize) as *mut String;
+            *member_ptr = value;
+        }
+    }
+
+    fn get_member_string(&self, offset: u32) -> String {
+        unsafe {
+            let member_ptr = self.ptr.offset(offset as isize) as *mut String;
+            let member_value: String = (*member_ptr).clone();
+            member_value
+        }
+    }
+
+    fn set_member_u32array(&self, offset: u32, value: Vec<u32>) {
+        unsafe {
+            let member_ptr = self.ptr.offset(offset as isize) as *mut Vec<u32>;
+            *member_ptr = value;
+        }
+    }
+
+    fn get_member_u32array(&self, offset: u32) -> Vec<u32> {
+        unsafe {
+            let member_ptr = self.ptr.offset(offset as isize) as *mut Vec<u32>;
+            let member_value: Vec<u32> = (*member_ptr).clone();
+            member_value
+        }
+    }   
+
+    fn set_member_f32array(&self, offset: u32, value: Vec<f32>) {
+        unsafe {
+            let member_ptr = self.ptr.offset(offset as isize) as *mut Vec<f32>;
+            *member_ptr = value;
+        }
+    }
+
+    fn get_member_f32array(&self, offset: u32) -> Vec<f32> {
+        unsafe {
+            let member_ptr = self.ptr.offset(offset as isize) as *mut Vec<f32>;
+            let member_value: Vec<f32> = (*member_ptr).clone();
+            member_value
+        }
     }
 }
 

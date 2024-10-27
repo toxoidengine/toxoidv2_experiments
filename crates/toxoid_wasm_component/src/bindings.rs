@@ -49,6 +49,7 @@ pub mod toxoid_component {
                 ArrayT,
                 U32arrayT,
                 F32arrayT,
+                PointerT,
             }
             impl ::core::fmt::Debug for MemberType {
                 fn fmt(
@@ -79,6 +80,9 @@ pub mod toxoid_component {
                         MemberType::F32arrayT => {
                             f.debug_tuple("MemberType::F32arrayT").finish()
                         }
+                        MemberType::PointerT => {
+                            f.debug_tuple("MemberType::PointerT").finish()
+                        }
                     }
                 }
             }
@@ -104,6 +108,7 @@ pub mod toxoid_component {
                         12 => MemberType::ArrayT,
                         13 => MemberType::U32arrayT,
                         14 => MemberType::F32arrayT,
+                        15 => MemberType::PointerT,
                         _ => panic!("invalid enum discriminant"),
                     }
                 }
@@ -347,6 +352,656 @@ pub mod toxoid_component {
                     }
                 }
             }
+            impl Component {
+                #[allow(unused_unsafe, clippy::all)]
+                pub fn set_member_u8(&self, offset: u32, value: u8) {
+                    unsafe {
+                        #[cfg(target_arch = "wasm32")]
+                        #[link(wasm_import_module = "toxoid-component:component/ecs")]
+                        extern "C" {
+                            #[link_name = "[method]component.set-member-u8"]
+                            fn wit_import(_: i32, _: i32, _: i32);
+                        }
+                        #[cfg(not(target_arch = "wasm32"))]
+                        fn wit_import(_: i32, _: i32, _: i32) {
+                            unreachable!()
+                        }
+                        wit_import(
+                            (self).handle() as i32,
+                            _rt::as_i32(&offset),
+                            _rt::as_i32(&value),
+                        );
+                    }
+                }
+            }
+            impl Component {
+                #[allow(unused_unsafe, clippy::all)]
+                pub fn get_member_u8(&self, offset: u32) -> u8 {
+                    unsafe {
+                        #[cfg(target_arch = "wasm32")]
+                        #[link(wasm_import_module = "toxoid-component:component/ecs")]
+                        extern "C" {
+                            #[link_name = "[method]component.get-member-u8"]
+                            fn wit_import(_: i32, _: i32) -> i32;
+                        }
+                        #[cfg(not(target_arch = "wasm32"))]
+                        fn wit_import(_: i32, _: i32) -> i32 {
+                            unreachable!()
+                        }
+                        let ret = wit_import(
+                            (self).handle() as i32,
+                            _rt::as_i32(&offset),
+                        );
+                        ret as u8
+                    }
+                }
+            }
+            impl Component {
+                #[allow(unused_unsafe, clippy::all)]
+                pub fn set_member_u16(&self, offset: u32, value: u16) {
+                    unsafe {
+                        #[cfg(target_arch = "wasm32")]
+                        #[link(wasm_import_module = "toxoid-component:component/ecs")]
+                        extern "C" {
+                            #[link_name = "[method]component.set-member-u16"]
+                            fn wit_import(_: i32, _: i32, _: i32);
+                        }
+                        #[cfg(not(target_arch = "wasm32"))]
+                        fn wit_import(_: i32, _: i32, _: i32) {
+                            unreachable!()
+                        }
+                        wit_import(
+                            (self).handle() as i32,
+                            _rt::as_i32(&offset),
+                            _rt::as_i32(&value),
+                        );
+                    }
+                }
+            }
+            impl Component {
+                #[allow(unused_unsafe, clippy::all)]
+                pub fn get_member_u16(&self, offset: u32) -> u16 {
+                    unsafe {
+                        #[cfg(target_arch = "wasm32")]
+                        #[link(wasm_import_module = "toxoid-component:component/ecs")]
+                        extern "C" {
+                            #[link_name = "[method]component.get-member-u16"]
+                            fn wit_import(_: i32, _: i32) -> i32;
+                        }
+                        #[cfg(not(target_arch = "wasm32"))]
+                        fn wit_import(_: i32, _: i32) -> i32 {
+                            unreachable!()
+                        }
+                        let ret = wit_import(
+                            (self).handle() as i32,
+                            _rt::as_i32(&offset),
+                        );
+                        ret as u16
+                    }
+                }
+            }
+            impl Component {
+                #[allow(unused_unsafe, clippy::all)]
+                pub fn set_member_u32(&self, offset: u32, value: u32) {
+                    unsafe {
+                        #[cfg(target_arch = "wasm32")]
+                        #[link(wasm_import_module = "toxoid-component:component/ecs")]
+                        extern "C" {
+                            #[link_name = "[method]component.set-member-u32"]
+                            fn wit_import(_: i32, _: i32, _: i32);
+                        }
+                        #[cfg(not(target_arch = "wasm32"))]
+                        fn wit_import(_: i32, _: i32, _: i32) {
+                            unreachable!()
+                        }
+                        wit_import(
+                            (self).handle() as i32,
+                            _rt::as_i32(&offset),
+                            _rt::as_i32(&value),
+                        );
+                    }
+                }
+            }
+            impl Component {
+                #[allow(unused_unsafe, clippy::all)]
+                pub fn get_member_u32(&self, offset: u32) -> u32 {
+                    unsafe {
+                        #[cfg(target_arch = "wasm32")]
+                        #[link(wasm_import_module = "toxoid-component:component/ecs")]
+                        extern "C" {
+                            #[link_name = "[method]component.get-member-u32"]
+                            fn wit_import(_: i32, _: i32) -> i32;
+                        }
+                        #[cfg(not(target_arch = "wasm32"))]
+                        fn wit_import(_: i32, _: i32) -> i32 {
+                            unreachable!()
+                        }
+                        let ret = wit_import(
+                            (self).handle() as i32,
+                            _rt::as_i32(&offset),
+                        );
+                        ret as u32
+                    }
+                }
+            }
+            impl Component {
+                #[allow(unused_unsafe, clippy::all)]
+                pub fn set_member_u64(&self, offset: u32, value: u64) {
+                    unsafe {
+                        #[cfg(target_arch = "wasm32")]
+                        #[link(wasm_import_module = "toxoid-component:component/ecs")]
+                        extern "C" {
+                            #[link_name = "[method]component.set-member-u64"]
+                            fn wit_import(_: i32, _: i32, _: i64);
+                        }
+                        #[cfg(not(target_arch = "wasm32"))]
+                        fn wit_import(_: i32, _: i32, _: i64) {
+                            unreachable!()
+                        }
+                        wit_import(
+                            (self).handle() as i32,
+                            _rt::as_i32(&offset),
+                            _rt::as_i64(&value),
+                        );
+                    }
+                }
+            }
+            impl Component {
+                #[allow(unused_unsafe, clippy::all)]
+                pub fn get_member_u64(&self, offset: u32) -> u64 {
+                    unsafe {
+                        #[cfg(target_arch = "wasm32")]
+                        #[link(wasm_import_module = "toxoid-component:component/ecs")]
+                        extern "C" {
+                            #[link_name = "[method]component.get-member-u64"]
+                            fn wit_import(_: i32, _: i32) -> i64;
+                        }
+                        #[cfg(not(target_arch = "wasm32"))]
+                        fn wit_import(_: i32, _: i32) -> i64 {
+                            unreachable!()
+                        }
+                        let ret = wit_import(
+                            (self).handle() as i32,
+                            _rt::as_i32(&offset),
+                        );
+                        ret as u64
+                    }
+                }
+            }
+            impl Component {
+                #[allow(unused_unsafe, clippy::all)]
+                pub fn set_member_i8(&self, offset: u32, value: i8) {
+                    unsafe {
+                        #[cfg(target_arch = "wasm32")]
+                        #[link(wasm_import_module = "toxoid-component:component/ecs")]
+                        extern "C" {
+                            #[link_name = "[method]component.set-member-i8"]
+                            fn wit_import(_: i32, _: i32, _: i32);
+                        }
+                        #[cfg(not(target_arch = "wasm32"))]
+                        fn wit_import(_: i32, _: i32, _: i32) {
+                            unreachable!()
+                        }
+                        wit_import(
+                            (self).handle() as i32,
+                            _rt::as_i32(&offset),
+                            _rt::as_i32(&value),
+                        );
+                    }
+                }
+            }
+            impl Component {
+                #[allow(unused_unsafe, clippy::all)]
+                pub fn get_member_i8(&self, offset: u32) -> i8 {
+                    unsafe {
+                        #[cfg(target_arch = "wasm32")]
+                        #[link(wasm_import_module = "toxoid-component:component/ecs")]
+                        extern "C" {
+                            #[link_name = "[method]component.get-member-i8"]
+                            fn wit_import(_: i32, _: i32) -> i32;
+                        }
+                        #[cfg(not(target_arch = "wasm32"))]
+                        fn wit_import(_: i32, _: i32) -> i32 {
+                            unreachable!()
+                        }
+                        let ret = wit_import(
+                            (self).handle() as i32,
+                            _rt::as_i32(&offset),
+                        );
+                        ret as i8
+                    }
+                }
+            }
+            impl Component {
+                #[allow(unused_unsafe, clippy::all)]
+                pub fn set_member_i16(&self, offset: u32, value: i16) {
+                    unsafe {
+                        #[cfg(target_arch = "wasm32")]
+                        #[link(wasm_import_module = "toxoid-component:component/ecs")]
+                        extern "C" {
+                            #[link_name = "[method]component.set-member-i16"]
+                            fn wit_import(_: i32, _: i32, _: i32);
+                        }
+                        #[cfg(not(target_arch = "wasm32"))]
+                        fn wit_import(_: i32, _: i32, _: i32) {
+                            unreachable!()
+                        }
+                        wit_import(
+                            (self).handle() as i32,
+                            _rt::as_i32(&offset),
+                            _rt::as_i32(&value),
+                        );
+                    }
+                }
+            }
+            impl Component {
+                #[allow(unused_unsafe, clippy::all)]
+                pub fn get_member_i16(&self, offset: u32) -> i16 {
+                    unsafe {
+                        #[cfg(target_arch = "wasm32")]
+                        #[link(wasm_import_module = "toxoid-component:component/ecs")]
+                        extern "C" {
+                            #[link_name = "[method]component.get-member-i16"]
+                            fn wit_import(_: i32, _: i32) -> i32;
+                        }
+                        #[cfg(not(target_arch = "wasm32"))]
+                        fn wit_import(_: i32, _: i32) -> i32 {
+                            unreachable!()
+                        }
+                        let ret = wit_import(
+                            (self).handle() as i32,
+                            _rt::as_i32(&offset),
+                        );
+                        ret as i16
+                    }
+                }
+            }
+            impl Component {
+                #[allow(unused_unsafe, clippy::all)]
+                pub fn set_member_i32(&self, offset: u32, value: i32) {
+                    unsafe {
+                        #[cfg(target_arch = "wasm32")]
+                        #[link(wasm_import_module = "toxoid-component:component/ecs")]
+                        extern "C" {
+                            #[link_name = "[method]component.set-member-i32"]
+                            fn wit_import(_: i32, _: i32, _: i32);
+                        }
+                        #[cfg(not(target_arch = "wasm32"))]
+                        fn wit_import(_: i32, _: i32, _: i32) {
+                            unreachable!()
+                        }
+                        wit_import(
+                            (self).handle() as i32,
+                            _rt::as_i32(&offset),
+                            _rt::as_i32(&value),
+                        );
+                    }
+                }
+            }
+            impl Component {
+                #[allow(unused_unsafe, clippy::all)]
+                pub fn get_member_i32(&self, offset: u32) -> i32 {
+                    unsafe {
+                        #[cfg(target_arch = "wasm32")]
+                        #[link(wasm_import_module = "toxoid-component:component/ecs")]
+                        extern "C" {
+                            #[link_name = "[method]component.get-member-i32"]
+                            fn wit_import(_: i32, _: i32) -> i32;
+                        }
+                        #[cfg(not(target_arch = "wasm32"))]
+                        fn wit_import(_: i32, _: i32) -> i32 {
+                            unreachable!()
+                        }
+                        let ret = wit_import(
+                            (self).handle() as i32,
+                            _rt::as_i32(&offset),
+                        );
+                        ret
+                    }
+                }
+            }
+            impl Component {
+                #[allow(unused_unsafe, clippy::all)]
+                pub fn set_member_i64(&self, offset: u32, value: i64) {
+                    unsafe {
+                        #[cfg(target_arch = "wasm32")]
+                        #[link(wasm_import_module = "toxoid-component:component/ecs")]
+                        extern "C" {
+                            #[link_name = "[method]component.set-member-i64"]
+                            fn wit_import(_: i32, _: i32, _: i64);
+                        }
+                        #[cfg(not(target_arch = "wasm32"))]
+                        fn wit_import(_: i32, _: i32, _: i64) {
+                            unreachable!()
+                        }
+                        wit_import(
+                            (self).handle() as i32,
+                            _rt::as_i32(&offset),
+                            _rt::as_i64(&value),
+                        );
+                    }
+                }
+            }
+            impl Component {
+                #[allow(unused_unsafe, clippy::all)]
+                pub fn get_member_i64(&self, offset: u32) -> i64 {
+                    unsafe {
+                        #[cfg(target_arch = "wasm32")]
+                        #[link(wasm_import_module = "toxoid-component:component/ecs")]
+                        extern "C" {
+                            #[link_name = "[method]component.get-member-i64"]
+                            fn wit_import(_: i32, _: i32) -> i64;
+                        }
+                        #[cfg(not(target_arch = "wasm32"))]
+                        fn wit_import(_: i32, _: i32) -> i64 {
+                            unreachable!()
+                        }
+                        let ret = wit_import(
+                            (self).handle() as i32,
+                            _rt::as_i32(&offset),
+                        );
+                        ret
+                    }
+                }
+            }
+            impl Component {
+                #[allow(unused_unsafe, clippy::all)]
+                pub fn set_member_f32(&self, offset: u32, value: f32) {
+                    unsafe {
+                        #[cfg(target_arch = "wasm32")]
+                        #[link(wasm_import_module = "toxoid-component:component/ecs")]
+                        extern "C" {
+                            #[link_name = "[method]component.set-member-f32"]
+                            fn wit_import(_: i32, _: i32, _: f32);
+                        }
+                        #[cfg(not(target_arch = "wasm32"))]
+                        fn wit_import(_: i32, _: i32, _: f32) {
+                            unreachable!()
+                        }
+                        wit_import(
+                            (self).handle() as i32,
+                            _rt::as_i32(&offset),
+                            _rt::as_f32(&value),
+                        );
+                    }
+                }
+            }
+            impl Component {
+                #[allow(unused_unsafe, clippy::all)]
+                pub fn get_member_f32(&self, offset: u32) -> f32 {
+                    unsafe {
+                        #[cfg(target_arch = "wasm32")]
+                        #[link(wasm_import_module = "toxoid-component:component/ecs")]
+                        extern "C" {
+                            #[link_name = "[method]component.get-member-f32"]
+                            fn wit_import(_: i32, _: i32) -> f32;
+                        }
+                        #[cfg(not(target_arch = "wasm32"))]
+                        fn wit_import(_: i32, _: i32) -> f32 {
+                            unreachable!()
+                        }
+                        let ret = wit_import(
+                            (self).handle() as i32,
+                            _rt::as_i32(&offset),
+                        );
+                        ret
+                    }
+                }
+            }
+            impl Component {
+                #[allow(unused_unsafe, clippy::all)]
+                pub fn set_member_f64(&self, offset: u32, value: f64) {
+                    unsafe {
+                        #[cfg(target_arch = "wasm32")]
+                        #[link(wasm_import_module = "toxoid-component:component/ecs")]
+                        extern "C" {
+                            #[link_name = "[method]component.set-member-f64"]
+                            fn wit_import(_: i32, _: i32, _: f64);
+                        }
+                        #[cfg(not(target_arch = "wasm32"))]
+                        fn wit_import(_: i32, _: i32, _: f64) {
+                            unreachable!()
+                        }
+                        wit_import(
+                            (self).handle() as i32,
+                            _rt::as_i32(&offset),
+                            _rt::as_f64(&value),
+                        );
+                    }
+                }
+            }
+            impl Component {
+                #[allow(unused_unsafe, clippy::all)]
+                pub fn get_member_f64(&self, offset: u32) -> f64 {
+                    unsafe {
+                        #[cfg(target_arch = "wasm32")]
+                        #[link(wasm_import_module = "toxoid-component:component/ecs")]
+                        extern "C" {
+                            #[link_name = "[method]component.get-member-f64"]
+                            fn wit_import(_: i32, _: i32) -> f64;
+                        }
+                        #[cfg(not(target_arch = "wasm32"))]
+                        fn wit_import(_: i32, _: i32) -> f64 {
+                            unreachable!()
+                        }
+                        let ret = wit_import(
+                            (self).handle() as i32,
+                            _rt::as_i32(&offset),
+                        );
+                        ret
+                    }
+                }
+            }
+            impl Component {
+                #[allow(unused_unsafe, clippy::all)]
+                pub fn set_member_bool(&self, offset: u32, value: bool) {
+                    unsafe {
+                        #[cfg(target_arch = "wasm32")]
+                        #[link(wasm_import_module = "toxoid-component:component/ecs")]
+                        extern "C" {
+                            #[link_name = "[method]component.set-member-bool"]
+                            fn wit_import(_: i32, _: i32, _: i32);
+                        }
+                        #[cfg(not(target_arch = "wasm32"))]
+                        fn wit_import(_: i32, _: i32, _: i32) {
+                            unreachable!()
+                        }
+                        wit_import(
+                            (self).handle() as i32,
+                            _rt::as_i32(&offset),
+                            match &value {
+                                true => 1,
+                                false => 0,
+                            },
+                        );
+                    }
+                }
+            }
+            impl Component {
+                #[allow(unused_unsafe, clippy::all)]
+                pub fn get_member_bool(&self, offset: u32) -> bool {
+                    unsafe {
+                        #[cfg(target_arch = "wasm32")]
+                        #[link(wasm_import_module = "toxoid-component:component/ecs")]
+                        extern "C" {
+                            #[link_name = "[method]component.get-member-bool"]
+                            fn wit_import(_: i32, _: i32) -> i32;
+                        }
+                        #[cfg(not(target_arch = "wasm32"))]
+                        fn wit_import(_: i32, _: i32) -> i32 {
+                            unreachable!()
+                        }
+                        let ret = wit_import(
+                            (self).handle() as i32,
+                            _rt::as_i32(&offset),
+                        );
+                        _rt::bool_lift(ret as u8)
+                    }
+                }
+            }
+            impl Component {
+                #[allow(unused_unsafe, clippy::all)]
+                pub fn set_member_string(&self, offset: u32, value: &str) {
+                    unsafe {
+                        let vec0 = value;
+                        let ptr0 = vec0.as_ptr().cast::<u8>();
+                        let len0 = vec0.len();
+                        #[cfg(target_arch = "wasm32")]
+                        #[link(wasm_import_module = "toxoid-component:component/ecs")]
+                        extern "C" {
+                            #[link_name = "[method]component.set-member-string"]
+                            fn wit_import(_: i32, _: i32, _: *mut u8, _: usize);
+                        }
+                        #[cfg(not(target_arch = "wasm32"))]
+                        fn wit_import(_: i32, _: i32, _: *mut u8, _: usize) {
+                            unreachable!()
+                        }
+                        wit_import(
+                            (self).handle() as i32,
+                            _rt::as_i32(&offset),
+                            ptr0.cast_mut(),
+                            len0,
+                        );
+                    }
+                }
+            }
+            impl Component {
+                #[allow(unused_unsafe, clippy::all)]
+                pub fn get_member_string(&self, offset: u32) -> _rt::String {
+                    unsafe {
+                        #[repr(align(4))]
+                        struct RetArea([::core::mem::MaybeUninit<u8>; 8]);
+                        let mut ret_area = RetArea(
+                            [::core::mem::MaybeUninit::uninit(); 8],
+                        );
+                        let ptr0 = ret_area.0.as_mut_ptr().cast::<u8>();
+                        #[cfg(target_arch = "wasm32")]
+                        #[link(wasm_import_module = "toxoid-component:component/ecs")]
+                        extern "C" {
+                            #[link_name = "[method]component.get-member-string"]
+                            fn wit_import(_: i32, _: i32, _: *mut u8);
+                        }
+                        #[cfg(not(target_arch = "wasm32"))]
+                        fn wit_import(_: i32, _: i32, _: *mut u8) {
+                            unreachable!()
+                        }
+                        wit_import((self).handle() as i32, _rt::as_i32(&offset), ptr0);
+                        let l1 = *ptr0.add(0).cast::<*mut u8>();
+                        let l2 = *ptr0.add(4).cast::<usize>();
+                        let len3 = l2;
+                        let bytes3 = _rt::Vec::from_raw_parts(l1.cast(), len3, len3);
+                        _rt::string_lift(bytes3)
+                    }
+                }
+            }
+            impl Component {
+                #[allow(unused_unsafe, clippy::all)]
+                pub fn set_member_u32array(&self, offset: u32, value: &[u32]) {
+                    unsafe {
+                        let vec0 = value;
+                        let ptr0 = vec0.as_ptr().cast::<u8>();
+                        let len0 = vec0.len();
+                        #[cfg(target_arch = "wasm32")]
+                        #[link(wasm_import_module = "toxoid-component:component/ecs")]
+                        extern "C" {
+                            #[link_name = "[method]component.set-member-u32array"]
+                            fn wit_import(_: i32, _: i32, _: *mut u8, _: usize);
+                        }
+                        #[cfg(not(target_arch = "wasm32"))]
+                        fn wit_import(_: i32, _: i32, _: *mut u8, _: usize) {
+                            unreachable!()
+                        }
+                        wit_import(
+                            (self).handle() as i32,
+                            _rt::as_i32(&offset),
+                            ptr0.cast_mut(),
+                            len0,
+                        );
+                    }
+                }
+            }
+            impl Component {
+                #[allow(unused_unsafe, clippy::all)]
+                pub fn get_member_u32array(&self, offset: u32) -> _rt::Vec<u32> {
+                    unsafe {
+                        #[repr(align(4))]
+                        struct RetArea([::core::mem::MaybeUninit<u8>; 8]);
+                        let mut ret_area = RetArea(
+                            [::core::mem::MaybeUninit::uninit(); 8],
+                        );
+                        let ptr0 = ret_area.0.as_mut_ptr().cast::<u8>();
+                        #[cfg(target_arch = "wasm32")]
+                        #[link(wasm_import_module = "toxoid-component:component/ecs")]
+                        extern "C" {
+                            #[link_name = "[method]component.get-member-u32array"]
+                            fn wit_import(_: i32, _: i32, _: *mut u8);
+                        }
+                        #[cfg(not(target_arch = "wasm32"))]
+                        fn wit_import(_: i32, _: i32, _: *mut u8) {
+                            unreachable!()
+                        }
+                        wit_import((self).handle() as i32, _rt::as_i32(&offset), ptr0);
+                        let l1 = *ptr0.add(0).cast::<*mut u8>();
+                        let l2 = *ptr0.add(4).cast::<usize>();
+                        let len3 = l2;
+                        _rt::Vec::from_raw_parts(l1.cast(), len3, len3)
+                    }
+                }
+            }
+            impl Component {
+                #[allow(unused_unsafe, clippy::all)]
+                pub fn set_member_f32array(&self, offset: u32, value: &[f32]) {
+                    unsafe {
+                        let vec0 = value;
+                        let ptr0 = vec0.as_ptr().cast::<u8>();
+                        let len0 = vec0.len();
+                        #[cfg(target_arch = "wasm32")]
+                        #[link(wasm_import_module = "toxoid-component:component/ecs")]
+                        extern "C" {
+                            #[link_name = "[method]component.set-member-f32array"]
+                            fn wit_import(_: i32, _: i32, _: *mut u8, _: usize);
+                        }
+                        #[cfg(not(target_arch = "wasm32"))]
+                        fn wit_import(_: i32, _: i32, _: *mut u8, _: usize) {
+                            unreachable!()
+                        }
+                        wit_import(
+                            (self).handle() as i32,
+                            _rt::as_i32(&offset),
+                            ptr0.cast_mut(),
+                            len0,
+                        );
+                    }
+                }
+            }
+            impl Component {
+                #[allow(unused_unsafe, clippy::all)]
+                pub fn get_member_f32array(&self, offset: u32) -> _rt::Vec<f32> {
+                    unsafe {
+                        #[repr(align(4))]
+                        struct RetArea([::core::mem::MaybeUninit<u8>; 8]);
+                        let mut ret_area = RetArea(
+                            [::core::mem::MaybeUninit::uninit(); 8],
+                        );
+                        let ptr0 = ret_area.0.as_mut_ptr().cast::<u8>();
+                        #[cfg(target_arch = "wasm32")]
+                        #[link(wasm_import_module = "toxoid-component:component/ecs")]
+                        extern "C" {
+                            #[link_name = "[method]component.get-member-f32array"]
+                            fn wit_import(_: i32, _: i32, _: *mut u8);
+                        }
+                        #[cfg(not(target_arch = "wasm32"))]
+                        fn wit_import(_: i32, _: i32, _: *mut u8) {
+                            unreachable!()
+                        }
+                        wit_import((self).handle() as i32, _rt::as_i32(&offset), ptr0);
+                        let l1 = *ptr0.add(0).cast::<*mut u8>();
+                        let l2 = *ptr0.add(4).cast::<usize>();
+                        let len3 = l2;
+                        _rt::Vec::from_raw_parts(l1.cast(), len3, len3)
+                    }
+                }
+            }
             impl Entity {
                 #[allow(unused_unsafe, clippy::all)]
                 pub fn new(init: &EntityDesc) -> Self {
@@ -516,6 +1171,65 @@ mod _rt {
         }
     }
     pub use alloc_crate::alloc;
+    pub fn as_i32<T: AsI32>(t: T) -> i32 {
+        t.as_i32()
+    }
+    pub trait AsI32 {
+        fn as_i32(self) -> i32;
+    }
+    impl<'a, T: Copy + AsI32> AsI32 for &'a T {
+        fn as_i32(self) -> i32 {
+            (*self).as_i32()
+        }
+    }
+    impl AsI32 for i32 {
+        #[inline]
+        fn as_i32(self) -> i32 {
+            self as i32
+        }
+    }
+    impl AsI32 for u32 {
+        #[inline]
+        fn as_i32(self) -> i32 {
+            self as i32
+        }
+    }
+    impl AsI32 for i16 {
+        #[inline]
+        fn as_i32(self) -> i32 {
+            self as i32
+        }
+    }
+    impl AsI32 for u16 {
+        #[inline]
+        fn as_i32(self) -> i32 {
+            self as i32
+        }
+    }
+    impl AsI32 for i8 {
+        #[inline]
+        fn as_i32(self) -> i32 {
+            self as i32
+        }
+    }
+    impl AsI32 for u8 {
+        #[inline]
+        fn as_i32(self) -> i32 {
+            self as i32
+        }
+    }
+    impl AsI32 for char {
+        #[inline]
+        fn as_i32(self) -> i32 {
+            self as i32
+        }
+    }
+    impl AsI32 for usize {
+        #[inline]
+        fn as_i32(self) -> i32 {
+            self as i32
+        }
+    }
     pub fn as_i64<T: AsI64>(t: T) -> i64 {
         t.as_i64()
     }
@@ -539,9 +1253,50 @@ mod _rt {
             self as i64
         }
     }
-    #[cfg(target_arch = "wasm32")]
-    pub fn run_ctors_once() {
-        wit_bindgen_rt::run_ctors_once();
+    pub fn as_f32<T: AsF32>(t: T) -> f32 {
+        t.as_f32()
+    }
+    pub trait AsF32 {
+        fn as_f32(self) -> f32;
+    }
+    impl<'a, T: Copy + AsF32> AsF32 for &'a T {
+        fn as_f32(self) -> f32 {
+            (*self).as_f32()
+        }
+    }
+    impl AsF32 for f32 {
+        #[inline]
+        fn as_f32(self) -> f32 {
+            self as f32
+        }
+    }
+    pub fn as_f64<T: AsF64>(t: T) -> f64 {
+        t.as_f64()
+    }
+    pub trait AsF64 {
+        fn as_f64(self) -> f64;
+    }
+    impl<'a, T: Copy + AsF64> AsF64 for &'a T {
+        fn as_f64(self) -> f64 {
+            (*self).as_f64()
+        }
+    }
+    impl AsF64 for f64 {
+        #[inline]
+        fn as_f64(self) -> f64 {
+            self as f64
+        }
+    }
+    pub unsafe fn bool_lift(val: u8) -> bool {
+        if cfg!(debug_assertions) {
+            match val {
+                0 => false,
+                1 => true,
+                _ => panic!("invalid bool discriminant"),
+            }
+        } else {
+            val != 0
+        }
     }
     pub unsafe fn string_lift(bytes: Vec<u8>) -> String {
         if cfg!(debug_assertions) {
@@ -549,6 +1304,10 @@ mod _rt {
         } else {
             String::from_utf8_unchecked(bytes)
         }
+    }
+    #[cfg(target_arch = "wasm32")]
+    pub fn run_ctors_once() {
+        wit_bindgen_rt::run_ctors_once();
     }
     extern crate alloc as alloc_crate;
 }
@@ -584,24 +1343,56 @@ pub(crate) use __export_toxoid_component_world_impl as export;
 #[cfg(target_arch = "wasm32")]
 #[link_section = "component-type:wit-bindgen:0.31.0:toxoid-component:component:toxoid-component-world:encoded world"]
 #[doc(hidden)]
-pub static __WIT_BINDGEN_COMPONENT_TYPE: [u8; 824] = *b"\
-\0asm\x0d\0\x01\0\0\x19\x16wit-component-encoding\x04\0\x07\xab\x05\x01A\x02\x01\
-A\x04\x01B\x1f\x01w\x04\0\x0cecs-entity-t\x03\0\0\x01m\x0f\x04u8-t\x05u16-t\x05u\
-32-t\x05u64-t\x04i8-t\x05i16-t\x05i32-t\x05i64-t\x05f32-t\x05f64-t\x06bool-t\x08\
-string-t\x07array-t\x0au32array-t\x0af32array-t\x04\0\x0bmember-type\x03\0\x02\x01\
-ps\x01p}\x01r\x03\x04names\x0cmember-names\x04\x0cmember-types\x05\x04\0\x0ecomp\
-onent-desc\x03\0\x06\x01ks\x01r\x01\x04name\x08\x04\0\x0bentity-desc\x03\0\x09\x04\
-\0\x0ecomponent-type\x03\x01\x04\0\x09component\x03\x01\x04\0\x06entity\x03\x01\x01\
-i\x0b\x01@\x01\x04init\x07\0\x0e\x04\0\x1b[constructor]component-type\x01\x0f\x01\
-h\x0b\x01@\x01\x04self\x10\0\x01\x04\0\x1d[method]component-type.get-id\x01\x11\x01\
-i\x0d\x01@\x01\x04init\x0a\0\x12\x04\0\x13[constructor]entity\x01\x13\x01h\x0d\x01\
-@\x01\x04self\x14\0\x01\x04\0\x15[method]entity.get-id\x01\x15\x01i\x0c\x01@\x02\
-\x04self\x14\x09component\x01\0\x16\x04\0\x1c[method]entity.get-component\x01\x17\
-\x01@\x02\x04self\x14\x09component\x01\x01\0\x04\0\x1c[method]entity.add-compone\
-nt\x01\x18\x03\x01\x1etoxoid-component:component/ecs\x05\0\x01@\x01\x04names\0w\x04\
-\0\x04init\x01\x01\x04\x011toxoid-component:component/toxoid-component-world\x04\
-\0\x0b\x1c\x01\0\x16toxoid-component-world\x03\0\0\0G\x09producers\x01\x0cproces\
-sed-by\x02\x0dwit-component\x070.216.0\x10wit-bindgen-rust\x060.31.0";
+pub static __WIT_BINDGEN_COMPONENT_TYPE: [u8; 2533] = *b"\
+\0asm\x0d\0\x01\0\0\x19\x16wit-component-encoding\x04\0\x07\xd8\x12\x01A\x02\x01\
+A\x04\x01BZ\x01w\x04\0\x0cecs-entity-t\x03\0\0\x01m\x10\x04u8-t\x05u16-t\x05u32-\
+t\x05u64-t\x04i8-t\x05i16-t\x05i32-t\x05i64-t\x05f32-t\x05f64-t\x06bool-t\x08str\
+ing-t\x07array-t\x0au32array-t\x0af32array-t\x09pointer-t\x04\0\x0bmember-type\x03\
+\0\x02\x01ps\x01p}\x01r\x03\x04names\x0cmember-names\x04\x0cmember-types\x05\x04\
+\0\x0ecomponent-desc\x03\0\x06\x01ks\x01r\x01\x04name\x08\x04\0\x0bentity-desc\x03\
+\0\x09\x04\0\x0ecomponent-type\x03\x01\x04\0\x09component\x03\x01\x04\0\x06entit\
+y\x03\x01\x01i\x0b\x01@\x01\x04init\x07\0\x0e\x04\0\x1b[constructor]component-ty\
+pe\x01\x0f\x01h\x0b\x01@\x01\x04self\x10\0\x01\x04\0\x1d[method]component-type.g\
+et-id\x01\x11\x01h\x0c\x01@\x03\x04self\x12\x06offsety\x05value}\x01\0\x04\0\x1f\
+[method]component.set-member-u8\x01\x13\x01@\x02\x04self\x12\x06offsety\0}\x04\0\
+\x1f[method]component.get-member-u8\x01\x14\x01@\x03\x04self\x12\x06offsety\x05v\
+alue{\x01\0\x04\0\x20[method]component.set-member-u16\x01\x15\x01@\x02\x04self\x12\
+\x06offsety\0{\x04\0\x20[method]component.get-member-u16\x01\x16\x01@\x03\x04sel\
+f\x12\x06offsety\x05valuey\x01\0\x04\0\x20[method]component.set-member-u32\x01\x17\
+\x01@\x02\x04self\x12\x06offsety\0y\x04\0\x20[method]component.get-member-u32\x01\
+\x18\x01@\x03\x04self\x12\x06offsety\x05valuew\x01\0\x04\0\x20[method]component.\
+set-member-u64\x01\x19\x01@\x02\x04self\x12\x06offsety\0w\x04\0\x20[method]compo\
+nent.get-member-u64\x01\x1a\x01@\x03\x04self\x12\x06offsety\x05value~\x01\0\x04\0\
+\x1f[method]component.set-member-i8\x01\x1b\x01@\x02\x04self\x12\x06offsety\0~\x04\
+\0\x1f[method]component.get-member-i8\x01\x1c\x01@\x03\x04self\x12\x06offsety\x05\
+value|\x01\0\x04\0\x20[method]component.set-member-i16\x01\x1d\x01@\x02\x04self\x12\
+\x06offsety\0|\x04\0\x20[method]component.get-member-i16\x01\x1e\x01@\x03\x04sel\
+f\x12\x06offsety\x05valuez\x01\0\x04\0\x20[method]component.set-member-i32\x01\x1f\
+\x01@\x02\x04self\x12\x06offsety\0z\x04\0\x20[method]component.get-member-i32\x01\
+\x20\x01@\x03\x04self\x12\x06offsety\x05valuex\x01\0\x04\0\x20[method]component.\
+set-member-i64\x01!\x01@\x02\x04self\x12\x06offsety\0x\x04\0\x20[method]componen\
+t.get-member-i64\x01\"\x01@\x03\x04self\x12\x06offsety\x05valuev\x01\0\x04\0\x20\
+[method]component.set-member-f32\x01#\x01@\x02\x04self\x12\x06offsety\0v\x04\0\x20\
+[method]component.get-member-f32\x01$\x01@\x03\x04self\x12\x06offsety\x05valueu\x01\
+\0\x04\0\x20[method]component.set-member-f64\x01%\x01@\x02\x04self\x12\x06offset\
+y\0u\x04\0\x20[method]component.get-member-f64\x01&\x01@\x03\x04self\x12\x06offs\
+ety\x05value\x7f\x01\0\x04\0![method]component.set-member-bool\x01'\x01@\x02\x04\
+self\x12\x06offsety\0\x7f\x04\0![method]component.get-member-bool\x01(\x01@\x03\x04\
+self\x12\x06offsety\x05values\x01\0\x04\0#[method]component.set-member-string\x01\
+)\x01@\x02\x04self\x12\x06offsety\0s\x04\0#[method]component.get-member-string\x01\
+*\x01py\x01@\x03\x04self\x12\x06offsety\x05value+\x01\0\x04\0%[method]component.\
+set-member-u32array\x01,\x01@\x02\x04self\x12\x06offsety\0+\x04\0%[method]compon\
+ent.get-member-u32array\x01-\x01pv\x01@\x03\x04self\x12\x06offsety\x05value.\x01\
+\0\x04\0%[method]component.set-member-f32array\x01/\x01@\x02\x04self\x12\x06offs\
+ety\0.\x04\0%[method]component.get-member-f32array\x010\x01i\x0d\x01@\x01\x04ini\
+t\x0a\01\x04\0\x13[constructor]entity\x012\x01h\x0d\x01@\x01\x04self3\0\x01\x04\0\
+\x15[method]entity.get-id\x014\x01i\x0c\x01@\x02\x04self3\x09component\x01\05\x04\
+\0\x1c[method]entity.get-component\x016\x01@\x02\x04self3\x09component\x01\x01\0\
+\x04\0\x1c[method]entity.add-component\x017\x03\x01\x1etoxoid-component:componen\
+t/ecs\x05\0\x01@\x01\x04names\0w\x04\0\x04init\x01\x01\x04\x011toxoid-component:\
+component/toxoid-component-world\x04\0\x0b\x1c\x01\0\x16toxoid-component-world\x03\
+\0\0\0G\x09producers\x01\x0cprocessed-by\x02\x0dwit-component\x070.216.0\x10wit-\
+bindgen-rust\x060.31.0";
 #[inline(never)]
 #[doc(hidden)]
 pub fn __link_custom_section_describing_imports() {

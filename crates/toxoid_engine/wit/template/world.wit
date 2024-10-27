@@ -19,6 +19,7 @@ interface ecs {
         array-t,
         u32array-t,
         f32array-t,
+        pointer-t
     }
     
     record component-desc {
@@ -43,34 +44,34 @@ interface ecs {
         {% else %}
         constructor(ptr: s64);
         {% endif %}
-        // set-member-u8: func(offset: u32, value: u8);
-        // set-member-u16: func(offset: u32, value: u16);
-        // set-member-u32: func(offset: u32, value: u32);
-        // set-member-u64: func(offset: u32, value: u64);
-        // set-member-i8: func(offset: u32, value: s8);
-        // set-member-i16: func(offset: u32, value: s16);
-        // set-member-i32: func(offset: u32, value: s32);
-        // set-member-i64: func(offset: u32, value: s64);
-        // set-member-f32: func(offset: u32, value: f32);
-        // set-member-f64: func(offset: u32, value: f64);
-        // set-member-bool: func(offset: u32, value: bool);
-        // set-member-string: func(offset: u32, value: string);
-        // set-member-u32array: func(offset: u32, value: list<u32>);
-        // set-member-f32array: func(offset: u32, value: list<f32>);
-        // get-member-u8: func(offset: u32) -> u8;
-        // get-member-u16: func(offset: u32) -> u16;
-        // get-member-u32: func(offset: u32) -> u32;
-        // get-member-u64: func(offset: u32) -> u64;
-        // get-member-i8: func(offset: u32) -> s8;
-        // get-member-i16: func(offset: u32) -> s16;
-        // get-member-i32: func(offset: u32) -> s32;
-        // get-member-i64: func(offset: u32) -> s64;
-        // get-member-f32: func(offset: u32) -> f32;
-        // get-member-f64: func(offset: u32) -> f64;
-        // get-member-bool: func(offset: u32) -> bool;
-        // get-member-string: func(offset: u32) -> string;
-        // get-member-u32array: func(offset: u32) -> list<u32>;
-        // get-member-f32array: func(offset: u32) -> list<f32>;
+        set-member-u8: func(offset: u32, value: u8);
+        get-member-u8: func(offset: u32) -> u8;
+        set-member-u16: func(offset: u32, value: u16);
+        get-member-u16: func(offset: u32) -> u16;
+        set-member-u32: func(offset: u32, value: u32);
+        get-member-u32: func(offset: u32) -> u32;
+        set-member-u64: func(offset: u32, value: u64);
+        get-member-u64: func(offset: u32) -> u64;
+        set-member-i8: func(offset: u32, value: s8);
+        get-member-i8: func(offset: u32) -> s8;
+        set-member-i16: func(offset: u32, value: s16);
+        get-member-i16: func(offset: u32) -> s16;
+        set-member-i32: func(offset: u32, value: s32);
+        get-member-i32: func(offset: u32) -> s32;
+        set-member-i64: func(offset: u32, value: s64);
+        get-member-i64: func(offset: u32) -> s64;
+        set-member-f32: func(offset: u32, value: f32);
+        get-member-f32: func(offset: u32) -> f32;
+        set-member-f64: func(offset: u32, value: f64);
+        get-member-f64: func(offset: u32) -> f64;
+        set-member-bool: func(offset: u32, value: bool);
+        get-member-bool: func(offset: u32) -> bool;
+        set-member-string: func(offset: u32, value: string);
+        get-member-string: func(offset: u32) -> string;
+        set-member-u32array: func(offset: u32, value: list<u32>);
+        get-member-u32array: func(offset: u32) -> list<u32>;
+        set-member-f32array: func(offset: u32, value: list<f32>);
+        get-member-f32array: func(offset: u32) -> list<f32>;
     }
 
     resource entity {

@@ -19,7 +19,9 @@ impl Guest for ToxoidWasmComponent {
         });
         entity.add_component(component.get_id());
         let component = entity.get_component(component.get_id());
-        component.take_handle() as u64
+        component.set_member_u64(0, 777);
+        component.get_member_u64(0) as u64
+        // component.take_handle() as u64
         // component.get_id()
     }
 }

@@ -95,7 +95,6 @@ impl toxoid_component::component::ecs::HostEntity for StoreState {
                 ptr: boxed_component_ptr
             })
             .expect("Failed to push component to table");
-        println!("Component ID: {:?}", id);
         id
     }
 
@@ -159,28 +158,215 @@ impl toxoid_component::component::ecs::HostComponentType for StoreState {
 }
 
 impl toxoid_component::component::ecs::HostComponent for StoreState {
-    // fn new(&mut self, resource_id: u32) -> Resource<ComponentProxy> {
-    //     todo!()
-    // }
-    // fn new(&mut self, resource_id: u32) -> Resource<ComponentProxy> {
-    //     // Create component
-    //     let component = toxoid_engine::ComponentType::new(toxoid_engine::bindings::exports::toxoid::engine::ecs::ComponentDesc {
-    //         name: "".to_string(),
-    //         member_names: vec![],
-    //         member_types: vec![],
-    //     });
-    //     // Create boxed component
-    //     let boxed_component = Box::new(component);
-    //     let boxed_component_ptr = Box::into_raw(boxed_component);
-    //     // Push component to resource table
-    //     let id = self
-    //         .table
-    //         .push::<ComponentProxy>(ComponentProxy { 
-    //             ptr: boxed_component_ptr as *mut toxoid_engine::Component
-    //         })
-    //         .unwrap();
-    //     id
-    // }
+    fn set_member_u8(&mut self, component: Resource<toxoid_component::component::ecs::Component>, offset: u32, value: u8) -> () {
+        let component_proxy = self.table.get(&component).unwrap() as &ComponentProxy;
+        let component = unsafe { Box::from_raw(component_proxy.ptr) };
+        component.set_member_u8(offset, value);
+        Box::into_raw(component);
+    }
+
+    fn get_member_u8(&mut self, component: Resource<toxoid_component::component::ecs::Component>, offset: u32) -> u8 {
+        let component_proxy = self.table.get(&component).unwrap() as &ComponentProxy;
+        let component = unsafe { Box::from_raw(component_proxy.ptr) };
+        let value = component.get_member_u8(offset);
+        Box::into_raw(component);
+        value
+    }
+
+    fn set_member_u16(&mut self, component: Resource<toxoid_component::component::ecs::Component>, offset: u32, value: u16) -> () {
+        let component_proxy = self.table.get(&component).unwrap() as &ComponentProxy;
+        let component = unsafe { Box::from_raw(component_proxy.ptr) };
+        component.set_member_u16(offset, value);
+        Box::into_raw(component);
+    }
+
+    fn get_member_u16(&mut self, component: Resource<toxoid_component::component::ecs::Component>, offset: u32) -> u16 {
+        let component_proxy = self.table.get(&component).unwrap() as &ComponentProxy;
+        let component = unsafe { Box::from_raw(component_proxy.ptr) };
+        let value = component.get_member_u16(offset);
+        Box::into_raw(component);
+        value
+    }
+
+    fn set_member_u32(&mut self, component: Resource<toxoid_component::component::ecs::Component>, offset: u32, value: u32) -> () {
+        let component_proxy = self.table.get(&component).unwrap() as &ComponentProxy;
+        let component = unsafe { Box::from_raw(component_proxy.ptr) };
+        component.set_member_u32(offset, value);
+        Box::into_raw(component);
+    }
+
+    fn get_member_u32(&mut self, component: Resource<toxoid_component::component::ecs::Component>, offset: u32) -> u32 {
+        let component_proxy = self.table.get(&component).unwrap() as &ComponentProxy;
+        let component = unsafe { Box::from_raw(component_proxy.ptr) };
+        let value = component.get_member_u32(offset);
+        Box::into_raw(component);
+        value
+    }
+
+    fn set_member_u64(&mut self, component: Resource<toxoid_component::component::ecs::Component>, offset: u32, value: u64) -> () {
+        let component_proxy = self.table.get(&component).unwrap() as &ComponentProxy;
+        let component = unsafe { Box::from_raw(component_proxy.ptr) };
+        component.set_member_u64(offset, value);
+        Box::into_raw(component);
+    }
+
+    fn get_member_u64(&mut self, component: Resource<toxoid_component::component::ecs::Component>, offset: u32) -> u64 {
+        let component_proxy = self.table.get(&component).unwrap() as &ComponentProxy;
+        let component = unsafe { Box::from_raw(component_proxy.ptr) };
+        let value = component.get_member_u64(offset);
+        Box::into_raw(component);
+        value
+    }
+
+    fn get_member_i8(&mut self, component: Resource<toxoid_component::component::ecs::Component>, offset: u32) -> i8 {
+        let component_proxy = self.table.get(&component).unwrap() as &ComponentProxy;
+        let component = unsafe { Box::from_raw(component_proxy.ptr) };
+        let value = component.get_member_i8(offset);
+        Box::into_raw(component);
+        value
+    }
+
+    fn set_member_i8(&mut self, component: Resource<toxoid_component::component::ecs::Component>, offset: u32, value: i8) -> () {
+        let component_proxy = self.table.get(&component).unwrap() as &ComponentProxy;
+        let component = unsafe { Box::from_raw(component_proxy.ptr) };
+        component.set_member_i8(offset, value);
+        Box::into_raw(component);
+    }
+
+    fn get_member_i16(&mut self, component: Resource<toxoid_component::component::ecs::Component>, offset: u32) -> i16 {
+        let component_proxy = self.table.get(&component).unwrap() as &ComponentProxy;
+        let component = unsafe { Box::from_raw(component_proxy.ptr) };
+        let value = component.get_member_i16(offset);
+        Box::into_raw(component);
+        value
+    }
+
+    fn set_member_i16(&mut self, component: Resource<toxoid_component::component::ecs::Component>, offset: u32, value: i16) -> () {
+        let component_proxy = self.table.get(&component).unwrap() as &ComponentProxy;
+        let component = unsafe { Box::from_raw(component_proxy.ptr) };
+        component.set_member_i16(offset, value);
+        Box::into_raw(component);
+    }
+
+    fn get_member_i32(&mut self, component: Resource<toxoid_component::component::ecs::Component>, offset: u32) -> i32 {
+        let component_proxy = self.table.get(&component).unwrap() as &ComponentProxy;
+        let component = unsafe { Box::from_raw(component_proxy.ptr) };
+        let value = component.get_member_i32(offset);
+        Box::into_raw(component);
+        value
+    }
+
+    fn set_member_i32(&mut self, component: Resource<toxoid_component::component::ecs::Component>, offset: u32, value: i32) -> () {
+        let component_proxy = self.table.get(&component).unwrap() as &ComponentProxy;
+        let component = unsafe { Box::from_raw(component_proxy.ptr) };
+        component.set_member_i32(offset, value);
+        Box::into_raw(component);
+    }
+
+    fn get_member_i64(&mut self, component: Resource<toxoid_component::component::ecs::Component>, offset: u32) -> i64 {
+        let component_proxy = self.table.get(&component).unwrap() as &ComponentProxy;
+        let component = unsafe { Box::from_raw(component_proxy.ptr) };
+        let value = component.get_member_i64(offset);
+        Box::into_raw(component);
+        value
+    }
+
+    fn set_member_i64(&mut self, component: Resource<toxoid_component::component::ecs::Component>, offset: u32, value: i64) -> () {
+        let component_proxy = self.table.get(&component).unwrap() as &ComponentProxy;
+        let component = unsafe { Box::from_raw(component_proxy.ptr) };
+        component.set_member_i64(offset, value);
+        Box::into_raw(component);
+    }
+
+    fn get_member_f32(&mut self, component: Resource<toxoid_component::component::ecs::Component>, offset: u32) -> f32 {
+        let component_proxy = self.table.get(&component).unwrap() as &ComponentProxy;
+        let component = unsafe { Box::from_raw(component_proxy.ptr) };
+        let value = component.get_member_f32(offset);
+        Box::into_raw(component);
+        value
+    }
+
+    fn set_member_f32(&mut self, component: Resource<toxoid_component::component::ecs::Component>, offset: u32, value: f32) -> () {
+        let component_proxy = self.table.get(&component).unwrap() as &ComponentProxy;
+        let component = unsafe { Box::from_raw(component_proxy.ptr) };
+        component.set_member_f32(offset, value);
+        Box::into_raw(component);
+    }
+
+    fn get_member_f64(&mut self, component: Resource<toxoid_component::component::ecs::Component>, offset: u32) -> f64 {
+        let component_proxy = self.table.get(&component).unwrap() as &ComponentProxy;
+        let component = unsafe { Box::from_raw(component_proxy.ptr) };
+        let value = component.get_member_f64(offset);
+        Box::into_raw(component);
+        value
+    }
+
+    fn set_member_f64(&mut self, component: Resource<toxoid_component::component::ecs::Component>, offset: u32, value: f64) -> () {
+        let component_proxy = self.table.get(&component).unwrap() as &ComponentProxy;
+        let component = unsafe { Box::from_raw(component_proxy.ptr) };
+        component.set_member_f64(offset, value);
+        Box::into_raw(component);
+    }
+
+    fn get_member_bool(&mut self, component: Resource<toxoid_component::component::ecs::Component>, offset: u32) -> bool {
+        let component_proxy = self.table.get(&component).unwrap() as &ComponentProxy;
+        let component = unsafe { Box::from_raw(component_proxy.ptr) };
+        let value = component.get_member_bool(offset);
+        Box::into_raw(component);
+        value
+    }
+
+    fn set_member_bool(&mut self, component: Resource<toxoid_component::component::ecs::Component>, offset: u32, value: bool) -> () {
+        let component_proxy = self.table.get(&component).unwrap() as &ComponentProxy;
+        let component = unsafe { Box::from_raw(component_proxy.ptr) };
+        component.set_member_bool(offset, value);
+        Box::into_raw(component);
+    }
+
+    fn get_member_string(&mut self, component: Resource<toxoid_component::component::ecs::Component>, offset: u32) -> String {
+        let component_proxy = self.table.get(&component).unwrap() as &ComponentProxy;
+        let component = unsafe { Box::from_raw(component_proxy.ptr) };
+        let value = component.get_member_string(offset);
+        Box::into_raw(component);
+        value
+    }
+
+    fn set_member_string(&mut self, component: Resource<toxoid_component::component::ecs::Component>, offset: u32, value: String) -> () {
+        let component_proxy = self.table.get(&component).unwrap() as &ComponentProxy;
+        let component = unsafe { Box::from_raw(component_proxy.ptr) };
+        component.set_member_string(offset, value);
+        Box::into_raw(component);
+    }
+
+    fn get_member_u32array(&mut self, component: Resource<toxoid_component::component::ecs::Component>, offset: u32) -> Vec<u32> {
+        let component_proxy = self.table.get(&component).unwrap() as &ComponentProxy;
+        let component = unsafe { Box::from_raw(component_proxy.ptr) };
+        let value = component.get_member_u32array(offset);
+        Box::into_raw(component);
+        value
+    }
+
+    fn set_member_u32array(&mut self, component: Resource<toxoid_component::component::ecs::Component>, offset: u32, value: Vec<u32>) -> () {
+        let component_proxy = self.table.get(&component).unwrap() as &ComponentProxy;
+        let component = unsafe { Box::from_raw(component_proxy.ptr) };
+        component.set_member_u32array(offset, value);
+        Box::into_raw(component);
+    }
+
+    fn get_member_f32array(&mut self, component: Resource<toxoid_component::component::ecs::Component>, offset: u32) -> Vec<f32> {
+        let component_proxy = self.table.get(&component).unwrap() as &ComponentProxy;
+        let component = unsafe { Box::from_raw(component_proxy.ptr) };
+        let value = component.get_member_f32array(offset);
+        Box::into_raw(component);
+        value
+    }
+
+    fn set_member_f32array(&mut self, component: Resource<toxoid_component::component::ecs::Component>, offset: u32, value: Vec<f32>) -> () {
+        let component_proxy = self.table.get(&component).unwrap() as &ComponentProxy;
+        let component = unsafe { Box::from_raw(component_proxy.ptr) };
+        component.set_member_f32array(offset, value);
+        Box::into_raw(component);
+    }
 
     fn drop(&mut self, component: Resource<toxoid_component::component::ecs::Component>) -> Result<(), wasmtime::Error> {
         // let component_proxy = self.table.get(&component).unwrap() as &ComponentProxy;
