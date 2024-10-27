@@ -74,10 +74,11 @@ interface ecs {
     
     resource entity {
         constructor(init: entity-desc);
+        from-id: static func(id: u64) -> entity;
         get-id: func() -> ecs-entity-t;
-        get-component: func(component: ecs-entity-t) -> component;
-        add-component: func(component: ecs-entity-t);
-        // remove-component: func(component: ecs-entity-t);
+        get: func(component: ecs-entity-t) -> component;
+        add: func(component: ecs-entity-t);
+        // remove: func(component: ecs-entity-t);
     }
 
     resource query {
@@ -87,7 +88,7 @@ interface ecs {
         iter: func();
         next: func() -> bool;
         count: func() -> s32;
-        // ptrs: func(component-query-index: u32) -> *mut *mut c_void;
+        entities: func() -> list<entity>;
     }
 }
 

@@ -1,7 +1,6 @@
 #[allow(warnings)]
 mod bindings;
 use bindings::{toxoid_component::component::ecs::{Component, ComponentDesc, ComponentType, Entity, EntityDesc, MemberType, Query, QueryDesc}, Guest};
-// use bindings::toxoid_component::component::ecs::MemberType;
 
 struct ToxoidWasmComponent;
 
@@ -15,15 +14,20 @@ impl Guest for ToxoidWasmComponent {
         let entity = Entity::new(&EntityDesc {
             name: Some(format!("Test entity {}", name))
         });
-        entity.add_component(component.get_id());
-        let component = entity.get_component(component.get_id());
+        let component_id = component.get_id();
+        entity.add(component_id);
+        let component = entity.get(component_id);
         component.set_member_u64(0, 777);
         component.get_member_u64(0) as u64;
         let query = Query::new(&QueryDesc { expr: "Position($this)".to_string() });
         query.build();
         query.iter();
         query.next();
-        query.count() as u64
+        let entities = query.entities();
+        let entity = entities.get(0).unwrap();
+        let component = entity.get(component_id);
+        let value = component.get_member_u64(0) as u64;
+        value
     }
 }
 

@@ -1134,12 +1134,21 @@ pub mod exports {
                 }
                 #[doc(hidden)]
                 #[allow(non_snake_case)]
-                pub unsafe fn _export_method_entity_get_component_cabi<T: GuestEntity>(
+                pub unsafe fn _export_static_entity_from_id_cabi<T: GuestEntity>(
+                    arg0: i64,
+                ) -> i64 {
+                    #[cfg(target_arch = "wasm32")] _rt::run_ctors_once();
+                    let result0 = T::from_id(arg0 as u64);
+                    _rt::as_i64(result0)
+                }
+                #[doc(hidden)]
+                #[allow(non_snake_case)]
+                pub unsafe fn _export_method_entity_get_cabi<T: GuestEntity>(
                     arg0: *mut u8,
                     arg1: i64,
                 ) -> i64 {
                     #[cfg(target_arch = "wasm32")] _rt::run_ctors_once();
-                    let result0 = T::get_component(
+                    let result0 = T::get(
                         EntityBorrow::lift(arg0 as u32 as usize).get(),
                         arg1 as u64,
                     );
@@ -1147,15 +1156,12 @@ pub mod exports {
                 }
                 #[doc(hidden)]
                 #[allow(non_snake_case)]
-                pub unsafe fn _export_method_entity_add_component_cabi<T: GuestEntity>(
+                pub unsafe fn _export_method_entity_add_cabi<T: GuestEntity>(
                     arg0: *mut u8,
                     arg1: i64,
                 ) {
                     #[cfg(target_arch = "wasm32")] _rt::run_ctors_once();
-                    T::add_component(
-                        EntityBorrow::lift(arg0 as u32 as usize).get(),
-                        arg1 as u64,
-                    );
+                    T::add(EntityBorrow::lift(arg0 as u32 as usize).get(), arg1 as u64);
                 }
                 #[doc(hidden)]
                 #[allow(non_snake_case)]
@@ -1226,6 +1232,35 @@ pub mod exports {
                         QueryBorrow::lift(arg0 as u32 as usize).get(),
                     );
                     _rt::as_i32(result0)
+                }
+                #[doc(hidden)]
+                #[allow(non_snake_case)]
+                pub unsafe fn _export_method_query_entities_cabi<T: GuestQuery>(
+                    arg0: *mut u8,
+                ) -> *mut u8 {
+                    #[cfg(target_arch = "wasm32")] _rt::run_ctors_once();
+                    let result0 = T::entities(
+                        QueryBorrow::lift(arg0 as u32 as usize).get(),
+                    );
+                    let ptr1 = _RET_AREA.0.as_mut_ptr().cast::<u8>();
+                    let vec2 = (result0).into_boxed_slice();
+                    let ptr2 = vec2.as_ptr().cast::<u8>();
+                    let len2 = vec2.len();
+                    ::core::mem::forget(vec2);
+                    *ptr1.add(4).cast::<usize>() = len2;
+                    *ptr1.add(0).cast::<*mut u8>() = ptr2.cast_mut();
+                    ptr1
+                }
+                #[doc(hidden)]
+                #[allow(non_snake_case)]
+                pub unsafe fn __post_return_method_query_entities<T: GuestQuery>(
+                    arg0: *mut u8,
+                ) {
+                    let l0 = *arg0.add(0).cast::<*mut u8>();
+                    let l1 = *arg0.add(4).cast::<usize>();
+                    let base2 = l0;
+                    let len2 = l1;
+                    _rt::cabi_dealloc(base2, len2 * 8, 8);
                 }
                 pub trait Guest {
                     type ComponentType: GuestComponentType;
@@ -1391,8 +1426,9 @@ pub mod exports {
                     }
                     fn new(desc: EntityDesc) -> Self;
                     fn get_id(&self) -> EcsEntityT;
-                    fn get_component(&self, component: EcsEntityT) -> i64;
-                    fn add_component(&self, component: EcsEntityT);
+                    fn from_id(id: u64) -> i64;
+                    fn get(&self, component: EcsEntityT) -> i64;
+                    fn add(&self, component: EcsEntityT);
                 }
                 pub trait GuestQuery: 'static {
                     #[doc(hidden)]
@@ -1441,6 +1477,7 @@ pub mod exports {
                     fn iter(&self);
                     fn next(&self) -> bool;
                     fn count(&self) -> i32;
+                    fn entities(&self) -> _rt::Vec<u64>;
                 }
                 #[doc(hidden)]
                 macro_rules! __export_toxoid_engine_ecs_cabi {
@@ -1661,24 +1698,26 @@ pub mod exports {
                         export_method_entity_get_id(arg0 : * mut u8,) -> i64 {
                         $($path_to_types)*:: _export_method_entity_get_id_cabi::<<$ty as
                         $($path_to_types)*:: Guest >::Entity > (arg0) } #[export_name =
-                        "toxoid:engine/ecs#[method]entity.get-component"] unsafe extern
-                        "C" fn export_method_entity_get_component(arg0 : * mut u8, arg1 :
-                        i64,) -> i64 { $($path_to_types)*::
-                        _export_method_entity_get_component_cabi::<<$ty as
+                        "toxoid:engine/ecs#[static]entity.from-id"] unsafe extern "C" fn
+                        export_static_entity_from_id(arg0 : i64,) -> i64 {
+                        $($path_to_types)*:: _export_static_entity_from_id_cabi::<<$ty as
+                        $($path_to_types)*:: Guest >::Entity > (arg0) } #[export_name =
+                        "toxoid:engine/ecs#[method]entity.get"] unsafe extern "C" fn
+                        export_method_entity_get(arg0 : * mut u8, arg1 : i64,) -> i64 {
+                        $($path_to_types)*:: _export_method_entity_get_cabi::<<$ty as
                         $($path_to_types)*:: Guest >::Entity > (arg0, arg1) }
-                        #[export_name = "toxoid:engine/ecs#[method]entity.add-component"]
-                        unsafe extern "C" fn export_method_entity_add_component(arg0 : *
-                        mut u8, arg1 : i64,) { $($path_to_types)*::
-                        _export_method_entity_add_component_cabi::<<$ty as
-                        $($path_to_types)*:: Guest >::Entity > (arg0, arg1) }
-                        #[export_name = "toxoid:engine/ecs#[constructor]query"] unsafe
-                        extern "C" fn export_constructor_query(arg0 : * mut u8, arg1 :
-                        usize,) -> i32 { $($path_to_types)*::
-                        _export_constructor_query_cabi::<<$ty as $($path_to_types)*::
-                        Guest >::Query > (arg0, arg1) } #[export_name =
-                        "toxoid:engine/ecs#[method]query.expr"] unsafe extern "C" fn
-                        export_method_query_expr(arg0 : * mut u8, arg1 : * mut u8, arg2 :
-                        usize,) { $($path_to_types)*::
+                        #[export_name = "toxoid:engine/ecs#[method]entity.add"] unsafe
+                        extern "C" fn export_method_entity_add(arg0 : * mut u8, arg1 :
+                        i64,) { $($path_to_types)*::
+                        _export_method_entity_add_cabi::<<$ty as $($path_to_types)*::
+                        Guest >::Entity > (arg0, arg1) } #[export_name =
+                        "toxoid:engine/ecs#[constructor]query"] unsafe extern "C" fn
+                        export_constructor_query(arg0 : * mut u8, arg1 : usize,) -> i32 {
+                        $($path_to_types)*:: _export_constructor_query_cabi::<<$ty as
+                        $($path_to_types)*:: Guest >::Query > (arg0, arg1) }
+                        #[export_name = "toxoid:engine/ecs#[method]query.expr"] unsafe
+                        extern "C" fn export_method_query_expr(arg0 : * mut u8, arg1 : *
+                        mut u8, arg2 : usize,) { $($path_to_types)*::
                         _export_method_query_expr_cabi::<<$ty as $($path_to_types)*::
                         Guest >::Query > (arg0, arg1, arg2) } #[export_name =
                         "toxoid:engine/ecs#[method]query.build"] unsafe extern "C" fn
@@ -1696,6 +1735,15 @@ pub mod exports {
                         "toxoid:engine/ecs#[method]query.count"] unsafe extern "C" fn
                         export_method_query_count(arg0 : * mut u8,) -> i32 {
                         $($path_to_types)*:: _export_method_query_count_cabi::<<$ty as
+                        $($path_to_types)*:: Guest >::Query > (arg0) } #[export_name =
+                        "toxoid:engine/ecs#[method]query.entities"] unsafe extern "C" fn
+                        export_method_query_entities(arg0 : * mut u8,) -> * mut u8 {
+                        $($path_to_types)*:: _export_method_query_entities_cabi::<<$ty as
+                        $($path_to_types)*:: Guest >::Query > (arg0) } #[export_name =
+                        "cabi_post_toxoid:engine/ecs#[method]query.entities"] unsafe
+                        extern "C" fn _post_return_method_query_entities(arg0 : * mut
+                        u8,) { $($path_to_types)*::
+                        __post_return_method_query_entities::<<$ty as
                         $($path_to_types)*:: Guest >::Query > (arg0) } const _ : () = {
                         #[doc(hidden)] #[export_name =
                         "toxoid:engine/ecs#[dtor]component-type"]
@@ -1994,9 +2042,9 @@ pub(crate) use __export_toxoid_engine_world_impl as export;
 #[cfg(target_arch = "wasm32")]
 #[link_section = "component-type:wit-bindgen:0.31.0:toxoid:engine:toxoid-engine-world:encoded world"]
 #[doc(hidden)]
-pub static __WIT_BINDGEN_COMPONENT_TYPE: [u8; 2760] = *b"\
-\0asm\x0d\0\x01\0\0\x19\x16wit-component-encoding\x04\0\x07\xbe\x14\x01A\x02\x01\
-A\x02\x01Bl\x01w\x04\0\x0cecs-entity-t\x03\0\0\x01m\x10\x04u8-t\x05u16-t\x05u32-\
+pub static __WIT_BINDGEN_COMPONENT_TYPE: [u8; 2818] = *b"\
+\0asm\x0d\0\x01\0\0\x19\x16wit-component-encoding\x04\0\x07\xf8\x14\x01A\x02\x01\
+A\x02\x01Bq\x01w\x04\0\x0cecs-entity-t\x03\0\0\x01m\x10\x04u8-t\x05u16-t\x05u32-\
 t\x05u64-t\x04i8-t\x05i16-t\x05i32-t\x05i64-t\x05f32-t\x05f64-t\x06bool-t\x08str\
 ing-t\x07array-t\x0au32array-t\x0af32array-t\x09pointer-t\x04\0\x0bmember-type\x03\
 \0\x02\x01ps\x01p}\x01r\x03\x04names\x0cmember-names\x04\x0cmember-types\x05\x04\
@@ -2039,16 +2087,17 @@ v\x01@\x03\x04self\x17\x06offsety\x05value3\x01\0\x04\0%[method]component.set-me
 mber-f32array\x014\x01@\x02\x04self\x17\x06offsety\03\x04\0%[method]component.ge\
 t-member-f32array\x015\x01i\x0f\x01@\x01\x04desc\x0a\06\x04\0\x13[constructor]en\
 tity\x017\x01h\x0f\x01@\x01\x04self8\0\x01\x04\0\x15[method]entity.get-id\x019\x01\
-@\x02\x04self8\x09component\x01\0x\x04\0\x1c[method]entity.get-component\x01:\x01\
-@\x02\x04self8\x09component\x01\x01\0\x04\0\x1c[method]entity.add-component\x01;\
-\x01i\x10\x01@\x01\x04desc\x0c\0<\x04\0\x12[constructor]query\x01=\x01h\x10\x01@\
-\x02\x04self>\x04exprs\x01\0\x04\0\x12[method]query.expr\x01?\x01@\x01\x04self>\x01\
-\0\x04\0\x13[method]query.build\x01@\x04\0\x12[method]query.iter\x01@\x01@\x01\x04\
-self>\0\x7f\x04\0\x12[method]query.next\x01A\x01@\x01\x04self>\0z\x04\0\x13[meth\
-od]query.count\x01B\x04\x01\x11toxoid:engine/ecs\x05\0\x04\x01!toxoid:engine/tox\
-oid-engine-world\x04\0\x0b\x19\x01\0\x13toxoid-engine-world\x03\0\0\0G\x09produc\
-ers\x01\x0cprocessed-by\x02\x0dwit-component\x070.216.0\x10wit-bindgen-rust\x060\
-.31.0";
+@\x01\x02idw\0x\x04\0\x16[static]entity.from-id\x01:\x01@\x02\x04self8\x09compon\
+ent\x01\0x\x04\0\x12[method]entity.get\x01;\x01@\x02\x04self8\x09component\x01\x01\
+\0\x04\0\x12[method]entity.add\x01<\x01i\x10\x01@\x01\x04desc\x0c\0=\x04\0\x12[c\
+onstructor]query\x01>\x01h\x10\x01@\x02\x04self?\x04exprs\x01\0\x04\0\x12[method\
+]query.expr\x01@\x01@\x01\x04self?\x01\0\x04\0\x13[method]query.build\x01A\x04\0\
+\x12[method]query.iter\x01A\x01@\x01\x04self?\0\x7f\x04\0\x12[method]query.next\x01\
+B\x01@\x01\x04self?\0z\x04\0\x13[method]query.count\x01C\x01pw\x01@\x01\x04self?\
+\0\xc4\0\x04\0\x16[method]query.entities\x01E\x04\x01\x11toxoid:engine/ecs\x05\0\
+\x04\x01!toxoid:engine/toxoid-engine-world\x04\0\x0b\x19\x01\0\x13toxoid-engine-\
+world\x03\0\0\0G\x09producers\x01\x0cprocessed-by\x02\x0dwit-component\x070.216.\
+0\x10wit-bindgen-rust\x060.31.0";
 #[inline(never)]
 #[doc(hidden)]
 pub fn __link_custom_section_describing_imports() {

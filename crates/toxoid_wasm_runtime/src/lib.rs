@@ -34,7 +34,7 @@ pub struct QueryProxy {
 unsafe impl Send for QueryProxy {}
 
 // StoreState is the state of the WASM store.
-struct StoreState {
+pub struct StoreState {
     ctx: WasiCtx,
     table: ResourceTable,
 }
@@ -75,7 +75,7 @@ impl toxoid_component::component::ecs::HostEntity for StoreState {
     }
 
     #[cfg(not(feature = "wasm"))]
-    fn get_component(&mut self, entity: Resource<toxoid_component::component::ecs::Entity>, component: toxoid_component::component::ecs::EcsEntityT) -> Resource<ComponentProxy> {
+    fn get(&mut self, entity: Resource<toxoid_component::component::ecs::Entity>, component: toxoid_component::component::ecs::EcsEntityT) -> Resource<ComponentProxy> {
         // Safely retrieve the entity proxy
         let entity_proxy = self.table.get(&entity).expect("Entity not found in table") as &EntityProxy;
 
@@ -83,7 +83,7 @@ impl toxoid_component::component::ecs::HostEntity for StoreState {
         let entity = unsafe { Box::from_raw(entity_proxy.ptr) };
         
         // Retrieve the component
-        let component = entity.get_component(component);
+        let component = entity.get(component);
         Box::into_raw(entity);
 
         // Create component
@@ -104,14 +104,25 @@ impl toxoid_component::component::ecs::HostEntity for StoreState {
     }
 
     #[cfg(feature = "wasm")]
-    fn get_component(&mut self, entity: Resource<toxoid_component::component::ecs::Entity>, component: toxoid_component::component::ecs::EcsEntityT) -> Resource<ComponentProxy> {
+    fn get(&mut self, entity: Resource<toxoid_component::component::ecs::Entity>, component: toxoid_component::component::ecs::EcsEntityT) -> Resource<ComponentProxy> {
         unimplemented!()
     }
 
-    fn add_component(&mut self, entity: Resource<toxoid_component::component::ecs::Entity>, component: toxoid_component::component::ecs::EcsEntityT) -> () {
+    #[cfg(not(feature = "wasm"))]
+    fn from_id(&mut self, id: u64) -> Resource<EntityProxy> {
+        let entity = toxoid_engine::Entity::from_id(id) as *mut toxoid_engine::Entity; 
+        self.table.push::<EntityProxy>(EntityProxy { ptr: entity }).unwrap()
+    }
+
+    #[cfg(feature = "wasm")]
+    fn from_id(&mut self, id: u64) -> Resource<EntityProxy> {
+        unimplemented!()
+    }
+
+    fn add(&mut self, entity: Resource<toxoid_component::component::ecs::Entity>, component: toxoid_component::component::ecs::EcsEntityT) -> () {
         let entity_proxy = self.table.get(&entity).unwrap() as &EntityProxy;
         let entity = unsafe { Box::from_raw(entity_proxy.ptr) };
-        entity.add_component(component);
+        entity.add(component);
         Box::into_raw(entity);
     }
 
@@ -424,13 +435,33 @@ impl toxoid_component::component::ecs::HostQuery for StoreState {
         query.count()
     }
 
+    fn entities(&mut self, query: Resource<toxoid_component::component::ecs::Query>) -> Vec<Resource<EntityProxy>> {
+        let query_proxy = self.table.get(&query).unwrap() as &QueryProxy;
+        let query = unsafe { Box::from_raw(query_proxy.ptr) };
+        let entity_ids = query.entities();
+
+        entity_ids.iter().map(|entity_id| {
+            // Create entity
+            let entity = toxoid_engine::Entity::from_id(*entity_id) as *mut toxoid_engine::Entity;
+
+            // Push component to resource table
+            let id = self
+                .table
+                .push::<EntityProxy>(EntityProxy {
+                    ptr: entity
+                })
+                .expect("Failed to push component to table");
+            id
+        }).collect()
+    }
+
     fn drop(&mut self, _query: Resource<toxoid_component::component::ecs::Query>) -> Result<(), wasmtime::Error> {
         Ok(())
     }
 }
 
 // Instantiate the WASM engine
-static ENGINE: Lazy<Engine> = Lazy::new(Engine::default);
+pub static ENGINE: Lazy<Engine> = Lazy::new(Engine::default);
 
 // Create WASM Component Linker
 static LINKER: Lazy<Linker<StoreState>> = Lazy::new(|| {
@@ -442,7 +473,7 @@ static LINKER: Lazy<Linker<StoreState>> = Lazy::new(|| {
 });
 
 // Create WASM Store
-static mut STORE: Lazy<Store<StoreState>> = Lazy::new(|| {
+pub static mut STORE: Lazy<Store<StoreState>> = Lazy::new(|| {
     let engine = &*ENGINE; // Ensure ENGINE is initialized
     Store::new(
         engine,
@@ -453,22 +484,18 @@ static mut STORE: Lazy<Store<StoreState>> = Lazy::new(|| {
     )
 });
 
-fn main() -> Result<()> {
+pub fn load_wasm_component(filename: &str) -> Result<()> {
     // Get WASM engine, linker and store
     let engine = &*ENGINE; // Ensure ENGINE is initialized
     let linker = &*LINKER; // Ensure LINKER is initialized
     let store = unsafe { &mut *STORE }; // Ensure STORE is initialized
-
     // Load the component from disk
-    let bytes = std::fs::read("toxoid_wasm_component.wasm")?;
+    let bytes = std::fs::read(filename)?;
     // Create WASM Component
     let component = Component::new(&engine, bytes)?;
     let toxoid_component_world = ToxoidComponentWorld::instantiate(&mut *store, &component, &linker)?;
+    // TODO: Change parameters to not pass anything in or return anything
     let component_id = toxoid_component_world.call_init(&mut *store, "test")?;
-    // let component_id_2 = toxoid_component_world.call_init(&mut *store, "test2")?;
-
     println!("Component ID: {:?}", component_id);
-    // println!("Component ID 2: {:?}", component_id_2);
-
     Ok(())
 }

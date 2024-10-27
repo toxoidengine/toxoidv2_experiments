@@ -82,12 +82,17 @@ interface ecs {
         constructor(desc: entity-desc);
         get-id: func() -> ecs-entity-t;
         {% if wasm %}
-        get-component: func(component: ecs-entity-t) -> component;
+        from-id: static func(id: u64) -> entity;
         {% else %}
-        get-component: func(component: ecs-entity-t) -> s64;
+        from-id: static func(id: u64) -> s64;
         {% endif %}
-        add-component: func(component: ecs-entity-t);
-        // remove-component: func(component: ecs-entity-t);
+        {% if wasm %}
+        get: func(component: ecs-entity-t) -> component;
+        {% else %}
+        get: func(component: ecs-entity-t) -> s64;
+        {% endif %}
+        add: func(component: ecs-entity-t);
+        // remove: func(component: ecs-entity-t);
     }
 
     resource query {
@@ -97,6 +102,11 @@ interface ecs {
         iter: func();
         next: func() -> bool;
         count: func() -> s32;
+        {% if wasm %}
+        entities: func() -> list<ecs-entity-t>;
+        {% else %}
+        entities: func() -> list<u64>;
+        {% endif %}
         // ptrs: func(component-query-index: u32) -> *mut *mut c_void;
     }
 

@@ -124,8 +124,6 @@ impl GuestComponentType for ComponentType {
     fn get_id(&self) -> ecs_entity_t {
         self.id
     }
-
-    
 }
 
 impl GuestComponent for Component {
@@ -367,21 +365,31 @@ impl GuestEntity for Entity {
         self.id
     }
 
-    fn add_component(&self, component: ecs_entity_t) {
+    fn add(&self, component: ecs_entity_t) {
         unsafe {
             ecs_add_id(WORLD.0, self.id, component);
         }
     }
 
     #[cfg(not(target_arch = "wasm32"))]
-    fn get_component(&self, component: ecs_entity_t) -> i64 {
+    fn from_id(id: u64) -> i64 {
+        Box::into_raw(Box::new(Entity { id })) as i64
+    }
+
+    #[cfg(target_arch = "wasm32")]
+    fn from_id(id: u64) -> Entity {
+        Entity { id }
+    }
+
+    #[cfg(not(target_arch = "wasm32"))]
+    fn get(&self, component: ecs_entity_t) -> i64 {
         unsafe {
             ecs_get_mut_id(WORLD.0, self.id, component) as i64
         }
     }
 
     #[cfg(target_arch = "wasm32")]
-    fn get_component(&self, component: ecs_entity_t) -> bindings::exports::toxoid::engine::ecs::Component {
+    fn get(&self, component: ecs_entity_t) -> bindings::exports::toxoid::engine::ecs::Component {
         unsafe {
             let ptr = ecs_get_mut_id(WORLD.0, self.id, component);
             bindings::exports::toxoid::engine::ecs::Component::new(Component { id: component, ptr })
@@ -417,6 +425,40 @@ impl GuestQuery for Query {
     fn count(&self) -> i32 {
         self.iter.borrow().count
     }
+
+    #[cfg(not(target_arch = "wasm32"))]
+    fn entities(&self) -> Vec<u64> {
+        let entities = self.iter.borrow().entities;
+        let entities_slice = unsafe { std::slice::from_raw_parts(entities, self.count() as usize) };
+        entities_slice.to_vec()
+    }
+
+    #[cfg(target_arch = "wasm32")]
+    fn entities(&self) -> Vec<Entity> {
+        let entities = self.iter.borrow().entities;
+        let entities_slice = std::slice::from_raw_parts(entities, self.count() as usize);
+        entities_slice.iter().map(|entity| Entity { id: *entity }).collect()
+    }
+
+    // fn field(&self, index: u32) -> *const c_void {
+    //     let iter
+
+    //     let size = ecs_field_size(iter, term_index);
+    //     let field = ecs_field_w_size(iter, size, term_index);
+
+    //     let ptrs_slice = std::slice::from_raw_parts(field, count as usize * size);
+    //     let mut component_ptrs: Vec<*const c_void> = Vec::new();
+
+    //     for i in 0..count {
+    //         let ptr = &ptrs_slice[i as usize * size];
+    //         component_ptrs.push(ptr as *const c_void);
+    //     }
+
+    //     let boxed_slice = component_ptrs.into_boxed_slice();
+    //     let raw_ptr = Box::into_raw(boxed_slice);
+
+    //     raw_ptr
+    // }
 }
 
 impl Guest for ToxoidApi {
