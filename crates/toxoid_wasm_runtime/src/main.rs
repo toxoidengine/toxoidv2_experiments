@@ -6,10 +6,11 @@ bindgen!({
         "toxoid-component:component/ecs/component-type": ComponentTypeProxy,
         "toxoid-component:component/ecs/component": ComponentProxy,
         "toxoid-component:component/ecs/entity": EntityProxy,
+        "toxoid-component:component/ecs/query": QueryProxy,
     },
 });
 
-use toxoid_engine::bindings::exports::toxoid::engine::ecs::{GuestComponent, GuestComponentType, GuestEntity};
+use toxoid_engine::bindings::exports::toxoid::engine::ecs::{GuestComponent, GuestComponentType, GuestEntity, GuestQuery};
 use wasmtime::component::{bindgen, Component, Linker, Resource, ResourceTable};
 use wasmtime::{Engine, Result, Store};
 use wasmtime_wasi::{WasiCtx, WasiView, WasiCtxBuilder};
@@ -27,6 +28,10 @@ pub struct EntityProxy {
     ptr: *mut toxoid_engine::Entity
 }
 unsafe impl Send for EntityProxy {}
+pub struct QueryProxy {
+    ptr: *mut toxoid_engine::Query
+}
+unsafe impl Send for QueryProxy {}
 
 // StoreState is the state of the WASM store.
 struct StoreState {
@@ -372,6 +377,52 @@ impl toxoid_component::component::ecs::HostComponent for StoreState {
         // let component_proxy = self.table.get(&component).unwrap() as &ComponentProxy;
         // drop(unsafe { Box::from_raw(component_proxy.ptr) });
         // self.table.delete::<ComponentProxy>(component).unwrap();
+        Ok(())
+    }
+}
+
+impl toxoid_component::component::ecs::HostQuery for StoreState {
+    fn new(&mut self, query_desc: toxoid_component::component::ecs::QueryDesc) -> Resource<toxoid_component::component::ecs::Query> {
+        let query = toxoid_engine::Query::new(toxoid_engine::bindings::exports::toxoid::engine::ecs::QueryDesc { expr: query_desc.expr });
+        let ptr = Box::into_raw(Box::new(query));
+        let query_resource = self.table.push(QueryProxy { ptr }).unwrap();
+        query_resource
+    }
+
+    fn expr(&mut self, query: Resource<toxoid_component::component::ecs::Query>, expr: String) -> () {
+        let query_proxy = self.table.get(&query).unwrap() as &QueryProxy;
+        let query = unsafe { Box::from_raw(query_proxy.ptr) };
+        query.expr(expr);
+        Box::into_raw(query);
+    }
+
+    fn build(&mut self, query: Resource<toxoid_component::component::ecs::Query>) -> () {
+        let query_proxy = self.table.get(&query).unwrap() as &QueryProxy;
+        let query = unsafe { Box::from_raw(query_proxy.ptr) };
+        query.build();
+        Box::into_raw(query);
+    }
+
+    fn iter(&mut self, query: Resource<toxoid_component::component::ecs::Query>) -> () {
+        let query_proxy = self.table.get(&query).unwrap() as &QueryProxy;
+        let query = unsafe { Box::from_raw(query_proxy.ptr) };
+        query.iter();
+        Box::into_raw(query);
+    }
+
+    fn next(&mut self, query: Resource<toxoid_component::component::ecs::Query>) -> bool {
+        let query_proxy = self.table.get(&query).unwrap() as &QueryProxy;
+        let query = unsafe { Box::from_raw(query_proxy.ptr) };
+        query.next()
+    }
+
+    fn count(&mut self, query: Resource<toxoid_component::component::ecs::Query>) -> i32 {
+        let query_proxy = self.table.get(&query).unwrap() as &QueryProxy;
+        let query = unsafe { Box::from_raw(query_proxy.ptr) };
+        query.count()
+    }
+
+    fn drop(&mut self, _query: Resource<toxoid_component::component::ecs::Query>) -> Result<(), wasmtime::Error> {
         Ok(())
     }
 }

@@ -391,8 +391,9 @@ impl GuestEntity for Entity {
 // }
 
 impl GuestQuery for Query {
-    fn new(desc: QueryDesc) -> Query {
-        let desc: ecs_query_desc_t = unsafe { MaybeUninit::zeroed().assume_init() };
+    fn new(query_desc: QueryDesc) -> Query {
+        let mut desc: ecs_query_desc_t = unsafe { MaybeUninit::zeroed().assume_init() };
+        desc.expr = query_desc.expr.as_ptr() as *const i8;
         Query { desc: RefCell::new(desc), query: unsafe { MaybeUninit::zeroed().assume_init() }, iter: unsafe { MaybeUninit::zeroed().assume_init() } }
     }
 
