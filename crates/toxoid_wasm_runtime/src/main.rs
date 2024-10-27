@@ -463,10 +463,10 @@ fn main() -> Result<()> {
     let component = Component::new(&engine, bytes)?;
     let toxoid_component_world = ToxoidComponentWorld::instantiate(&mut *store, &component, &linker)?;
     let component_id = toxoid_component_world.call_init(&mut *store, "test")?;
-    let component_id_2 = toxoid_component_world.call_init(&mut *store, "test2")?;
+    // let component_id_2 = toxoid_component_world.call_init(&mut *store, "test2")?;
 
     println!("Component ID: {:?}", component_id);
-    println!("Component ID 2: {:?}", component_id_2);
+    // println!("Component ID 2: {:?}", component_id_2);
 
     Ok(())
 }

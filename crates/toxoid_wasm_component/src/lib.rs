@@ -22,10 +22,11 @@ impl Guest for ToxoidWasmComponent {
         component.set_member_u64(0, 777);
         component.get_member_u64(0) as u64;
 
-        // let query = Query::new(&QueryDesc { expr: "Position".to_string() });
-        // query.build();
-        // query.iter();
-        // query.count() as u64
+        let query = Query::new(&QueryDesc { expr: "Position($this)".to_string() });
+        query.build();
+        query.iter();
+        // query.next();
+        query.count() as u64
         // component.take_handle() as u64
         // component.get_id()
     }

@@ -13,8 +13,6 @@ use std::cell::RefCell;
 
 pub struct ToxoidApi;
 
-// struct World;
-
 pub struct ComponentType { 
     pub id: ecs_entity_t
 }
@@ -79,12 +77,19 @@ unsafe fn get_member_type(member_type: u8) -> ecs_entity_t {
     }
 }
 
+fn c_string(rust_str: &str) -> *const i8 {
+    let c_string = std::ffi::CString::new(rust_str).expect("CString::new failed");
+    let c_ptr = c_string.as_ptr();
+    std::mem::forget(c_string); // Prevent CString from being deallocated
+    c_ptr
+}
+
 impl GuestComponentType for ComponentType {
     fn new(desc: ComponentDesc) -> ComponentType {
         unsafe {
             // Create component entity
             let mut ent_desc: ecs_entity_desc_t = MaybeUninit::zeroed().assume_init();
-            ent_desc.name = desc.name.as_ptr() as *const i8;
+            ent_desc.name = c_string(&desc.name);
             let component_entity: ecs_entity_t = ecs_entity_init(WORLD.0, &ent_desc);
 
             // Create runtime component description
@@ -347,7 +352,7 @@ impl GuestEntity for Entity {
         unsafe {
             let mut ent_desc: ecs_entity_desc_t = MaybeUninit::zeroed().assume_init();
             if let Some(name) = desc.name {
-                ent_desc.name = name.as_ptr() as *const i8;
+                ent_desc.name = c_string(&name);
             }
             let entity = ecs_entity_init(WORLD.0, &ent_desc);
             Entity { id: entity }
@@ -380,20 +385,10 @@ impl GuestEntity for Entity {
     }
 }
 
-// impl GuestIter for Iter {
-//     fn new() -> Iter {
-//         Iter { ptr: std::ptr::null_mut() }
-//     }
-
-//     fn next(&self) -> bool {
-//         false
-//     }
-// }
-
 impl GuestQuery for Query {
     fn new(query_desc: QueryDesc) -> Query {
         let mut desc: ecs_query_desc_t = unsafe { MaybeUninit::zeroed().assume_init() };
-        desc.expr = query_desc.expr.as_ptr() as *const i8;
+        desc.expr = c_string(&query_desc.expr);
         Query { desc: RefCell::new(desc), query: unsafe { MaybeUninit::zeroed().assume_init() }, iter: unsafe { MaybeUninit::zeroed().assume_init() } }
     }
 
