@@ -1855,6 +1855,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "toxoid_api"
+version = "0.1.0"
+dependencies = [
+ "toxoid_engine",
+]
+
+[[package]]
 name = "toxoid_cli"
 version = "0.1.0"
 dependencies = [

@@ -2,7 +2,8 @@
 members = [      
      "crates/toxoid_cli",
      "crates/toxoid_wasm_runtime",
-     "crates/toxoid_wasm_component"
+     "crates/toxoid_wasm_component",
+     "crates/toxoid_api"
 ]
 exclude = [
      "crates_old/toxoid_api", 
