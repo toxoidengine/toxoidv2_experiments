@@ -22,6 +22,7 @@ impl Guest for ToxoidWasmComponent {
         let query = Query::new(&QueryDesc { expr: "Position($this)".to_string() });
         query.build();
         query.iter();
+        query.next();
         query.count() as u64
     }
 }

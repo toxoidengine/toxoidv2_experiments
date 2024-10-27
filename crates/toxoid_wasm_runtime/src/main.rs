@@ -413,7 +413,9 @@ impl toxoid_component::component::ecs::HostQuery for StoreState {
     fn next(&mut self, query: Resource<toxoid_component::component::ecs::Query>) -> bool {
         let query_proxy = self.table.get(&query).unwrap() as &QueryProxy;
         let query = unsafe { Box::from_raw(query_proxy.ptr) };
-        query.next()
+        let result = query.next();
+        Box::into_raw(query);
+        result
     }
 
     fn count(&mut self, query: Resource<toxoid_component::component::ecs::Query>) -> i32 {

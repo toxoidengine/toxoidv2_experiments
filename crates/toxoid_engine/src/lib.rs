@@ -3,7 +3,7 @@
 
 pub mod bindings;
 use bindings::exports::toxoid::engine::ecs::{self, ComponentDesc, EntityDesc, Guest, GuestComponent, GuestComponentType, GuestEntity, GuestQuery, QueryDesc};
-use toxoid_flecs::bindings::{ecs_add_id, ecs_entity_desc_t, ecs_entity_init, ecs_get_mut_id, ecs_init, ecs_iter_t, ecs_member_t, ecs_progress, ecs_query_desc_t, ecs_query_init, ecs_query_next, ecs_query_t, ecs_struct_desc_t, ecs_struct_init, ecs_world_t};
+use toxoid_flecs::bindings::{ecs_add_id, ecs_entity_desc_t, ecs_entity_init, ecs_get_mut_id, ecs_init, ecs_iter_t, ecs_member_t, ecs_progress, ecs_query_desc_t, ecs_query_init, ecs_query_next, ecs_query_t, ecs_struct_desc_t, ecs_struct_init, ecs_world_t, ecs_query_iter};
 use std::{borrow::BorrowMut, mem::MaybeUninit};
 use core::ffi::c_void;
 use once_cell::sync::Lazy;
@@ -407,13 +407,11 @@ impl GuestQuery for Query {
     }
 
     fn iter(&self) {
-        use toxoid_flecs::bindings::ecs_query_iter;
         *self.iter.borrow_mut() = unsafe { ecs_query_iter(WORLD.0, self.query.as_ptr()) };
     }
 
     fn next(&self) -> bool {
-        let iter = self.iter.borrow_mut();
-        unsafe { ecs_query_next(Box::into_raw(Box::new(*iter))) }
+        unsafe { ecs_query_next(self.iter.as_ptr()) }
     }
 
     fn count(&self) -> i32 {

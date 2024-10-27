@@ -3,13 +3,6 @@ use toxoid_engine::bindings::exports::toxoid::engine::ecs::{ComponentDesc, Entit
 use toxoid_engine::{Component, ComponentType, Entity, Query};
 
 fn main() {
-    // #[cfg(not(target_arch = "wasm32"))]
-    // let component = toxoid_engine::Component::new(toxoid_engine::bindings::exports::toxoid::api::ecs::ComponentDesc {
-    //     name: "test".to_string(),
-    //     member_names: vec!["test".to_string()],
-    //     member_types: vec![0],
-    // });
-    // println!("{:?}", component.get_id());
     let component = ComponentType::new(ComponentDesc {
         name: "Position".to_string(),
         member_names: vec!["x".to_string(), "y".to_string()],
@@ -27,9 +20,9 @@ fn main() {
     println!("{:?}", value);
     let query = Query::new(QueryDesc { expr: "Position($this)".to_string() });
     query.build();
-    toxoid_engine::toxoid_progress(1.0);
     query.iter();
     query.next();
+    // toxoid_engine::toxoid_progress(1.0);
     let count = query.count();
     println!("{:?}", count);
 }
