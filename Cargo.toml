@@ -6,7 +6,7 @@ members = [
      "crates/toxoid_api", 
      "app/host", 
      "app/guest"
-]
+, "crates/toxoid_host"]
 exclude = [
      "crates_old/toxoid_api", 
      "crates_old/toxoid_flecs", 

@@ -895,6 +895,9 @@ dependencies = [
 [[package]]
 name = "guest"
 version = "0.1.0"
+dependencies = [
+ "toxoid_api",
+]
 
 [[package]]
 name = "hashbrown"
@@ -931,7 +934,7 @@ checksum = "d231dfb89cfffdbc30e7fc41579ed6066ad03abda9e567ccafae602b97ec5024"
 name = "host"
 version = "0.1.0"
 dependencies = [
- "toxoid_wasm_runtime",
+ "toxoid_host",
 ]
 
 [[package]]
@@ -1897,6 +1900,13 @@ dependencies = [
  "bindgen",
  "cc",
  "once_cell",
+]
+
+[[package]]
+name = "toxoid_host"
+version = "0.1.0"
+dependencies = [
+ "toxoid_wasm_runtime",
 ]
 
 [[package]]

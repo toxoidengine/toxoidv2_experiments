@@ -1,9 +1,13 @@
-// #[cfg(not(target_arch = "wasm32"))]
+#[cfg(not(target_arch = "wasm32"))]
 use toxoid_engine::bindings::exports::toxoid::engine::ecs::{ComponentDesc, EntityDesc, GuestComponent, GuestComponentType, GuestEntity, GuestQuery, MemberType, QueryDesc};
+#[cfg(not(target_arch = "wasm32"))]
 use toxoid_engine::{Component as ToxoidComponent, ComponentType as ToxoidComponentType, Entity as ToxoidEntity, Query as ToxoidQuery};
+
+// #[cfg(target_arch = "wasm32")]
+// #[cfg(target_arch = "wasm32")]
 use std::collections::HashMap;
 
-pub static mut HASH_MAP: HashMap<u64, ToxoidComponent> = HashMap::new();
+// pub static mut COMPONENT_CACHE: HashMap<u64, ToxoidComponent> = HashMap::new();
 
 pub trait ComponentType {
     // fn register() -> ecs_entity_t;
@@ -45,13 +49,57 @@ impl Entity {
         ToxoidComponent::new(component)
     }
 
-    pub fn add<(&self, component_id: u64) {
-        self.entity.add(component_id);
+    pub fn add<T: Component + ComponentType + 'static>(&mut self) {
+        // let type_hash = T::get_hash();
+        // let component_id_split = toxoid_component_cache_get(type_hash);
+        // let component_id = combine_u32(component_id_split);
+        // toxoid_entity_add_component(self.entity.id, component_id);
+        // self.entity.add(component_id);
+    }
+
+    pub fn remove<T: Component + ComponentType + 'static>(&mut self) {
+        // let type_hash = T::get_hash();
+        // let component_id_split = toxoid_component_cache_get(type_hash);
+        // let component_id = combine_u32(component_id_split);
+        // toxoid_entity_remove_component(self.entity.id, component_id);
     }
 
     // pub fn remove_component(&self, component_id: u64) {
     //     self.entity.remove_component(component_id);
     // }
+}
+
+pub struct Query {
+    query: ToxoidQuery
+}
+
+impl Query {
+    pub fn new(desc: Option<QueryDesc>) -> Self {
+        let desc = desc.unwrap_or(QueryDesc { expr: "".to_string() });
+        let query = ToxoidQuery::new(desc);
+        Self { query }
+    }
+
+    pub fn build(&mut self) {
+        self.query.build();
+    }
+
+    pub fn iter(&mut self) {
+        self.query.iter();
+    }
+
+    pub fn next(&mut self) {
+        self.query.next();
+    }
+
+    pub fn count(&self) -> i32 {
+        self.query.count()
+    }
+
+    pub fn entities(&self) -> Vec<Entity> {
+        // self.query.entities().iter().map(|entity_id| Entity { entity: EntityToxoidEntity::from_id(entity_id) }).collect()
+        unimplemented!()
+    }
 }
 
 fn main() {

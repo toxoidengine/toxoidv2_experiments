@@ -1,5 +1,5 @@
 #[allow(warnings)]
-mod bindings;
+pub mod bindings;
 use bindings::{toxoid_component::component::ecs::{Component, ComponentDesc, ComponentType, Entity, EntityDesc, MemberType, Query, QueryDesc}, Guest};
 
 struct ToxoidWasmComponent;

@@ -4,4 +4,4 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-toxoid_wasm_runtime = { path = "../../crates/toxoid_wasm_runtime" }
+toxoid_host = { path = "../../crates/toxoid_host" }
