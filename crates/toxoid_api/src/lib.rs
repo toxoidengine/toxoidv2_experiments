@@ -2,12 +2,16 @@
 use toxoid_engine::bindings::exports::toxoid::engine::ecs::{ComponentDesc, EntityDesc, GuestComponent, GuestComponentType, GuestEntity, GuestQuery, MemberType, QueryDesc};
 #[cfg(not(target_arch = "wasm32"))]
 use toxoid_engine::{Component as ToxoidComponent, ComponentType as ToxoidComponentType, Entity as ToxoidEntity, Query as ToxoidQuery};
-
-// #[cfg(target_arch = "wasm32")]
-// #[cfg(target_arch = "wasm32")]
+#[cfg(target_arch = "wasm32")]
+use toxoid_wasm_component::bindings::exports::toxoid::component::ecs::{Component, ComponentDesc, ComponentType, Entity, EntityDesc, MemberType, Query, QueryDesc};
+#[cfg(target_arch = "wasm32")]
+use toxoid_wasm_component::{Component as ToxoidComponent, ComponentType as ToxoidComponentType, Entity as ToxoidEntity, Query as ToxoidQuery};
 use std::collections::HashMap;
+use once_cell::sync::Lazy;
 
-// pub static mut COMPONENT_CACHE: HashMap<u64, ToxoidComponent> = HashMap::new();
+#[cfg(target_arch = "wasm32")]
+pub static mut INIT: Lazy<fn() -> u64> = Lazy::new(|| { || 0 });
+pub static mut COMPONENT_CACHE: Lazy<HashMap<u64, ToxoidComponent>> = Lazy::new(|| HashMap::new());
 
 pub trait ComponentType {
     // fn register() -> ecs_entity_t;
@@ -102,26 +106,46 @@ impl Query {
     }
 }
 
-fn main() {
-    // let component = ComponentType::new(ComponentDesc {
-    //     name: "Position".to_string(),
-    //     member_names: vec!["x".to_string(), "y".to_string()],
-    //     member_types: vec![MemberType::U32T as u8, MemberType::U32T as u8],
-    // });
-    // println!("{:?}", component.get_id());
-    // let entity = Entity::new(EntityDesc {
-    //     name: Some("Test entity".to_string())
-    // });
-    // entity.add(component.get_id());
-    // let component = entity.get(component.get_id());
-    // let component = Component::new(component);
-    // component.set_member_u64(0, 777);
-    // let value = component.get_member_u64(0) as u64;
-    // println!("{:?}", value);
-    // let query = Query::new(QueryDesc { expr: "Position($this)".to_string() });
-    // query.build();
-    // query.iter();
-    // query.next();
-    // let count = query.count();
-    // println!("{:?}", count);
+
+#[cfg(target_arch = "wasm32")]
+impl Guest for ToxoidWasmComponent {
+    fn init() -> u64 {
+        INIT()
+    }
 }
+
+pub fn init(f: fn() -> u64) {
+    #[cfg(not(target_arch = "wasm32"))]
+    f();
+    #[cfg(target_arch = "wasm32")]
+    unsafe {
+        INIT = Lazy::new(|| f());
+    }
+}
+
+// #[cfg(not(target_arch = "wasm32"))]
+// pub fn init() -> u64 {
+//     let component = ToxoidComponentType::new(&ComponentDesc {
+//         name: "Position".to_string(),
+//         member_names: vec!["x".to_string(), "y".to_string()],
+//         member_types: vec![MemberType::U32T as u8, MemberType::U32T as u8],
+//     });
+//     let entity = ToxoidEntity::new(&EntityDesc {
+//         name: Some("Test Entity".to_string())
+//     });
+//     let component_id = component.get_id();
+//     entity.add(component_id);
+//     let component = entity.get(component_id);
+//     component.set_member_u64(0, 777);
+//     component.get_member_u64(0) as u64;
+//     let query = ToxoidQuery::new(&QueryDesc { expr: "Position($this)".to_string() });
+//     query.build();
+//     query.iter();
+//     query.next();
+//     let entities = query.entities();
+//     let entity = entities.get(0).unwrap();
+//     let component = entity.get(component_id);
+//     let value = component.get_member_u64(0) as u64;
+//     value
+// }
+

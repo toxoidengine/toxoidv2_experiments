@@ -94,5 +94,5 @@ interface ecs {
 
 world toxoid-component-world {
     import ecs;
-    export init: func(name: string) -> u64;
+    export init: func() -> u64;
 }

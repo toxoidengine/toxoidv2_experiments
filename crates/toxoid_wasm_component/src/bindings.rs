@@ -1,21 +1,18 @@
 #[doc(hidden)]
 #[allow(non_snake_case)]
-pub unsafe fn _export_init_cabi<T: Guest>(arg0: *mut u8, arg1: usize) -> i64 {
+pub unsafe fn _export_init_cabi<T: Guest>() -> i64 {
     #[cfg(target_arch = "wasm32")] _rt::run_ctors_once();
-    let len0 = arg1;
-    let bytes0 = _rt::Vec::from_raw_parts(arg0.cast(), len0, len0);
-    let result1 = T::init(_rt::string_lift(bytes0));
-    _rt::as_i64(result1)
+    let result0 = T::init();
+    _rt::as_i64(result0)
 }
 pub trait Guest {
-    fn init(name: _rt::String) -> u64;
+    fn init() -> u64;
 }
 #[doc(hidden)]
 macro_rules! __export_world_toxoid_component_world_cabi {
     ($ty:ident with_types_in $($path_to_types:tt)*) => {
-        const _ : () = { #[export_name = "init"] unsafe extern "C" fn export_init(arg0 :
-        * mut u8, arg1 : usize,) -> i64 { $($path_to_types)*:: _export_init_cabi::<$ty >
-        (arg0, arg1) } };
+        const _ : () = { #[export_name = "init"] unsafe extern "C" fn export_init() ->
+        i64 { $($path_to_types)*:: _export_init_cabi::<$ty > () } };
     };
 }
 #[doc(hidden)]
@@ -1575,8 +1572,8 @@ pub(crate) use __export_toxoid_component_world_impl as export;
 #[cfg(target_arch = "wasm32")]
 #[link_section = "component-type:wit-bindgen:0.31.0:toxoid-component:component:toxoid-component-world:encoded world"]
 #[doc(hidden)]
-pub static __WIT_BINDGEN_COMPONENT_TYPE: [u8; 2833] = *b"\
-\0asm\x0d\0\x01\0\0\x19\x16wit-component-encoding\x04\0\x07\x84\x15\x01A\x02\x01\
+pub static __WIT_BINDGEN_COMPONENT_TYPE: [u8; 2827] = *b"\
+\0asm\x0d\0\x01\0\0\x19\x16wit-component-encoding\x04\0\x07\xfe\x14\x01A\x02\x01\
 A\x04\x01Bo\x01w\x04\0\x0cecs-entity-t\x03\0\0\x01m\x10\x04u8-t\x05u16-t\x05u32-\
 t\x05u64-t\x04i8-t\x05i16-t\x05i32-t\x05i64-t\x05f32-t\x05f64-t\x06bool-t\x08str\
 ing-t\x07array-t\x0au32array-t\x0af32array-t\x09pointer-t\x04\0\x0bmember-type\x03\
@@ -1627,10 +1624,10 @@ component\x01\09\x04\0\x12[method]entity.get\x01:\x01@\x02\x04self7\x09component
 @\x04\0\x12[method]query.iter\x01@\x01@\x01\x04self>\0\x7f\x04\0\x12[method]quer\
 y.next\x01A\x01@\x01\x04self>\0z\x04\0\x13[method]query.count\x01B\x01p4\x01@\x01\
 \x04self>\0\xc3\0\x04\0\x16[method]query.entities\x01D\x03\x01\x1etoxoid-compone\
-nt:component/ecs\x05\0\x01@\x01\x04names\0w\x04\0\x04init\x01\x01\x04\x011toxoid\
--component:component/toxoid-component-world\x04\0\x0b\x1c\x01\0\x16toxoid-compon\
-ent-world\x03\0\0\0G\x09producers\x01\x0cprocessed-by\x02\x0dwit-component\x070.\
-216.0\x10wit-bindgen-rust\x060.31.0";
+nt:component/ecs\x05\0\x01@\0\0w\x04\0\x04init\x01\x01\x04\x011toxoid-component:\
+component/toxoid-component-world\x04\0\x0b\x1c\x01\0\x16toxoid-component-world\x03\
+\0\0\0G\x09producers\x01\x0cprocessed-by\x02\x0dwit-component\x070.216.0\x10wit-\
+bindgen-rust\x060.31.0";
 #[inline(never)]
 #[doc(hidden)]
 pub fn __link_custom_section_describing_imports() {
