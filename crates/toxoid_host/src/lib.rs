@@ -1,10 +1,12 @@
-use interprocess::local_socket::{ListenerOptions, Stream, prelude::*};
+use interprocess::local_socket::{prelude::*, ListenerOptions, GenericFilePath, GenericNamespaced, Stream, traits::Stream as StreamTrait,};
 use std::io::{BufReader, prelude::*};
 use std::thread;
 
+const SOCKET_NAME: &str = "toxoid.sock";
+
 #[cfg(not(target_arch = "wasm32"))]
 fn game_loop(delta_time: f32) {
-    println!("delta_time: {}", delta_time);
+    // println!("delta_time: {}", delta_time);
 }
 
 #[cfg(target_arch = "wasm32")]
@@ -36,7 +38,15 @@ fn bootstrap() {
 
     // Start a thread to listen for IPC messages
     thread::spawn(move || {
-        let listener = ListenerOptions::new().name("example.sock").create_sync().unwrap();
+        // Pick a name.
+        let name = if GenericNamespaced::is_supported() {
+            SOCKET_NAME.to_ns_name::<GenericNamespaced>().unwrap()
+        } else {
+            let socket_path = std::env::temp_dir().join(SOCKET_NAME);
+            socket_path.to_fs_name::<GenericFilePath>().unwrap()
+        };
+        println!("Listening on {:?}", GenericNamespaced::is_supported());
+        let listener = ListenerOptions::new().name(name).create_sync().unwrap();
         for conn in listener.incoming().filter_map(Result::ok) {
             let mut conn = BufReader::new(conn);
             let mut buffer = String::new();
@@ -49,7 +59,7 @@ fn bootstrap() {
     });
 
     // Initial load of the WASM component
-    toxoid_wasm_runtime::load_wasm_component("guest.wasm").unwrap();
+    // toxoid_wasm_runtime::load_wasm_component("guest.wasm").unwrap();
 }
 
 pub fn init() {

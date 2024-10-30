@@ -1,14 +1,13 @@
 use clap::{Parser, Subcommand};
 use notify::{Config, RecommendedWatcher, RecursiveMode, Watcher, Event};
-use interprocess::local_socket::{Name, Stream};
-use interprocess::local_socket::traits::Stream as StreamTrait;
-use interprocess::local_socket::{prelude::*, GenericFilePath, GenericNamespaced};
+use interprocess::local_socket::{prelude::*, GenericFilePath, GenericNamespaced, Stream, traits::Stream as StreamTrait};
 use std::sync::mpsc::channel;
 use std::time::{Duration, Instant};
-use std::process::Command;
+use std::process::{Command, Stdio};
 use std::io::prelude::*;
 use std::path::PathBuf;
 
+const SOCKET_NAME: &str = "toxoid.sock";
 
 #[derive(Parser, Debug)]
 #[command(name = "toxoid_cli")]
@@ -37,6 +36,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     match &cli.command {
         Commands::Watch { path, output } => {
+            // Start the host application in a separate process
+            let mut host_process = Command::new("cargo")
+                .args(&["run", "--package", "host"])
+                .stdout(Stdio::inherit())
+                .stderr(Stdio::inherit())
+                .spawn()
+                .expect("Failed to run host");
+
             let (tx, rx) = channel();
             let mut watcher = RecommendedWatcher::new(tx, Config::default())?;
             watcher.watch(path.as_ref(), RecursiveMode::Recursive)?;
@@ -48,15 +55,18 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
             // Pick a name.
             let name = if GenericNamespaced::is_supported() {
-                "toxoid.sock".to_ns_name::<GenericNamespaced>()?
+                SOCKET_NAME.to_ns_name::<GenericNamespaced>()?
             } else {
-                "/tmp/toxoid.sock".to_fs_name::<GenericFilePath>()?
+                let socket_path = std::env::temp_dir().join(SOCKET_NAME);
+                socket_path.to_fs_name::<GenericFilePath>()?
             };
 
             Command::new("cargo")
                 .args(&["run", "--package", "host"])
                 .status()
                 .expect("Failed to run host");
+
+            println!("Host running");
 
             for res in rx {
                 match res {
@@ -85,6 +95,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                     _ => (),
                 }
             }
+
+            // Ensure the host process is terminated when the CLI exits
+            host_process.kill().expect("Failed to kill host process");
         }
     }
 
