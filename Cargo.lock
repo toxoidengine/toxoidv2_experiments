@@ -931,9 +931,6 @@ dependencies = [
 [[package]]
 name = "guest"
 version = "0.1.0"
-dependencies = [
- "toxoid_api",
-]
 
 [[package]]
 name = "hashbrown"

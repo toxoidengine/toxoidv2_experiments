@@ -2,7 +2,10 @@ use std::net::{TcpListener, TcpStream};
 use std::io::{BufReader, prelude::*};
 use std::thread;
 
+// TODO: Make this configurable via ENV variable
 const HOST_ADDRESS: &str = "127.0.0.1:7878";
+// TODO: Make this configurable via ENV variable
+const GUEST_WASM_PATH: &str = "app/host/guest.wasm";
 
 #[cfg(not(target_arch = "wasm32"))]
 fn game_loop(delta_time: f32) {
@@ -46,15 +49,17 @@ fn bootstrap() {
             let mut conn = BufReader::new(stream);
             let mut buffer = String::new();
             conn.read_line(&mut buffer).unwrap();
-            if buffer.trim() == "Reload WASM script" {
+            if buffer.contains("reload") {
                 println!("Reloading WASM component...");
-                toxoid_wasm_runtime::load_wasm_component("guest.wasm").unwrap();
+                toxoid_wasm_runtime::load_wasm_component(GUEST_WASM_PATH).unwrap();
             }
         }
     });
 
-    // Initial load of the WASM component
-    // toxoid_wasm_runtime::load_wasm_component("guest.wasm").unwrap();
+    // Initial load of the main WASM component / game engine script
+    if std::path::Path::new(GUEST_WASM_PATH).exists() {
+        toxoid_wasm_runtime::load_wasm_component(GUEST_WASM_PATH).unwrap();
+    }
 }
 
 pub fn init() {
