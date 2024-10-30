@@ -8,6 +8,7 @@ use std::path::PathBuf;
 use std::fs;
 use std::thread;
 
+// TODO: Make this configurable CLI argument
 const HOST_ADDRESS: &str = "127.0.0.1:7878";
 
 #[derive(Parser, Debug)]

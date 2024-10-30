@@ -931,6 +931,9 @@ dependencies = [
 [[package]]
 name = "guest"
 version = "0.1.0"
+dependencies = [
+ "toxoid_api",
+]
 
 [[package]]
 name = "hashbrown"
@@ -1988,6 +1991,7 @@ version = "0.1.0"
 dependencies = [
  "once_cell",
  "toxoid_engine",
+ "toxoid_wasm_component",
 ]
 
 [[package]]
@@ -2029,6 +2033,7 @@ dependencies = [
 name = "toxoid_wasm_component"
 version = "0.1.0"
 dependencies = [
+ "once_cell",
  "wit-bindgen-rt",
 ]
 

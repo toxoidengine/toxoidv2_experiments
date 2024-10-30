@@ -4,4 +4,4 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-# toxoid_api = { path = "../../crates/toxoid_api" }
+toxoid_api = { path = "../../crates/toxoid_api" }
