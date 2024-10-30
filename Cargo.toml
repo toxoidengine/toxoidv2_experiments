@@ -9,11 +9,4 @@ members = [
      "app/host", 
      "app/guest", 
 ]
-exclude = [
-     "crates_old/toxoid_api", 
-     "crates_old/toxoid_flecs", 
-     "crates_old/toxoid_wasm_runtime",
-     "crates_old/toxoid_wasm_component", 
-     "crates_old/notan_example",
-     "crates_old/native_component"
-]
+exclude = []

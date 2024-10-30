@@ -1,7 +1,0 @@
-[package]
-name = "notan_example"
-version = "0.1.0"
-edition = "2021"
-
-[dependencies]
-notan = "0.12.1"
