@@ -1,12 +1,14 @@
 [workspace]
+name = "toxoid_app"
 members = [      
      "crates/toxoid_cli",
      "crates/toxoid_wasm_runtime",
      "crates/toxoid_wasm_component",
      "crates/toxoid_api", 
+     "crates/toxoid_host",
      "app/host", 
-     "app/guest"
-, "crates/toxoid_host"]
+     "app/guest", 
+]
 exclude = [
      "crates_old/toxoid_api", 
      "crates_old/toxoid_flecs", 

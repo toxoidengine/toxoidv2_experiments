@@ -495,7 +495,7 @@ pub fn load_wasm_component(filename: &str) -> Result<()> {
     let component = Component::new(&engine, bytes)?;
     let toxoid_component_world = ToxoidComponentWorld::instantiate(&mut *store, &component, &linker)?;
     // TODO: Change parameters to not pass anything in or return anything
-    let component_id = toxoid_component_world.call_init(&mut *store, "test")?;
+    let component_id = toxoid_component_world.call_init(&mut *store)?;
     println!("Component ID: {:?}", component_id);
     Ok(())
 }
