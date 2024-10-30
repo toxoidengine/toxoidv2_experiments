@@ -1,13 +1,12 @@
 use clap::{Parser, Subcommand};
 use notify::{Config, RecommendedWatcher, RecursiveMode, Watcher, Event};
-use interprocess::local_socket::{prelude::*, GenericFilePath, GenericNamespaced, Stream, traits::Stream as StreamTrait};
 use std::sync::mpsc::channel;
 use std::time::{Duration, Instant};
 use std::process::{Command, Stdio};
 use std::io::prelude::*;
 use std::path::PathBuf;
 
-const SOCKET_NAME: &str = "toxoid.sock";
+const HOST_ADDRESS: &str = "127.0.0.1:7878";
 
 #[derive(Parser, Debug)]
 #[command(name = "toxoid_cli")]
@@ -53,19 +52,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             let debounce_duration = Duration::from_secs(2);
             let mut last_event_time = Instant::now();
 
-            // Pick a name.
-            let name = if GenericNamespaced::is_supported() {
-                SOCKET_NAME.to_ns_name::<GenericNamespaced>()?
-            } else {
-                let socket_path = std::env::temp_dir().join(SOCKET_NAME);
-                socket_path.to_fs_name::<GenericFilePath>()?
-            };
-
-            Command::new("cargo")
-                .args(&["run", "--package", "host"])
-                .status()
-                .expect("Failed to run host");
-
             println!("Host running");
 
             for res in rx {
@@ -86,7 +72,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                             std::fs::copy("target/wasm32-wasip1/debug/guest.wasm", output)
                                 .expect("Failed to copy WASM file");
 
-                            let mut conn = Stream::connect(name.clone())?;
+                            // Connect to the server using TcpStream
+                            let mut conn = std::net::TcpStream::connect(HOST_ADDRESS)?;
                             conn.write_all(b"Reload WASM script\n")?;
                             println!("Sent reload message to host");
                         }

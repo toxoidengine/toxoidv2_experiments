@@ -1,8 +1,8 @@
-use interprocess::local_socket::{prelude::*, ListenerOptions, GenericFilePath, GenericNamespaced, Stream, traits::Stream as StreamTrait,};
+use std::net::{TcpListener, TcpStream};
 use std::io::{BufReader, prelude::*};
 use std::thread;
 
-const SOCKET_NAME: &str = "toxoid.sock";
+const HOST_ADDRESS: &str = "127.0.0.1:7878";
 
 #[cfg(not(target_arch = "wasm32"))]
 fn game_loop(delta_time: f32) {
@@ -36,19 +36,14 @@ fn bootstrap() {
         }
     });
 
-    // Start a thread to listen for IPC messages
+    // Start a thread to listen for TCP messages
     thread::spawn(move || {
-        // Pick a name.
-        let name = if GenericNamespaced::is_supported() {
-            SOCKET_NAME.to_ns_name::<GenericNamespaced>().unwrap()
-        } else {
-            let socket_path = std::env::temp_dir().join(SOCKET_NAME);
-            socket_path.to_fs_name::<GenericFilePath>().unwrap()
-        };
-        println!("Listening on {:?}", GenericNamespaced::is_supported());
-        let listener = ListenerOptions::new().name(name).create_sync().unwrap();
-        for conn in listener.incoming().filter_map(Result::ok) {
-            let mut conn = BufReader::new(conn);
+        // Define the TCP address and port
+        let listener = TcpListener::bind(HOST_ADDRESS).unwrap();
+        println!("Listening on {}", HOST_ADDRESS);
+
+        for stream in listener.incoming().filter_map(Result::ok) {
+            let mut conn = BufReader::new(stream);
             let mut buffer = String::new();
             conn.read_line(&mut buffer).unwrap();
             if buffer.trim() == "Reload WASM script" {
