@@ -5,11 +5,10 @@ edition = "2021"
 
 [dependencies]
 once_cell = "1.20.2"
-toxoid_wasm_component = { path = "../toxoid_wasm_component" }
 
 # WASM32 dependencies
 [target.'cfg(target_arch = "wasm32")'.dependencies]
-
+toxoid_wasm_component = { path = "../toxoid_wasm_component" }
 
 # Native dependencies
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]

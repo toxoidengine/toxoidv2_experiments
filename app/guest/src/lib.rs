@@ -1,11 +1,13 @@
 pub mod bindings;
-use bindings::Guest;
+pub mod api;
 
 pub struct ToxoidWasmComponent;
 
-impl Guest for ToxoidWasmComponent {
+impl bindings::Guest for ToxoidWasmComponent {
     fn init() -> u64 {
-        777
+        let entity = api::Entity::new(None);
+        let id = entity.get_id();
+        id
     }
 }
 

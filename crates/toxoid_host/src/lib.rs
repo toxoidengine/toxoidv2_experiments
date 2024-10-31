@@ -55,9 +55,10 @@ fn bootstrap() {
             }
         }
     });
-
+    
     // Initial load of the main WASM component / game engine script
     if std::path::Path::new(GUEST_WASM_PATH).exists() {
+        println!("Loading WASM component...");
         toxoid_wasm_runtime::load_wasm_component(GUEST_WASM_PATH).unwrap();
     }
 }

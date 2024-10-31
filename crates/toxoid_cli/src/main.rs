@@ -34,6 +34,11 @@ enum Commands {
         // Host path for the WASM file
         #[arg(short = 'x', long, default_value = "app/host/guest.wasm")]
         host_path: PathBuf,
+
+        // TODO: Add a static linking feature that doesn't use WASM hot reloading
+        // cargo run --features static-linking --no-default-features
+        // #[arg(long)]
+        // static_linking: bool,
     },
 }
 

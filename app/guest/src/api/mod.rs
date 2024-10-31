@@ -1,11 +1,13 @@
+#![allow(warnings)]
+
 #[cfg(not(target_arch = "wasm32"))]
 use toxoid_engine::{Component as ToxoidComponent, ComponentType as ToxoidComponentType, Entity as ToxoidEntity, Query as ToxoidQuery, bindings::exports::toxoid::engine::ecs::{ComponentDesc, EntityDesc, GuestComponent, GuestComponentType, GuestEntity, GuestQuery, MemberType, QueryDesc}};
 #[cfg(target_arch = "wasm32")]
-use toxoid_wasm_component::bindings::{toxoid_component::component::ecs::{Component as ToxoidComponent, ComponentType as ToxoidComponentType, Entity as ToxoidEntity, Query as ToxoidQuery, ComponentDesc, EntityDesc, MemberType, QueryDesc}, Guest};
+use crate::bindings::{toxoid_component::component::ecs::{Component as ToxoidComponent, ComponentType as ToxoidComponentType, Entity as ToxoidEntity, Query as ToxoidQuery, ComponentDesc, EntityDesc, MemberType, QueryDesc}, Guest};
 use std::collections::HashMap;
-use once_cell::sync::Lazy;
+// use once_cell::sync::Lazy;
 
-pub static mut COMPONENT_CACHE: Lazy<HashMap<u64, ToxoidComponent>> = Lazy::new(|| HashMap::new());
+// pub static mut COMPONENT_CACHE: Lazy<HashMap<u64, ToxoidComponent>> = Lazy::new(|| HashMap::new());
 
 pub trait ComponentType {
     // fn register() -> ecs_entity_t;
