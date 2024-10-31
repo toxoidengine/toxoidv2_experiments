@@ -89,14 +89,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                                 thread::sleep(Duration::from_millis(500));
 
                                 // Move the WASM file to the final output path
-                                println!("Moving WASM file from {} to {}", out_path.display(), host_path.display());
+                                println!("Moving WASM file from {} to {}...", out_path.display(), host_path.display());
                                 fs::rename(out_path, host_path)
                                     .expect("Failed to move WASM file");
 
                                 // Connect to the server using TcpStream
                                 let mut conn = std::net::TcpStream::connect(HOST_ADDRESS)?;
                                 conn.write_all(format!("reload {}", "guest.wasm").as_bytes())?;
-                                println!("Sent reload message to host");
+                                println!("Sent reload message to host...");
                             } else {
                                 println!("Build failed, skipping file move.");
                             }
