@@ -4,8 +4,6 @@ pub mod bindings;
 pub mod api;
 
 use api::*;
-use bindings::toxoid_component::component::ecs::{ComponentDesc, MemberType};
-
 use toxoid_api_macro::component;
 
 component! {
@@ -19,7 +17,7 @@ pub struct ToxoidWasmComponent;
 
 impl bindings::Guest for ToxoidWasmComponent {
     fn init() {
-        let mut entity = Entity::new(None);
+        let mut entity = Entity::named("Test");
         entity.add::<Position>();
         let mut position = entity.get::<Position>();
         position.set_x(777);
@@ -27,6 +25,34 @@ impl bindings::Guest for ToxoidWasmComponent {
         let x = position.get_x();
         let y = position.get_y();
         println!("X: {}, Y: {}", x, y);
+
+        let mut entity = Entity::new(None);
+        entity.add::<Position>();
+        let mut position = entity.get::<Position>();
+        position.set_x(555);
+        position.set_y(888);
+        let x = position.get_x();
+        let y = position.get_y();
+        println!("X: {}, Y: {}", x, y);
+
+        // let mut query = Query::new(Some(QueryDesc { expr: "Position($this)".to_string() }));
+        let mut query = Query::dsl("Position($this)");
+        query.build();
+        query.iter();
+        query.next();
+        let count = query.count();
+        println!("Count: {}", count);
+        query
+            .entities()
+            .iter()
+            .for_each(|entity| {
+                println!("Entity: {}", entity.get_id());
+                let id = Position::get_id();
+                println!("ID: {}", id);
+                let x = entity.get::<Position>().get_x();
+                let y = entity.get::<Position>().get_y();
+                println!("Iter X: {}, Iter Y: {}", x, y);
+            });
     }
 }
 

@@ -1,11 +1,13 @@
 #![allow(warnings)]
 
 #[cfg(not(target_arch = "wasm32"))]
-use toxoid_engine::{Component as ToxoidComponent, ComponentType as ToxoidComponentType, Entity as ToxoidEntity, Query as ToxoidQuery, bindings::exports::toxoid::engine::ecs::{ComponentDesc, EntityDesc, GuestComponent, GuestComponentType, GuestEntity, GuestQuery, MemberType, QueryDesc}};
+use toxoid_engine::{Component as ToxoidComponent, ComponentType as ToxoidComponentType, Entity as ToxoidEntity, Query as ToxoidQuery, bindings::exports::toxoid::engine::ecs::{GuestComponent, GuestComponentType, GuestEntity, GuestQuery}};
 #[cfg(target_arch = "wasm32")]
-use crate::bindings::{toxoid_component::component::ecs::{Component as ToxoidComponent, ComponentType as ToxoidComponentType, Entity as ToxoidEntity, Query as ToxoidQuery, ComponentDesc, EntityDesc, MemberType, QueryDesc}, Guest};
-
-
+use crate::bindings::{toxoid_component::component::ecs::{Component as ToxoidComponent, ComponentType as ToxoidComponentType, Entity as ToxoidEntity, Query as ToxoidQuery}, Guest};
+#[cfg(not(target_arch = "wasm32"))]
+pub use toxoid_engine::bindings::exports::toxoid::engine::ecs::{EntityDesc, ComponentDesc, QueryDesc, MemberType};
+#[cfg(target_arch = "wasm32")]
+pub use crate::bindings::toxoid_component::component::ecs::{EntityDesc, ComponentDesc, QueryDesc, MemberType};
 
 pub type ecs_entity_t = u64;
 
@@ -37,6 +39,15 @@ pub struct Entity {
 impl Entity {
     pub fn new(desc: Option<EntityDesc>) -> Self {
         let desc = desc.unwrap_or(EntityDesc { name: None });
+        #[cfg(not(target_arch = "wasm32"))]
+        let entity = ToxoidEntity::new(desc);
+        #[cfg(target_arch = "wasm32")]
+        let entity = ToxoidEntity::new(&desc);
+        Self { entity }
+    }
+
+    pub fn named(name: &str) -> Self {
+        let desc = EntityDesc { name: Some(name.to_string()) };
         #[cfg(not(target_arch = "wasm32"))]
         let entity = ToxoidEntity::new(desc);
         #[cfg(target_arch = "wasm32")]
@@ -90,6 +101,11 @@ impl Query {
         Self { query }
     }
 
+    pub fn dsl(dsl: &str) -> Self {
+        let desc = QueryDesc { expr: dsl.to_string() };
+        Self::new(Some(desc))
+    }
+
     pub fn build(&mut self) {
         self.query.build();
     }
@@ -106,9 +122,14 @@ impl Query {
         self.query.count()
     }
 
+    #[cfg(not(target_arch = "wasm32"))]
     pub fn entities(&self) -> Vec<Entity> {
-        // self.query.entities().iter().map(|entity_id| Entity { entity: EntityToxoidEntity::from_id(entity_id) }).collect()
         unimplemented!()
+    }
+
+    #[cfg(target_arch = "wasm32")]
+    pub fn entities(&self) -> Vec<Entity> {
+        self.query.entities().iter().map(|entity| Entity { entity: ToxoidEntity::from_id(entity.get_id()) }).collect()
     }
 }
 

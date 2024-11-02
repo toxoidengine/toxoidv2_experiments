@@ -446,8 +446,7 @@ impl toxoid_component::component::ecs::HostQuery for StoreState {
         let query_proxy = self.table.get(&query).unwrap() as &QueryProxy;
         let query = unsafe { Box::from_raw(query_proxy.ptr) };
         let entity_ids = query.entities();
-
-        entity_ids.iter().map(|entity_id| {
+        let ids = entity_ids.iter().map(|entity_id| {
             // Create entity
             let entity = toxoid_engine::Entity::from_id(*entity_id) as *mut toxoid_engine::Entity;
 
@@ -459,7 +458,9 @@ impl toxoid_component::component::ecs::HostQuery for StoreState {
                 })
                 .expect("Failed to push component to table");
             id
-        }).collect()
+        }).collect();
+        Box::into_raw(query);
+        ids
     }
 
     fn drop(&mut self, _query: Resource<toxoid_component::component::ecs::Query>) -> Result<(), wasmtime::Error> {
@@ -510,10 +511,12 @@ pub fn load_wasm_component(filename: &str) -> Result<()> {
     // Reinitialize the store to unload the old WASM module
     // TODO: Create hashmap of stores to load multiple modules
     // where each WASM module has it's own memory and resources
-    // unsafe {
-    //     *STORE = new_store();
-    // }
-    // let store = unsafe { &mut *STORE }; // Ensure STORE is initialized
+    unsafe {
+        *STORE = new_store();
+    }
+    let store = unsafe { &mut *STORE }; // Ensure STORE is initialized
+    // Reset the world
+    toxoid_engine::toxoid_reset();
 
     // Load the component from disk
     let bytes = std::fs::read(filename)?;

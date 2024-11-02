@@ -3,7 +3,7 @@
 
 pub mod bindings;
 use bindings::exports::toxoid::engine::ecs::{self, ComponentDesc, EntityDesc, Guest, GuestComponent, GuestComponentType, GuestEntity, GuestQuery, QueryDesc};
-use toxoid_flecs::bindings::{ecs_add_id, ecs_entity_desc_t, ecs_entity_init, ecs_get_mut_id, ecs_init, ecs_iter_t, ecs_member_t, ecs_progress, ecs_query_desc_t, ecs_query_init, ecs_query_next, ecs_query_t, ecs_struct_desc_t, ecs_struct_init, ecs_world_t, ecs_query_iter};
+use toxoid_flecs::bindings::{ecs_add_id, ecs_entity_desc_t, ecs_entity_init, ecs_fini, ecs_get_mut_id, ecs_init, ecs_iter_t, ecs_lookup, ecs_member_t, ecs_progress, ecs_query_desc_t, ecs_query_init, ecs_query_iter, ecs_query_next, ecs_query_t, ecs_struct_desc_t, ecs_struct_init, ecs_world_t};
 use std::{borrow::BorrowMut, mem::MaybeUninit};
 use core::ffi::c_void;
 use once_cell::sync::Lazy;
@@ -57,12 +57,21 @@ enum FieldType {
     Pointer
 }
 
-static WORLD: Lazy<EcsWorldPtr> = Lazy::new(|| 
+static mut WORLD: Lazy<EcsWorldPtr> = Lazy::new(|| 
     EcsWorldPtr(unsafe { ecs_init() })
 );
 
+// Progress the world - game loop tick
 pub fn toxoid_progress(fps: f32) -> bool {
     unsafe { ecs_progress(WORLD.0, 1.0) }
+}
+
+// Reset the world - delete all entities
+pub fn toxoid_reset() {
+    unsafe {
+        ecs_fini(WORLD.0);
+        WORLD = Lazy::new(|| EcsWorldPtr(unsafe { ecs_init() }));
+    }
 }
 
 unsafe fn get_member_type(member_type: u8) -> ecs_entity_t {
@@ -109,7 +118,13 @@ impl GuestComponentType for ComponentType {
             // Create component entity
             let mut ent_desc: ecs_entity_desc_t = MaybeUninit::zeroed().assume_init();
             ent_desc.name = c_string(&desc.name);
-            let component_entity: ecs_entity_t = ecs_entity_init(WORLD.0, &ent_desc);
+            let lookup = ecs_lookup(WORLD.0, ent_desc.name);
+            let mut component_entity: ecs_entity_t;
+            if lookup == 0 {
+                component_entity = ecs_entity_init(WORLD.0, &ent_desc);
+            } else {
+                component_entity = ecs_lookup(WORLD.0, ent_desc.name);
+            }
 
             // Create runtime component description
             let mut struct_desc: ecs_struct_desc_t = MaybeUninit::zeroed().assume_init();
@@ -127,7 +142,9 @@ impl GuestComponentType for ComponentType {
             }
 
             // Initialize component
-            let component = ecs_struct_init(WORLD.0, &struct_desc);
+            if lookup == 0 {    
+                ecs_struct_init(WORLD.0, &struct_desc);
+            }
 
             // Return component 
             ComponentType { 
