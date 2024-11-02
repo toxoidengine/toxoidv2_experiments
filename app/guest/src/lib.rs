@@ -32,12 +32,15 @@ impl bindings::Guest for ToxoidWasmComponent {
         //     id: 0
         // };
         // println!("Test 1: {}", Test::get_name());
-        // println!("Test 1: {}", Test::get_id());
-        // println!("Test 2: {}", Test::get_id());
+        println!("Test 1: {}", Test::get_id());
+        println!("Test 2: {}", Test::get_id());
 
         entity.add::<Test>();
         println!("Hello world!");
-        let test = entity.get::<Test>();
+        let mut test = entity.get::<Test>();
+        test.set_best(21);
+        let best = test.get_best();
+        println!("Best: {}", best);
         // println!("Test 3: {}", test.best);
     }
 }

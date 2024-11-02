@@ -19,7 +19,7 @@ pub trait ComponentType {
 pub trait Component {
     // fn get_id(&self) -> u64;
     // #[cfg(all(target_arch="wasm32", target_os="unknown"))]
-    fn set_component(&mut self, component: crate::bindings::toxoid_component::component::ecs::Component);
+    fn set_ptr(&mut self, ptr: *mut crate::bindings::toxoid_component::component::ecs::Component);
     // #[cfg(not(all(target_arch="wasm32", target_os="unknown")))]
     // fn set_ptr(&mut self, ptr: *mut c_void);
     // #[cfg(all(target_arch="wasm32", target_os="unknown"))]
@@ -58,7 +58,8 @@ impl Entity {
         let toxoid_component = crate::bindings::toxoid_component::component::ecs::Component::new(component_ptr); 
         #[cfg(target_arch = "wasm32")]
         let toxoid_component = component_ptr;
-        component.set_component(toxoid_component);
+        let toxoid_component_ptr = Box::into_raw(Box::new(toxoid_component));
+        component.set_ptr(toxoid_component_ptr);
         component
     }
 

@@ -100,13 +100,12 @@ pub fn component(input: TokenStream) -> TokenStream {
                                 quote! {
                                     pub fn #getter_name(&self) -> #field_type {
                                         unsafe {
-                                            // &self.component.get_member_u8(self.ptr as i64, #field_offset)
-                                            20
+                                            self.ptr.as_mut().unwrap().get_member_u8(#field_offset)
                                         }
                                     }
                                     pub fn #setter_name(&mut self, value: u8) {
                                         unsafe {
-                                            // &self.component.set_member_u8(self.ptr as i64, #field_offset, value);
+                                            self.ptr.as_mut().unwrap().set_member_u8(#field_offset, value);
                                         }
                                     }
                                 }
@@ -153,7 +152,7 @@ pub fn component(input: TokenStream) -> TokenStream {
                 impl Default for #name {
                     fn default() -> Self {
                         Self {
-                            component: unsafe { crate::bindings::toxoid_component::component::ecs::Component::from_handle(0) },
+                            ptr: core::ptr::null_mut(),
                             singleton: false,
                             id: 0,
                             #(#default_body)*
@@ -216,7 +215,7 @@ pub fn component(input: TokenStream) -> TokenStream {
                 #[repr(C)]
                 pub struct #name {
                     // #[serde(skip)]
-                    component: crate::bindings::toxoid_component::component::ecs::Component,
+                    ptr: *mut crate::bindings::toxoid_component::component::ecs::Component,
                     singleton: bool,
                     id: ecs_entity_t,
                     #(#struct_fields)*
@@ -242,8 +241,8 @@ pub fn component(input: TokenStream) -> TokenStream {
                     //     combine_u32(unsafe { &self.component.lookup(toxoid_make_c_string(#type_name)) }) 
                     // }
 
-                    fn set_component(&mut self, component: crate::bindings::toxoid_component::component::ecs::Component) {
-                        self.component = component;
+                    fn set_ptr(&mut self, ptr: *mut crate::bindings::toxoid_component::component::ecs::Component) {
+                        self.ptr = ptr;
                     }
 
                     // fn get_ptr(&self) -> *mut core::ffi::c_void {
