@@ -391,7 +391,6 @@ impl GuestEntity for Entity {
 
     fn add(&self, component: ecs_entity_t) {
         unsafe {
-            println!("{} {}", self.id, component);
             ecs_add_id(WORLD.0, self.id, component);
         }
     }

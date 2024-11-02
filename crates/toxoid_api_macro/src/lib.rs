@@ -24,17 +24,6 @@ enum FieldType {
     Pointer
 }
 
-// Constants for FNV-1a hashing
-const FNV_PRIME: u64 = 1099511628211;
-const OFFSET_BASIS: u64 = 14695981039346656037;
-
-// Function to compute FNV-1a hash of a string
-fn fnv1a_hash_str(s: &str) -> u64 {
-    s.bytes().fold(OFFSET_BASIS, |hash, byte| {
-        (hash ^ (byte as u64)).wrapping_mul(FNV_PRIME)
-    })
-}
-
 // The input to the macro will be a list of field names and types.
 struct ComponentStruct {
     name: Ident,
@@ -106,6 +95,202 @@ pub fn component(input: TokenStream) -> TokenStream {
                                     pub fn #setter_name(&mut self, value: u8) {
                                         unsafe {
                                             self.ptr.as_mut().unwrap().set_member_u8(#field_offset, value);
+                                        }
+                                    }
+                                }
+                            },
+                            _ if field_type_str == "u16" => {
+                                quote! {
+                                    pub fn #getter_name(&self) -> #field_type {
+                                        unsafe {
+                                            self.ptr.as_mut().unwrap().get_member_u16(#field_offset)
+                                        }
+                                    }
+                                    pub fn #setter_name(&mut self, value: u16) {
+                                        unsafe {
+                                            self.ptr.as_mut().unwrap().set_member_u16(#field_offset, value);
+                                        }
+                                    }
+                                }
+                            },
+                            _ if field_type_str == "u32" => {
+                                quote! {
+                                    pub fn #getter_name(&self) -> #field_type {
+                                        unsafe {
+                                            self.ptr.as_mut().unwrap().get_member_u32(#field_offset)
+                                        }
+                                    }
+                                    pub fn #setter_name(&mut self, value: u32) {
+                                        unsafe {
+                                            self.ptr.as_mut().unwrap().set_member_u32(#field_offset, value);
+                                        }
+                                    }
+                                }
+                            },
+                            _ if field_type_str == "u64" => {
+                                quote! {
+                                    pub fn #getter_name(&self) -> #field_type {
+                                        unsafe {
+                                            self.ptr.as_mut().unwrap().get_member_u64(#field_offset)
+                                        }
+                                    }
+                                    pub fn #setter_name(&mut self, value: u64) {
+                                        unsafe {
+                                            self.ptr.as_mut().unwrap().set_member_u64(#field_offset, value);
+                                        }
+                                    }
+                                }
+                            },
+                            _ if field_type_str == "i8" => {
+                                quote! {
+                                    pub fn #getter_name(&self) -> #field_type {
+                                        unsafe {
+                                            self.ptr.as_mut().unwrap().get_member_i8(#field_offset)
+                                        }
+                                    }
+                                    pub fn #setter_name(&mut self, value: i8) {
+                                        unsafe {
+                                            self.ptr.as_mut().unwrap().set_member_i8(#field_offset, value);
+                                        }
+                                    }
+                                }
+                            },
+                            _ if field_type_str == "i16" => {
+                                quote! {
+                                    pub fn #getter_name(&self) -> #field_type {
+                                        unsafe {
+                                            self.ptr.as_mut().unwrap().get_member_i16(#field_offset)
+                                        }
+                                    }
+                                    pub fn #setter_name(&mut self, value: i16) {
+                                        unsafe {
+                                            self.ptr.as_mut().unwrap().set_member_i16(#field_offset, value);
+                                        }
+                                    }
+                                }
+                            },
+                            _ if field_type_str == "i32" => {
+                                quote! {
+                                    pub fn #getter_name(&self) -> #field_type {
+                                        unsafe {
+                                            self.ptr.as_mut().unwrap().get_member_i32(#field_offset)
+                                        }
+                                    }
+                                    pub fn #setter_name(&mut self, value: i32) {
+                                        unsafe {
+                                            self.ptr.as_mut().unwrap().set_member_i32(#field_offset, value);
+                                        }
+                                    }
+                                }
+                            },
+                            _ if field_type_str == "i64" => {
+                                quote! {
+                                    pub fn #getter_name(&self) -> #field_type {
+                                        unsafe {
+                                            self.ptr.as_mut().unwrap().get_member_i64(#field_offset)
+                                        }
+                                    }
+                                    pub fn #setter_name(&mut self, value: i64) {
+                                        unsafe {
+                                            self.ptr.as_mut().unwrap().set_member_i64(#field_offset, value);
+                                        }
+                                    }
+                                }
+                            },
+                            _ if field_type_str == "f32" => {
+                                quote! {
+                                    pub fn #getter_name(&self) -> #field_type {
+                                        unsafe {
+                                            self.ptr.as_mut().unwrap().get_member_f32(#field_offset)
+                                        }
+                                    }
+                                    pub fn #setter_name(&mut self, value: f32) {
+                                        unsafe {
+                                            self.ptr.as_mut().unwrap().set_member_f32(#field_offset, value);
+                                        }
+                                    }
+                                }
+                            },
+                            _ if field_type_str == "f64" => {
+                                quote! {
+                                    pub fn #getter_name(&self) -> #field_type {
+                                        unsafe {
+                                            self.ptr.as_mut().unwrap().get_member_f64(#field_offset)
+                                        }
+                                    }
+                                    pub fn #setter_name(&mut self, value: f64) {
+                                        unsafe {
+                                            self.ptr.as_mut().unwrap().set_member_f64(#field_offset, value);
+                                        }
+                                    }
+                                }
+                            },
+                            _ if field_type_str == "bool" => {
+                                quote! {
+                                    pub fn #getter_name(&self) -> #field_type {
+                                        unsafe {
+                                            self.ptr.as_mut().unwrap().get_member_bool(#field_offset)
+                                        }
+                                    }
+                                    pub fn #setter_name(&mut self, value: bool) {
+                                        unsafe {
+                                            self.ptr.as_mut().unwrap().set_member_bool(#field_offset, value);
+                                        }
+                                    }
+                                }
+                            },
+                            _ if field_type_str == "String" => {
+                                quote! {
+                                    pub fn #getter_name(&self) -> String {
+                                        unsafe {
+                                            self.ptr.as_mut().unwrap().get_member_string(#field_offset)
+                                        }
+                                    }
+                                    pub fn #setter_name(&mut self, value: String) {
+                                        unsafe {
+                                            self.ptr.as_mut().unwrap().set_member_string(#field_offset, value);
+                                        }
+                                    }
+                                }
+                            },
+                            _ if field_type_str == "U32Array" => {
+                                quote! {
+                                    pub fn #getter_name(&self) -> Vec<u32> {
+                                        unsafe {
+                                            self.ptr.as_mut().unwrap().get_member_u32_array(#field_offset)
+                                        }
+                                    }
+                                    pub fn #setter_name(&mut self, value: Vec<u32>) {
+                                        unsafe {
+                                            self.ptr.as_mut().unwrap().set_member_u32_array(#field_offset, value);
+                                        }
+                                    }
+                                }
+                            },
+                            _ if field_type_str == "F32Array" => {
+                                quote! {
+                                    pub fn #getter_name(&self) -> Vec<f32> {
+                                        unsafe {
+                                            self.ptr.as_mut().unwrap().get_member_f32_array(#field_offset)
+                                        }
+                                    }
+                                    pub fn #setter_name(&mut self, value: Vec<f32>) {
+                                        unsafe {
+                                            self.ptr.as_mut().unwrap().set_member_f32_array(#field_offset, value);
+                                        }
+                                    }
+                                }
+                            },
+                            _ if field_type_str == "Pointer" => {
+                                quote! {
+                                    pub fn #getter_name(&self) -> *const core::ffi::c_void {
+                                        unsafe {
+                                            // self.ptr.as_mut().unwrap().get_member_f32_array(#field_offset)
+                                        }
+                                    }
+                                    pub fn #setter_name(&mut self, value: *const core::ffi::c_void) {
+                                        unsafe {
+                                            // self.ptr.as_mut().unwrap().set_member_f32_array(#field_offset, value);
                                         }
                                     }
                                 }
@@ -201,11 +386,7 @@ pub fn component(input: TokenStream) -> TokenStream {
                     let component_type = ComponentType::new(&ComponentDesc {
                         name: #struct_name_str.to_string(),
                         member_names: vec![#(#field_names_str.to_string()),*],
-                        // member_types: vec![#(#field_types_code),*],
-                        // member_names: vec![#(#field_names_str),*],
-                        // member_types: vec![#(#field_types_code),*],
-                        // member_names: vec!["".to_string()],
-                        member_types: vec![0],
+                        member_types: vec![#(#field_types_code),*],
                     }); 
                     component_type.get_id()
                 }

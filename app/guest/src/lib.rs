@@ -9,8 +9,9 @@ use bindings::toxoid_component::component::ecs::{ComponentDesc, MemberType};
 use toxoid_api_macro::component;
 
 component! {
-    Test {
-        best: u8
+    Position {
+        x: u32,
+        y: u32
     }
 }
 
@@ -19,15 +20,13 @@ pub struct ToxoidWasmComponent;
 impl bindings::Guest for ToxoidWasmComponent {
     fn init() {
         let mut entity = Entity::new(None);
-        println!("Test 1: {}", Test::get_id());
-        println!("Test 2: {}", Test::get_id());
-
-        entity.add::<Test>();
-        println!("Hello world!");
-        let mut test = entity.get::<Test>();
-        test.set_best(21);
-        let best = test.get_best();
-        println!("Best: {}", best);
+        entity.add::<Position>();
+        let mut position = entity.get::<Position>();
+        position.set_x(777);
+        position.set_y(999);
+        let x = position.get_x();
+        let y = position.get_y();
+        println!("X: {}, Y: {}", x, y);
     }
 }
 
