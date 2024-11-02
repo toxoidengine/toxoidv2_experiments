@@ -68,6 +68,7 @@ fn main() {
         .define("FLECS_HTTP", None)
         .define("FLECS_REST", None)
         .define("FLECS_JOURNAL", None)
+        .define("NDEBUG", None)
         .include("flecs.h")
         .file("flecs.c")
         .compile("flecs_core");
