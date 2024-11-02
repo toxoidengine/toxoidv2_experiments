@@ -10,6 +10,8 @@ use once_cell::sync::Lazy;
 type ecs_entity_t = u64;
 use core::ffi::c_char;
 use std::cell::RefCell;
+use std::collections::HashMap;
+
 
 pub struct ToxoidApi;
 
@@ -88,6 +90,19 @@ fn c_string(rust_str: &str) -> *const i8 {
     c_ptr
 }
 
+// Constants for FNV-1a hashing
+const FNV_PRIME: u64 = 1099511628211;
+const OFFSET_BASIS: u64 = 14695981039346656037;
+
+// Function to compute FNV-1a hash of a string
+fn fnv1a_hash_str(s: &str) -> u64 {
+    s.bytes().fold(OFFSET_BASIS, |hash, byte| {
+        (hash ^ (byte as u64)).wrapping_mul(FNV_PRIME)
+    })
+}
+
+pub static mut COMPONENT_CACHE: Lazy<HashMap<u64, Component>> = Lazy::new(|| HashMap::new());
+
 impl GuestComponentType for ComponentType {
     fn new(desc: ComponentDesc) -> ComponentType {
         unsafe {
@@ -136,6 +151,15 @@ impl GuestComponent for Component {
     fn new(resource_id: u32) -> Component {
         Component { ptr: resource_id as *const c_void }
     }
+
+    // fn set_component_hash(&self, name: String) {
+    //     unsafe 
+    //         let hash = fnv1a_hash_str(&name);
+    //         COMPONENT_CACHE.insert(hash, self);
+    //     }
+    // }
+
+    // fn
 
     fn set_member_u8(&self, offset: u32, value: u8) {
         unsafe {
@@ -367,6 +391,7 @@ impl GuestEntity for Entity {
 
     fn add(&self, component: ecs_entity_t) {
         unsafe {
+            println!("{} {}", self.id, component);
             ecs_add_id(WORLD.0, self.id, component);
         }
     }

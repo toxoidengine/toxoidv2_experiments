@@ -4,21 +4,22 @@
 use toxoid_engine::{Component as ToxoidComponent, ComponentType as ToxoidComponentType, Entity as ToxoidEntity, Query as ToxoidQuery, bindings::exports::toxoid::engine::ecs::{ComponentDesc, EntityDesc, GuestComponent, GuestComponentType, GuestEntity, GuestQuery, MemberType, QueryDesc}};
 #[cfg(target_arch = "wasm32")]
 use crate::bindings::{toxoid_component::component::ecs::{Component as ToxoidComponent, ComponentType as ToxoidComponentType, Entity as ToxoidEntity, Query as ToxoidQuery, ComponentDesc, EntityDesc, MemberType, QueryDesc}, Guest};
-use std::collections::HashMap;
-// use once_cell::sync::Lazy;
 
-// pub static mut COMPONENT_CACHE: Lazy<HashMap<u64, ToxoidComponent>> = Lazy::new(|| HashMap::new());
+
+
+pub type ecs_entity_t = u64;
 
 pub trait ComponentType {
     // fn register() -> ecs_entity_t;
-    // fn get_name() -> &'static str;
+    fn get_name() -> &'static str;
+    fn get_id() -> ecs_entity_t;
     // fn get_hash() -> u64;
 }
 
 pub trait Component {
     // fn get_id(&self) -> u64;
     // #[cfg(all(target_arch="wasm32", target_os="unknown"))]
-    // fn set_ptr(&mut self, ptr: i64);
+    fn set_component(&mut self, component: crate::bindings::toxoid_component::component::ecs::Component);
     // #[cfg(not(all(target_arch="wasm32", target_os="unknown")))]
     // fn set_ptr(&mut self, ptr: *mut c_void);
     // #[cfg(all(target_arch="wasm32", target_os="unknown"))]
@@ -47,23 +48,23 @@ impl Entity {
         self.entity.get_id()
     }
 
-    pub fn get(&self, component_id: u64) -> ToxoidComponent {
-        unimplemented!()
-        // let component = self.entity.get(component_id);
-
-        // #[cfg(not(target_arch = "wasm32"))]
-        // ToxoidComponent::new(component)
-
-        // #[cfg(target_arch = "wasm32")]
-        // entity.get(component_id)
+    pub fn get<T: Component + ComponentType + Default + 'static>(&self) -> T {
+        let mut component= T::default();
+        #[cfg(not(target_arch = "wasm32"))]
+        let component_ptr = self.entity.get(T::get_id());
+        #[cfg(target_arch = "wasm32")]
+        let component_ptr = self.entity.get(T::get_id());
+        #[cfg(not(target_arch = "wasm32"))]
+        let toxoid_component = crate::bindings::toxoid_component::component::ecs::Component::new(component_ptr); 
+        #[cfg(target_arch = "wasm32")]
+        let toxoid_component = component_ptr;
+        component.set_component(toxoid_component);
+        component
     }
 
     pub fn add<T: Component + ComponentType + 'static>(&mut self) {
-        // let type_hash = T::get_hash();
-        // let component_id_split = toxoid_component_cache_get(type_hash);
-        // let component_id = combine_u32(component_id_split);
-        // toxoid_entity_add_component(self.entity.id, component_id);
-        // self.entity.add(component_id);
+        let component_id = T::get_id();
+        self.entity.add(component_id);
     }
 
     pub fn remove<T: Component + ComponentType + 'static>(&mut self) {
@@ -72,10 +73,6 @@ impl Entity {
         // let component_id = combine_u32(component_id_split);
         // toxoid_entity_remove_component(self.entity.id, component_id);
     }
-
-    // pub fn remove_component(&self, component_id: u64) {
-    //     self.entity.remove_component(component_id);
-    // }
 }
 
 pub struct Query {

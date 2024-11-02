@@ -101,7 +101,7 @@ pub fn component(input: TokenStream) -> TokenStream {
                                     pub fn #getter_name(&self) -> #field_type {
                                         unsafe {
                                             // &self.component.get_member_u8(self.ptr as i64, #field_offset)
-                                            0
+                                            20
                                         }
                                     }
                                     pub fn #setter_name(&mut self, value: u8) {
@@ -153,7 +153,7 @@ pub fn component(input: TokenStream) -> TokenStream {
                 impl Default for #name {
                     fn default() -> Self {
                         Self {
-                            component: ::std::ptr::null_mut(),
+                            component: unsafe { crate::bindings::toxoid_component::component::ecs::Component::from_handle(0) },
                             singleton: false,
                             id: 0,
                             #(#default_body)*
@@ -163,36 +163,32 @@ pub fn component(input: TokenStream) -> TokenStream {
             };
 
             let struct_name_str = name.to_string();
-            let type_hash = fnv1a_hash_str(&struct_name_str);
-            let type_hash_fn = quote! {
-                fn get_hash() -> u64 {
-                    #type_hash
-                }
-            };
+            // let type_hash = fnv1a_hash_str(&struct_name_str);
+            // let type_hash_fn = quote! {
+            //     fn get_hash() -> u64 {
+            //         #type_hash
+            //     }
+            // };
 
             // Create the register component tokens.
             let field_names_str = field_names.clone().map(|f| f.clone().unwrap().to_string());
             let field_types_code = field_types.clone().map(|f| get_type_code(f));
-            let register_component_tokens = quote! {
-                let component_id_split = unsafe {
-                    toxoid_register_component_ecs(
-                        #struct_name_str,
-                        &[#(#field_names_str),*],
-                        &[#(#field_types_code),*],
-                    )
-                };
-                let component_id = combine_u32(component_id_split);
-                let type_hash = split_u64(#type_hash);
-                cache_component_ecs(type_hash, split_u64(component_id));
-                component_id
-            };
+            // let register_component_tokens = quote! {
+            //     use crate::bindings::toxoid_component::component::ecs::ComponentType;
+            //     let id = ComponentType::new(&ComponentDesc {
+            //         name: #struct_name_str.to_string(),
+            //         member_names: vec![#(#field_names_str),*],
+            //         member_types: vec![#(#field_types_code),*],
+            //     }); 
+            //     id
+            // };
             
-            // Create the register implementation.
-            let register_fn = quote! {
-                fn register() -> u64 {
-                    #register_component_tokens
-                }
-            };
+            // // Create the register implementation.
+            // let register_fn = quote! {
+            //     fn register() -> u64 {
+            //         #register_component_tokens
+            //     }
+            // };
             
             let type_name = struct_name_str.as_str();
             let type_name_fn = quote! {
@@ -200,12 +196,27 @@ pub fn component(input: TokenStream) -> TokenStream {
                     #type_name
                 }
             };
+            let type_get_id_fn = quote! {
+                fn get_id() -> u64 {
+                    use crate::bindings::toxoid_component::component::ecs::{ComponentType, ComponentDesc};
+                    let component_type = ComponentType::new(&ComponentDesc {
+                        name: #struct_name_str.to_string(),
+                        member_names: vec![#(#field_names_str.to_string()),*],
+                        // member_types: vec![#(#field_types_code),*],
+                        // member_names: vec![#(#field_names_str),*],
+                        // member_types: vec![#(#field_types_code),*],
+                        // member_names: vec!["".to_string()],
+                        member_types: vec![0],
+                    }); 
+                    component_type.get_id()
+                }
+            };
             quote! {
                 // #[derive(Clone, PartialEq, Serialize, Deserialize)]
                 #[repr(C)]
                 pub struct #name {
                     // #[serde(skip)]
-                    component: *mut core::ffi::c_void,
+                    component: crate::bindings::toxoid_component::component::ecs::Component,
                     singleton: bool,
                     id: ecs_entity_t,
                     #(#struct_fields)*
@@ -221,7 +232,8 @@ pub fn component(input: TokenStream) -> TokenStream {
                     // // Static methods
                     // #register_fn
                     // #type_hash_fn
-                    // #type_name_fn
+                    #type_name_fn
+                    #type_get_id_fn
                 }
 
                 impl Component for #name {
@@ -230,9 +242,9 @@ pub fn component(input: TokenStream) -> TokenStream {
                     //     combine_u32(unsafe { &self.component.lookup(toxoid_make_c_string(#type_name)) }) 
                     // }
 
-                    // fn set_ptr(&mut self, ptr: *mut core::ffi::c_void) {
-                    //     self.ptr = ptr;
-                    // }
+                    fn set_component(&mut self, component: crate::bindings::toxoid_component::component::ecs::Component) {
+                        self.component = component;
+                    }
 
                     // fn get_ptr(&self) -> *mut core::ffi::c_void {
                     //     self.ptr

@@ -174,6 +174,13 @@ impl toxoid_component::component::ecs::HostComponentType for StoreState {
 }
 
 impl toxoid_component::component::ecs::HostComponent for StoreState {
+    fn new(&mut self, component_id: i64) -> Resource<ComponentProxy> {
+        let component = toxoid_engine::Component::new(component_id);
+        let boxed_component = Box::new(component);
+        let boxed_component_ptr = Box::into_raw(boxed_component);
+        self.table.push::<ComponentProxy>(ComponentProxy { ptr: boxed_component_ptr }).unwrap()
+    }
+
     fn set_member_u8(&mut self, component: Resource<toxoid_component::component::ecs::Component>, offset: u32, value: u8) -> () {
         let component_proxy = self.table.get(&component).unwrap() as &ComponentProxy;
         let component = unsafe { Box::from_raw(component_proxy.ptr) };
@@ -472,8 +479,7 @@ static LINKER: Lazy<Linker<StoreState>> = Lazy::new(|| {
     linker
 });
 
-// Create WASM Store
-pub static mut STORE: Lazy<Store<StoreState>> = Lazy::new(|| {
+fn new_store() -> Store<StoreState> {
     let engine = &*ENGINE; // Ensure ENGINE is initialized
     Store::new(
         engine,
@@ -490,15 +496,28 @@ pub static mut STORE: Lazy<Store<StoreState>> = Lazy::new(|| {
             table: ResourceTable::new(),
         }
     )
-});
+}
+
+// Create WASM Store
+pub static mut STORE: Lazy<Store<StoreState>> = Lazy::new(|| new_store());
 
 pub fn load_wasm_component(filename: &str) -> Result<()> {
     // Get WASM engine, linker and store
     let engine = &*ENGINE; // Ensure ENGINE is initialized
     let linker = &*LINKER; // Ensure LINKER is initialized
     let store = unsafe { &mut *STORE }; // Ensure STORE is initialized
+
+    // Reinitialize the store to unload the old WASM module
+    // TODO: Create hashmap of stores to load multiple modules
+    // where each WASM module has it's own memory and resources
+    // unsafe {
+    //     *STORE = new_store();
+    // }
+    // let store = unsafe { &mut *STORE }; // Ensure STORE is initialized
+
     // Load the component from disk
     let bytes = std::fs::read(filename)?;
+    
     // Create WASM Component
     let component = Component::new(&engine, bytes)?;
     let toxoid_component_world = ToxoidComponentWorld::instantiate(&mut *store, &component, &linker)?;

@@ -1,8 +1,0 @@
-[package]
-name = "macro_test"
-version = "0.1.0"
-edition = "2021"
-
-[dependencies]
-serde = { version = "1.0.214", features = ["derive"] }
-toxoid_api_macro = { path = "../../crates/toxoid_api_macro" }

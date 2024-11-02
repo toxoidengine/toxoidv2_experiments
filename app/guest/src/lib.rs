@@ -1,15 +1,44 @@
+#![allow(warnings)]
+
 pub mod bindings;
 pub mod api;
 
-use api::Entity;
+use api::*;
+use bindings::toxoid_component::component::ecs::{ComponentDesc, MemberType};
+
+use toxoid_api_macro::component;
+
+component! {
+    Test {
+        best: u8
+    }
+}
 
 pub struct ToxoidWasmComponent;
 
 impl bindings::Guest for ToxoidWasmComponent {
     fn init() {
-        let entity = Entity::new(None);
-        let id = entity.get_id();
-        println!("Entity ID: {}", id);
+        let mut entity = Entity::new(None);
+        // let id = ComponentType::new(&ComponentDesc {
+        //     name: "Test".to_string(),
+        //     member_names: vec!["best".to_string()],
+        //     member_types: vec![MemberType::U8],
+        // }); 
+        // let id = entity.get_id();
+        // let test = Test {
+        //     best: 1,
+        //     component: ::std::ptr::null_mut(),
+        //     singleton: false,
+        //     id: 0
+        // };
+        // println!("Test 1: {}", Test::get_name());
+        // println!("Test 1: {}", Test::get_id());
+        // println!("Test 2: {}", Test::get_id());
+
+        entity.add::<Test>();
+        println!("Hello world!");
+        let test = entity.get::<Test>();
+        // println!("Test 3: {}", test.best);
     }
 }
 
