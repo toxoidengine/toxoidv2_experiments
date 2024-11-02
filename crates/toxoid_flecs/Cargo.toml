@@ -4,8 +4,8 @@ version = "0.1.0"
 edition = "2021"
 
 [build-dependencies]
-bindgen = "0.70.1"
-cc = "1.1.19"
+bindgen = "0.69.1"
+cc = "1.0.83"
 
 [dependencies]
 once_cell = "1.19.0"

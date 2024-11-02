@@ -1,0 +1,21 @@
+[package]
+name = "toxoid_sokol"
+version = "0.1.0"
+edition = "2021"
+build = "build.rs"
+
+[dependencies]
+sokol = { git="https://github.com/floooh/sokol-rust" }
+
+[build-dependencies]
+bindgen = "0.69.1"
+cc = "1.0.83"
+
+[features]
+default = ["render", "fetch", "audio", "imgui", "spine", "stb"]
+render = []
+spine = []
+imgui = []
+fetch = []
+audio = []
+stb = []

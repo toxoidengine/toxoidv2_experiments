@@ -6,7 +6,8 @@ members = [
      "crates/toxoid_wasm_component",
      "crates/toxoid_api", 
      "crates/toxoid_host",
+     "crates/toxoid_sokol",
      "app/host", 
-     "app/guest",
+     "app/guest", "app/macro_test",
 ]
 exclude = []

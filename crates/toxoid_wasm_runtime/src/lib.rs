@@ -478,7 +478,15 @@ pub static mut STORE: Lazy<Store<StoreState>> = Lazy::new(|| {
     Store::new(
         engine,
         StoreState {
-            ctx: WasiCtxBuilder::new().build(),
+            ctx: WasiCtxBuilder::new()
+                    // .inherit_stdin()
+                    // .inherit_stdout()
+                    // .inherit_stderr()
+                    .inherit_stdio()
+                    .inherit_env()
+                    .inherit_args()
+                    // .inherit_network()
+                    .build(),
             table: ResourceTable::new(),
         }
     )
@@ -494,8 +502,7 @@ pub fn load_wasm_component(filename: &str) -> Result<()> {
     // Create WASM Component
     let component = Component::new(&engine, bytes)?;
     let toxoid_component_world = ToxoidComponentWorld::instantiate(&mut *store, &component, &linker)?;
-    // TODO: Change parameters to not pass anything in or return anything
-    let component_id = toxoid_component_world.call_init(&mut *store)?;
-    println!("Component ID: {:?}", component_id);
+    // Call init
+    toxoid_component_world.call_init(&mut *store)?;
     Ok(())
 }
