@@ -6,10 +6,10 @@ use api::Entity;
 pub struct ToxoidWasmComponent;
 
 impl bindings::Guest for ToxoidWasmComponent {
-    fn init() -> u64 {
+    fn init() {
         let entity = Entity::new(None);
         let id = entity.get_id();
-        id
+        println!("Entity ID: {}", id);
     }
 }
 
