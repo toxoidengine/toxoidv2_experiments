@@ -53,6 +53,9 @@ impl bindings::Guest for ToxoidWasmComponent {
                 let y = entity.get::<Position>().get_y();
                 println!("Iter X: {}, Iter Y: {}", x, y);
             });
+
+        let mut system = System::dsl("Position($this)", |query| println!("System query"));
+        system.build();
     }
 }
 

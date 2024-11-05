@@ -59,6 +59,13 @@ impl WasiView for StoreState {
 impl toxoid_component::component::ecs::Host for StoreState {}
 
 impl toxoid_component::component::ecs::HostCallback for StoreState {
+    fn new(&mut self, handle: i64) -> Resource<CallbackProxy> {
+        let callback = <toxoid_engine::Callback as toxoid_engine::bindings::exports::toxoid::engine::ecs::GuestCallback>::new(handle);
+        let boxed_callback = Box::new(callback);
+        let boxed_callback_ptr = Box::into_raw(boxed_callback);
+        self.table.push::<CallbackProxy>(CallbackProxy { ptr: boxed_callback_ptr }).unwrap()
+    }
+
     fn run(&mut self, callback: wasmtime::component::Resource<CallbackProxy>, query: wasmtime::component::Resource<QueryProxy>) -> () {
         let query_proxy = self.table.get(&query).unwrap() as &QueryProxy;
         let query = unsafe { Box::from_raw(query_proxy.ptr) };

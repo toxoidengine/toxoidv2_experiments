@@ -108,6 +108,7 @@ interface ecs {
     }
 
     resource callback {
+        constructor(handle: s64);
         run: func(query: query);
     }
 

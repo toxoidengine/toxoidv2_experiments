@@ -40,7 +40,7 @@ pub struct System {
 }
 
 pub struct Callback {
-    pub id: ecs_entity_t
+    pub handle: i64
 }
 
 pub struct EcsWorldPtr(*mut ecs_world_t);
@@ -558,6 +558,10 @@ impl GuestSystem for System {
 }
 
 impl GuestCallback for Callback {
+    fn new(handle: i64) -> Callback {
+        Callback { handle }
+    }
+
     fn run(&self, query: ecs::Query) {
         println!("Callback run");
     }

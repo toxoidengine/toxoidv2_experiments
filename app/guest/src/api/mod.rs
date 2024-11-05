@@ -1,7 +1,7 @@
 #![allow(warnings)]
 
 #[cfg(not(target_arch = "wasm32"))]
-use toxoid_engine::{Component as ToxoidComponent, ComponentType as ToxoidComponentType, Entity as ToxoidEntity, Query as ToxoidQuery, System as ToxoidSystem, Callback as ToxoidCallback, bindings::exports::toxoid::engine::ecs::{GuestComponent, GuestComponentType, GuestEntity, GuestQuery}};
+use toxoid_engine::{Component as ToxoidComponent, ComponentType as ToxoidComponentType, Entity as ToxoidEntity, Query as ToxoidQuery, System as ToxoidSystem, Callback as ToxoidCallback, bindings::exports::toxoid::engine::ecs::{GuestComponent, GuestComponentType, GuestEntity, GuestQuery, GuestSystem, GuestCallback}};
 #[cfg(target_arch = "wasm32")]
 use crate::bindings::{toxoid_component::component::ecs::{Component as ToxoidComponent, ComponentType as ToxoidComponentType, Entity as ToxoidEntity, Query as ToxoidQuery, System as ToxoidSystem, Callback as ToxoidCallback}, Guest};
 #[cfg(not(target_arch = "wasm32"))]
@@ -143,21 +143,33 @@ impl System {
     //     unimplemented!()
     // }
 
-    // #[cfg(target_arch = "wasm32")]
-    pub fn new(desc: Option<SystemDesc>) -> Self {
-        let desc = desc.unwrap_or(SystemDesc { name: None, callback: None, query_desc: QueryDesc { expr: "".to_string() }, query: ToxoidQuery::new(&QueryDesc { expr: "".to_string() }) });
+    #[cfg(target_arch = "wasm32")]
+    pub fn new(desc: Option<SystemDesc>, callback_fn: fn(&Query)) -> Self {
+        let callback = ToxoidCallback::new(7770);
+        let query_desc = desc.as_ref().unwrap().query_desc.clone();
+        #[cfg(not(target_arch = "wasm32"))]
+        let query = ToxoidQuery::new(query_desc);
+        #[cfg(target_arch = "wasm32")]
+        let query = ToxoidQuery::new(&query_desc);
+        #[cfg(target_arch = "wasm32")]
+        let desc = desc.unwrap_or(SystemDesc { name: None, callback, query_desc, query });
         Self { system: ToxoidSystem::new(desc) }
     }
 
     #[cfg(not(target_arch = "wasm32"))]
-    pub fn new_dsl(dsl: &str) -> Self {
+    pub fn dsl(dsl: &str, callback: fn(&Query)) -> Self {
         unimplemented!()
     }
 
     #[cfg(target_arch = "wasm32")]
-    pub fn dsl(dsl: &str) -> Self {
-        let desc = SystemDesc { name: None, query_desc: QueryDesc { expr: dsl.to_string() }, query: ToxoidQuery::new(&QueryDesc { expr: dsl.to_string() }) };
-        Self::new(Some(desc))
+    pub fn dsl(dsl: &str, callback_fn: fn(&Query)) -> Self {
+        let callback = ToxoidCallback::new(7770);
+        let desc = SystemDesc { name: None, callback, query_desc: QueryDesc { expr: dsl.to_string() }, query: ToxoidQuery::new(&QueryDesc { expr: dsl.to_string() }) };
+        Self::new(Some(desc), callback_fn)
+    }
+
+    pub fn build(&mut self) {
+        self.system.build();
     }
 }
 

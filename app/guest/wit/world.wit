@@ -93,11 +93,13 @@ interface ecs {
     }
 
     resource callback {
+        constructor(handle: s64);
         run: func(query: query);
     }
 
     record system-desc {
         name: option<string>,
+        callback: callback,
         query-desc: query-desc,
         query: query
     }
