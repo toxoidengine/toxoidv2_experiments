@@ -4,8 +4,8 @@ use bindings::Guest;
 pub struct ToxoidWasmComponent;
 
 impl Guest for ToxoidWasmComponent {
-    fn init() -> u64 {
-        777
+    fn init() {
+        println!("ToxoidWasmComponent init");
     }
 }
 

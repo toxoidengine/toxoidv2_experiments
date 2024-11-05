@@ -1,20 +1,20 @@
 #![allow(warnings)]
 
 #[cfg(not(target_arch = "wasm32"))]
-use toxoid_engine::{Component as ToxoidComponent, ComponentType as ToxoidComponentType, Entity as ToxoidEntity, Query as ToxoidQuery, bindings::exports::toxoid::engine::ecs::{GuestComponent, GuestComponentType, GuestEntity, GuestQuery}};
+use toxoid_engine::{Component as ToxoidComponent, ComponentType as ToxoidComponentType, Entity as ToxoidEntity, Query as ToxoidQuery, System as ToxoidSystem, Callback as ToxoidCallback, bindings::exports::toxoid::engine::ecs::{GuestComponent, GuestComponentType, GuestEntity, GuestQuery}};
 #[cfg(target_arch = "wasm32")]
-use crate::bindings::{toxoid_component::component::ecs::{Component as ToxoidComponent, ComponentType as ToxoidComponentType, Entity as ToxoidEntity, Query as ToxoidQuery}, Guest};
+use crate::bindings::{toxoid_component::component::ecs::{Component as ToxoidComponent, ComponentType as ToxoidComponentType, Entity as ToxoidEntity, Query as ToxoidQuery, System as ToxoidSystem, Callback as ToxoidCallback}, Guest};
 #[cfg(not(target_arch = "wasm32"))]
-pub use toxoid_engine::bindings::exports::toxoid::engine::ecs::{EntityDesc, ComponentDesc, QueryDesc, MemberType};
+pub use toxoid_engine::bindings::exports::toxoid::engine::ecs::{EntityDesc, ComponentDesc, QueryDesc, SystemDesc, MemberType};
 #[cfg(target_arch = "wasm32")]
-pub use crate::bindings::toxoid_component::component::ecs::{EntityDesc, ComponentDesc, QueryDesc, MemberType};
+pub use crate::bindings::toxoid_component::component::ecs::{EntityDesc, ComponentDesc, QueryDesc, SystemDesc, MemberType};
 
 pub type ecs_entity_t = u64;
 
 pub trait ComponentType {
-    // fn register() -> ecs_entity_t;
     fn get_name() -> &'static str;
     fn get_id() -> ecs_entity_t;
+    // fn register() -> ecs_entity_t;
     // fn get_hash() -> u64;
 }
 
@@ -131,6 +131,38 @@ impl Query {
     pub fn entities(&self) -> Vec<Entity> {
         self.query.entities().iter().map(|entity| Entity { entity: ToxoidEntity::from_id(entity.get_id()) }).collect()
     }
+}
+
+pub struct System {
+    system: ToxoidSystem
+}
+
+impl System {
+    // #[cfg(not(target_arch = "wasm32"))]
+    // pub fn new(desc: Option<SystemDesc>) -> Self {
+    //     unimplemented!()
+    // }
+
+    // #[cfg(target_arch = "wasm32")]
+    pub fn new(desc: Option<SystemDesc>) -> Self {
+        let desc = desc.unwrap_or(SystemDesc { name: None, callback: None, query_desc: QueryDesc { expr: "".to_string() }, query: ToxoidQuery::new(&QueryDesc { expr: "".to_string() }) });
+        Self { system: ToxoidSystem::new(desc) }
+    }
+
+    #[cfg(not(target_arch = "wasm32"))]
+    pub fn new_dsl(dsl: &str) -> Self {
+        unimplemented!()
+    }
+
+    #[cfg(target_arch = "wasm32")]
+    pub fn dsl(dsl: &str) -> Self {
+        let desc = SystemDesc { name: None, query_desc: QueryDesc { expr: dsl.to_string() }, query: ToxoidQuery::new(&QueryDesc { expr: dsl.to_string() }) };
+        Self::new(Some(desc))
+    }
+}
+
+pub struct Callback {
+    callback: ToxoidCallback
 }
 
 /* Native

@@ -2,16 +2,15 @@
 #![allow(warnings)]
 
 pub mod bindings;
-use bindings::exports::toxoid::engine::ecs::{self, ComponentDesc, EntityDesc, Guest, GuestComponent, GuestComponentType, GuestEntity, GuestQuery, QueryDesc};
-use toxoid_flecs::bindings::{ecs_add_id, ecs_entity_desc_t, ecs_entity_init, ecs_fini, ecs_get_mut_id, ecs_init, ecs_iter_t, ecs_lookup, ecs_member_t, ecs_progress, ecs_query_desc_t, ecs_query_init, ecs_query_iter, ecs_query_next, ecs_query_t, ecs_struct_desc_t, ecs_struct_init, ecs_world_t};
+use bindings::exports::toxoid::engine::ecs::{self, ComponentDesc, EntityDesc, Guest, GuestCallback, GuestComponent, GuestComponentType, GuestEntity, GuestQuery, GuestSystem, QueryDesc, SystemDesc};
+use toxoid_flecs::bindings::{ecs_add_id, ecs_entity_desc_t, ecs_entity_init, ecs_fini, ecs_get_mut_id, ecs_init, ecs_iter_t, ecs_lookup, ecs_make_pair, ecs_member_t, ecs_progress, ecs_query_desc_t, ecs_query_init, ecs_query_iter, ecs_query_next, ecs_query_t, ecs_struct_desc_t, ecs_struct_init, ecs_system_desc_t, ecs_system_init, ecs_system_t, ecs_world_t, EcsDependsOn, EcsOnUpdate};
 use std::{borrow::BorrowMut, mem::MaybeUninit};
 use core::ffi::c_void;
-use once_cell::sync::Lazy;
-type ecs_entity_t = u64;
 use core::ffi::c_char;
 use std::cell::RefCell;
 use std::collections::HashMap;
-
+use once_cell::sync::Lazy;
+type ecs_entity_t = u64;
 
 pub struct ToxoidApi;
 
@@ -32,6 +31,16 @@ pub struct Query {
     pub desc: RefCell<ecs_query_desc_t>,
     pub query: RefCell<ecs_query_t>,
     pub iter: RefCell<ecs_iter_t>
+}
+
+pub struct System {
+    pub desc: RefCell<ecs_system_desc_t>,
+    pub entity: RefCell<ecs_entity_t>,
+    pub system: RefCell<ecs_system_t>
+}
+
+pub struct Callback {
+    pub id: ecs_entity_t
 }
 
 pub struct EcsWorldPtr(*mut ecs_world_t);
@@ -142,12 +151,12 @@ impl GuestComponentType for ComponentType {
             }
 
             // Initialize component
-            if lookup == 0 {    
+            if lookup == 0 {
                 ecs_struct_init(WORLD.0, &struct_desc);
             }
 
             // Return component 
-            ComponentType { 
+            ComponentType {
                 id: component_entity
             }
         }
@@ -175,8 +184,6 @@ impl GuestComponent for Component {
     //         COMPONENT_CACHE.insert(hash, self);
     //     }
     // }
-
-    // fn
 
     fn set_member_u8(&self, offset: u32, value: u8) {
         unsafe {
@@ -502,11 +509,67 @@ impl GuestQuery for Query {
     // }
 }
 
+#[no_mangle]
+// Trampoline closure from Rust using C callback and binding_ctx field to call a Rust closure
+pub unsafe extern "C" fn query_trampoline(iter: *mut ecs_iter_t) {
+    let world = WORLD.0;
+    let callback = (*iter).binding_ctx as *mut c_void;
+    if callback.is_null() {
+        return;
+    }
+    // let iter = toxoid_api::Iter::from(iter as *mut c_void);
+    // let callback_fn: fn(&toxoid_api::Iter) = std::mem::transmute(callback);
+    // callback_fn(&iter); // Call the callback through the reference
+    println!("Query trampoline called");
+}
+
+impl GuestSystem for System {
+    fn new(desc: SystemDesc) -> System {
+        // Create system entity
+        let mut entity_desc: ecs_entity_desc_t = unsafe { MaybeUninit::zeroed().assume_init() };
+        // We have to add this pair so that the system is part of standard progress stage
+        let pair = &[unsafe { ecs_make_pair(EcsDependsOn, EcsOnUpdate) }];
+        entity_desc.add = pair.as_ptr() as *const u64;
+        if let Some(name) = desc.name.clone() {
+            entity_desc.name = c_string(&name);
+        }
+        let entity = unsafe { ecs_entity_init(WORLD.0, &entity_desc) };
+        // Create system descriptor
+        let mut system_desc: ecs_system_desc_t = unsafe { MaybeUninit::zeroed().assume_init() };
+        system_desc.entity = entity;
+        let mut query_desc: ecs_query_desc_t = unsafe { MaybeUninit::zeroed().assume_init() };
+        query_desc.expr = c_string(&desc.query_desc.expr);
+        system_desc.query = query_desc;
+        system_desc.ctx = desc.callback as *mut c_void;
+        system_desc.callback_ctx = desc.callback as *mut c_void;
+        system_desc.callback = Some(query_trampoline);
+        System { 
+            desc: RefCell::new(system_desc),
+            entity: RefCell::new(entity), 
+            system: RefCell::new(
+                unsafe { MaybeUninit::zeroed().assume_init() }
+            )
+        }
+    }
+
+    fn build(&self) {
+        *self.entity.borrow_mut() = unsafe { ecs_system_init(WORLD.0, self.desc.as_ptr()) };
+    }
+}
+
+impl GuestCallback for Callback {
+    fn run(&self, query: ecs::Query) {
+        println!("Callback run");
+    }
+}
+
 impl Guest for ToxoidApi {
     type ComponentType = ComponentType;
     type Component = Component;
     type Entity = Entity;
     type Query = Query;
+    type System = System;
+    type Callback = Callback;
 }
 
 #[cfg(target_arch = "wasm32")]

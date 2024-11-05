@@ -78,6 +78,11 @@ interface ecs {
         get-member-f32array: func(offset: u32) -> list<f32>;
     }
 
+    // resource tag {
+    //     constructor(name: string);
+    //     // get-id: func() -> ecs-entity-t;
+    // }
+
     resource entity {
         constructor(desc: entity-desc);
         get-id: func() -> ecs-entity-t;
@@ -110,31 +115,29 @@ interface ecs {
         // ptrs: func(component-query-index: u32) -> *mut *mut c_void;
     }
 
+    resource callback {
+        run: func(query: query);
+    }
 
-    // resource tag {
-    //     constructor(name: string);
-    //     // get-id: func() -> ecs-entity-t;
-    // }
+    record system-desc {
+        name: option<string>,
+        {% if wasm %}
+        callback: callback,
+        {% else %}
+        callback: s64,
+        {% endif %}
+        query-desc: query-desc,
+        {% if wasm %}
+        query: s64
+        {% else %}
+        query: query
+        {% endif %}
+    }
 
-    // record query-desc {
-    //     name: string
-    // }
-
-    // resource query {
-    //     constructor(desc: query-desc);
-    //     build: func();
-    // }
-
-    // record system-desc {
-    //     name: string,
-    //     query: query
-    // }
-
-    // resource system {
-    //     constructor(desc: system-desc);
-    //     build: func();
-    //     run: func();
-    // }
+    resource system {
+        constructor(desc: system-desc);
+        build: func();
+    }
 
     // component-create: func(desc: component-desc) -> ecs-entity-t;
     // component-get: func(name: string) -> ecs-entity-t;

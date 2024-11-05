@@ -91,6 +91,21 @@ interface ecs {
         count: func() -> s32;
         entities: func() -> list<entity>;
     }
+
+    resource callback {
+        run: func(query: query);
+    }
+
+    record system-desc {
+        name: option<string>,
+        query-desc: query-desc,
+        query: query
+    }
+
+    resource system {
+        constructor(desc: system-desc);
+        build: func();
+    }
 }
 
 world toxoid-component-world {

@@ -7,4 +7,5 @@
         "--all-targets",
         "--message-format=json"
     ],
+    "rust-analyzer.cargo.target": "wasm32-wasip1"
 }

@@ -7,10 +7,12 @@ bindgen!({
         "toxoid-component:component/ecs/component": ComponentProxy,
         "toxoid-component:component/ecs/entity": EntityProxy,
         "toxoid-component:component/ecs/query": QueryProxy,
+        "toxoid-component:component/ecs/system": SystemProxy,
+        "toxoid-component:component/ecs/callback": CallbackProxy,
     },
 });
 
-use toxoid_engine::bindings::exports::toxoid::engine::ecs::{GuestComponent, GuestComponentType, GuestEntity, GuestQuery};
+use toxoid_engine::bindings::exports::toxoid::engine::ecs::{GuestComponent, GuestComponentType, GuestEntity, GuestQuery, GuestSystem};
 use wasmtime::component::{bindgen, Component, Linker, Resource, ResourceTable};
 use wasmtime::{Engine, Result, Store};
 use wasmtime_wasi::{WasiCtx, WasiView, WasiCtxBuilder};
@@ -32,6 +34,14 @@ pub struct QueryProxy {
     ptr: *mut toxoid_engine::Query
 }
 unsafe impl Send for QueryProxy {}
+pub struct SystemProxy {
+    ptr: *mut toxoid_engine::System
+}
+unsafe impl Send for SystemProxy {}
+pub struct CallbackProxy {
+    ptr: *mut toxoid_engine::Callback
+}
+unsafe impl Send for CallbackProxy {}
 
 // StoreState is the state of the WASM store.
 pub struct StoreState {
@@ -47,6 +57,51 @@ impl WasiView for StoreState {
 }
 
 impl toxoid_component::component::ecs::Host for StoreState {}
+
+impl toxoid_component::component::ecs::HostCallback for StoreState {
+    fn run(&mut self, callback: wasmtime::component::Resource<CallbackProxy>, query: wasmtime::component::Resource<QueryProxy>) -> () {
+        let query_proxy = self.table.get(&query).unwrap() as &QueryProxy;
+        let query = unsafe { Box::from_raw(query_proxy.ptr) };
+        query.iter();
+    }
+
+    fn drop(&mut self, callback: Resource<toxoid_component::component::ecs::Callback>) -> Result<(), wasmtime::Error> {
+        Ok(())
+    }
+}
+
+impl toxoid_component::component::ecs::HostSystem for StoreState {
+    fn new(&mut self, desc: toxoid_component::component::ecs::SystemDesc) -> Resource<SystemProxy> {
+        let query_desc = toxoid_engine::bindings::exports::toxoid::engine::ecs::QueryDesc {
+            expr: desc.query_desc.expr,
+        };
+        // let query = unsafe { Box::from_raw(desc.query) };
+        let system = <toxoid_engine::System as toxoid_engine::bindings::exports::toxoid::engine::ecs::GuestSystem>::new(toxoid_engine::bindings::exports::toxoid::engine::ecs::SystemDesc {
+            name: desc.name,
+            query_desc: query_desc.clone(),
+            query: toxoid_engine::bindings::exports::toxoid::engine::ecs::Query::new(toxoid_engine::Query::new(query_desc)),
+            callback: desc.callback.rep() as i64,
+        });
+        let id = self
+            .table
+            .push::<SystemProxy>(SystemProxy {
+                ptr: Box::into_raw(Box::new(system))
+            })
+            .unwrap();
+        id
+    }
+
+    fn build(&mut self, system: Resource<toxoid_component::component::ecs::System>) -> () {
+        let system_proxy = self.table.get(&system).unwrap() as &SystemProxy;
+        let mut system = unsafe { Box::from_raw(system_proxy.ptr) };
+        system.as_mut().build();
+        Box::into_raw(system);
+    }
+
+    fn drop(&mut self, system: Resource<toxoid_component::component::ecs::System>) -> Result<(), wasmtime::Error> {
+        Ok(())
+    }
+}
 
 impl toxoid_component::component::ecs::HostEntity for StoreState {
     fn new(&mut self, desc: toxoid_component::component::ecs::EntityDesc) -> Resource<EntityProxy> {
