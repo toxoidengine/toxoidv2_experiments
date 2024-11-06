@@ -9,6 +9,14 @@ pub use toxoid_engine::bindings::exports::toxoid::engine::ecs::{EntityDesc, Comp
 #[cfg(target_arch = "wasm32")]
 pub use crate::bindings::toxoid_component::component::ecs::{EntityDesc, ComponentDesc, QueryDesc, SystemDesc, MemberType};
 
+pub struct ToxoidWasmComponent;
+
+impl crate::bindings::exports::toxoid_component::component::callbacks::Guest for ToxoidWasmComponent {
+    fn run(query: crate::bindings::toxoid_component::component::ecs::Query) {
+        println!("WASM callback");
+    }
+}
+
 pub type ecs_entity_t = u64;
 
 pub trait ComponentType {
@@ -147,12 +155,7 @@ impl System {
     pub fn new(desc: Option<SystemDesc>, callback_fn: fn(&Query)) -> Self {
         let callback = ToxoidCallback::new(7770);
         let query_desc = desc.as_ref().unwrap().query_desc.clone();
-        #[cfg(not(target_arch = "wasm32"))]
-        let query = ToxoidQuery::new(query_desc);
-        #[cfg(target_arch = "wasm32")]
-        let query = ToxoidQuery::new(&query_desc);
-        #[cfg(target_arch = "wasm32")]
-        let desc = desc.unwrap_or(SystemDesc { name: None, callback, query_desc, query });
+        let desc = desc.unwrap_or(SystemDesc { name: None, callback, query_desc });
         Self { system: ToxoidSystem::new(desc) }
     }
 
@@ -164,7 +167,7 @@ impl System {
     #[cfg(target_arch = "wasm32")]
     pub fn dsl(dsl: &str, callback_fn: fn(&Query)) -> Self {
         let callback = ToxoidCallback::new(7770);
-        let desc = SystemDesc { name: None, callback, query_desc: QueryDesc { expr: dsl.to_string() }, query: ToxoidQuery::new(&QueryDesc { expr: dsl.to_string() }) };
+        let desc = SystemDesc { name: None, callback, query_desc: QueryDesc { expr: dsl.to_string() } };
         Self::new(Some(desc), callback_fn)
     }
 
@@ -175,6 +178,13 @@ impl System {
 
 pub struct Callback {
     callback: ToxoidCallback
+}
+
+impl Callback {
+    pub fn new(callback_fn: fn(&Query)) -> Self {
+        let handle = Box::into_raw(Box::new(callback_fn));
+        Self { callback: ToxoidCallback::new(handle as i64) }
+    }
 }
 
 /* Native

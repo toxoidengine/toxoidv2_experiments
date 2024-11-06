@@ -82,11 +82,12 @@ impl toxoid_component::component::ecs::HostSystem for StoreState {
         let query_desc = toxoid_engine::bindings::exports::toxoid::engine::ecs::QueryDesc {
             expr: desc.query_desc.expr,
         };
-        // let query = unsafe { Box::from_raw(desc.query) };
+        let query = toxoid_engine::Query::new(query_desc.clone());
+        let query_ptr = Box::into_raw(Box::new(query));
         let system = <toxoid_engine::System as toxoid_engine::bindings::exports::toxoid::engine::ecs::GuestSystem>::new(toxoid_engine::bindings::exports::toxoid::engine::ecs::SystemDesc {
             name: desc.name,
-            query_desc: query_desc.clone(),
-            query: toxoid_engine::bindings::exports::toxoid::engine::ecs::Query::new(toxoid_engine::Query::new(query_desc)),
+            query_desc,
+            query: query_ptr as i64,
             callback: desc.callback.rep() as i64,
         });
         let id = self

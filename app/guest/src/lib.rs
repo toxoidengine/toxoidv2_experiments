@@ -2,18 +2,10 @@
 
 pub mod bindings;
 pub mod api;
+pub mod components;
 
 use api::*;
-use toxoid_api_macro::component;
-
-component! {
-    Position {
-        x: u32,
-        y: u32
-    }
-}
-
-pub struct ToxoidWasmComponent;
+use components::*;
 
 impl bindings::Guest for ToxoidWasmComponent {
     fn init() {
@@ -35,7 +27,6 @@ impl bindings::Guest for ToxoidWasmComponent {
         let y = position.get_y();
         println!("X: {}, Y: {}", x, y);
 
-        // let mut query = Query::new(Some(QueryDesc { expr: "Position($this)".to_string() }));
         let mut query = Query::dsl("Position($this)");
         query.build();
         query.iter();

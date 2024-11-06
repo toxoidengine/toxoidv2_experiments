@@ -100,8 +100,7 @@ interface ecs {
     record system-desc {
         name: option<string>,
         callback: callback,
-        query-desc: query-desc,
-        query: query
+        query-desc: query-desc
     }
 
     resource system {
@@ -110,7 +109,13 @@ interface ecs {
     }
 }
 
+interface callbacks {
+    use ecs.{query};
+    run: func(query: query);
+}
+
 world toxoid-component-world {
     import ecs;
     export init: func();
+    export callbacks;
 }

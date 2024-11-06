@@ -129,9 +129,9 @@ interface ecs {
         {% endif %}
         query-desc: query-desc,
         {% if wasm %}
-        query: s64
-        {% else %}
         query: query
+        {% else %}
+        query: s64
         {% endif %}
     }
 

@@ -119,7 +119,7 @@ interface ecs {
         
         query-desc: query-desc,
         
-        query: query
+        query: s64
         
     }
 

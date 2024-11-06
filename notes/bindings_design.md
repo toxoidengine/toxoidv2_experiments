@@ -1,0 +1,1 @@
+- It's okay for the wit files to be different from the host and the guest. The system description does not need need a query field. That can be accessed and held internally by the host implementation.
