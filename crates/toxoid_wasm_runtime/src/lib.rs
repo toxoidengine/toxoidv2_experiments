@@ -13,7 +13,7 @@ bindgen!({
     },
 });
 
-use toxoid_engine::bindings::exports::toxoid::engine::ecs::{GuestComponent, GuestComponentType, GuestEntity, GuestQuery, GuestSystem, GuestIter};
+use toxoid_engine::bindings::exports::toxoid::engine::ecs::{GuestCallback, GuestComponent, GuestComponentType, GuestEntity, GuestIter, GuestQuery, GuestSystem};
 use wasmtime::component::{bindgen, Component, Linker, Resource, ResourceTable};
 use wasmtime::{Engine, Result, Store};
 use wasmtime_wasi::{WasiCtx, WasiView, WasiCtxBuilder};
@@ -147,7 +147,7 @@ impl toxoid_component::component::ecs::HostSystem for StoreState {
             name: desc.name,
             query_desc,
             query: query_ptr as i64,
-            callback: callback.handle,
+            callback: callback.cb_handle(),
         });
         let id = self
             .table
@@ -672,11 +672,13 @@ pub unsafe extern "C" fn query_trampoline(iter: *mut toxoid_engine::ecs_iter_t) 
     // let world = toxoid_engine::WORLD.0;
     // let callback = (*iter).ctx as *mut core::ffi::c_void;
     // println!("Callback: {:?}", callback);
+    // let callback_ctx = (*iter).callback_ctx as *mut core::ffi::c_void;
+    // let callback_ctx = (*iter).callback_ctx as *mut core::ffi::c_void;
     // println!("Callback ctx: {:?}", callback_ctx);
-    let callback_ctx = (*iter).callback_ctx as *mut core::ffi::c_void;
-    if callback_ctx.is_null() {
-        return;
-    }
+    // if callback_ctx.is_null() {
+    //     return;
+    // }
+    let handle = (*iter).callback_ctx as i64;
     let store = unsafe { &mut *STORE };
     let iter = Box::into_raw(Box::new(toxoid_engine::Iter::new(iter as i64)));
     let iter_resource_id = store.data_mut().table.push::<IterProxy>(IterProxy { ptr: iter }).unwrap();
@@ -685,7 +687,7 @@ pub unsafe extern "C" fn query_trampoline(iter: *mut toxoid_engine::ecs_iter_t) 
             .as_ref()
             .unwrap()
             .toxoid_component_component_callbacks()
-            .call_run(store, iter_resource_id, callback_ctx as i64)
+            .call_run(store, iter_resource_id, handle)
             .unwrap();
     }
 }

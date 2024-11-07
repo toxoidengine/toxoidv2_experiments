@@ -558,8 +558,6 @@ impl GuestSystem for System {
     }
 
     fn build(&self) {
-        // println!("Building system");
-        // println!("Desc: {:#?}", self.desc.borrow());
         *self.entity.borrow_mut() = unsafe { ecs_system_init(WORLD.0, self.desc.as_ptr()) };
     }
 }

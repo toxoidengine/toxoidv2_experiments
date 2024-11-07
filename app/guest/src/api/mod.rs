@@ -1,9 +1,9 @@
 #![allow(warnings)]
 
 #[cfg(not(target_arch = "wasm32"))]
-use toxoid_engine::{Component as ToxoidComponent, ComponentType as ToxoidComponentType, Entity as ToxoidEntity, Query as ToxoidQuery, System as ToxoidSystem, Callback as ToxoidCallback, bindings::exports::toxoid::engine::ecs::{GuestComponent, GuestComponentType, GuestEntity, GuestQuery, GuestSystem, GuestCallback}};
+use toxoid_engine::{Component as ToxoidComponent, ComponentType as ToxoidComponentType, Entity as ToxoidEntity, Query as ToxoidQuery, System as ToxoidSystem, Callback as ToxoidCallback, Iter as ToxoidIter, bindings::exports::toxoid::engine::ecs::{GuestComponent, GuestComponentType, GuestEntity, GuestQuery, GuestSystem, GuestCallback, GuestIter}};
 #[cfg(target_arch = "wasm32")]
-use crate::bindings::{toxoid_component::component::ecs::{Component as ToxoidComponent, ComponentType as ToxoidComponentType, Entity as ToxoidEntity, Query as ToxoidQuery, System as ToxoidSystem, Callback as ToxoidCallback}, Guest};
+use crate::bindings::{toxoid_component::component::ecs::{Component as ToxoidComponent, ComponentType as ToxoidComponentType, Entity as ToxoidEntity, Query as ToxoidQuery, System as ToxoidSystem, Callback as ToxoidCallback, Iter as ToxoidIter}, Guest};
 #[cfg(not(target_arch = "wasm32"))]
 pub use toxoid_engine::bindings::exports::toxoid::engine::ecs::{EntityDesc, ComponentDesc, QueryDesc, SystemDesc, MemberType};
 #[cfg(target_arch = "wasm32")]
@@ -12,8 +12,9 @@ pub use crate::bindings::toxoid_component::component::ecs::{EntityDesc, Componen
 pub struct ToxoidWasmComponent;
 
 impl crate::bindings::exports::toxoid_component::component::callbacks::Guest for ToxoidWasmComponent {
-    fn run(query: crate::bindings::toxoid_component::component::ecs::Iter, handle: i64) {
-        println!("WASM callback");
+    fn run(iter: crate::bindings::toxoid_component::component::ecs::Iter, handle: i64) {
+        let callback = unsafe { CALLBACKS[handle as usize].as_ref() };
+        callback(&iter);
     }
 }
 
@@ -152,21 +153,29 @@ impl System {
     // }
 
     #[cfg(target_arch = "wasm32")]
-    pub fn new(desc: Option<SystemDesc>, callback_fn: fn(&Query)) -> Self {
-        let callback = ToxoidCallback::new(7770);
+    pub fn new(desc: Option<SystemDesc>, callback_fn: fn(&crate::bindings::toxoid_component::component::ecs::Iter)) -> Self {
+        // Register the callback in the guest environment
+        let callback = Callback::new(callback_fn);
+        // Create the Toxoid callback with the registered callback handle
+        let callback = ToxoidCallback::new(callback.cb_handle());
         let query_desc = desc.as_ref().unwrap().query_desc.clone();
         let desc = desc.unwrap_or(SystemDesc { name: None, callback, query_desc });
+       
         Self { system: ToxoidSystem::new(desc) }
     }
 
     #[cfg(not(target_arch = "wasm32"))]
-    pub fn dsl(dsl: &str, callback: fn(&Query)) -> Self {
+    pub fn dsl(dsl: &str, callback: fn(&crate::bindings::toxoid_component::component::ecs::Iter)) -> Self {
         unimplemented!()
     }
 
     #[cfg(target_arch = "wasm32")]
-    pub fn dsl(dsl: &str, callback_fn: fn(&Query)) -> Self {
-        let callback = ToxoidCallback::new(7770);
+    pub fn dsl(dsl: &str, callback_fn: fn(&crate::bindings::toxoid_component::component::ecs::Iter)) -> Self {
+        // Register the callback in the guest environment
+        let callback = Callback::new(callback_fn);
+        // Create the Toxoid callback with the registered callback handle
+        let callback = ToxoidCallback::new(callback.cb_handle());
+        println!("Callback handle: {}", callback.cb_handle());
         let desc = SystemDesc { name: None, callback, query_desc: QueryDesc { expr: dsl.to_string() } };
         Self::new(Some(desc), callback_fn)
     }
@@ -177,20 +186,46 @@ impl System {
 }
 
 pub struct Callback {
-    callback: ToxoidCallback
+    callback: ToxoidCallback,
 }
 
-pub static mut CALLBACKS: once_cell::sync::Lazy<Vec<Box<dyn Fn(&Query)>>> = once_cell::sync::Lazy::new(|| Vec::new());
+pub static mut CALLBACKS: once_cell::sync::Lazy<Vec<Box<dyn Fn(&crate::bindings::toxoid_component::component::ecs::Iter)>>> = once_cell::sync::Lazy::new(|| Vec::new());
 
 impl Callback {
-    pub fn new(callback_fn: fn(&Query)) -> Self {
+    pub fn new(callback_fn: fn(&crate::bindings::toxoid_component::component::ecs::Iter)) -> Self {
         let handle = unsafe { CALLBACKS.push(Box::new(callback_fn)); CALLBACKS.len() - 1 };
         Self { callback: ToxoidCallback::new(handle as i64) }   
     }
 
-    pub fn run(&self, query: &Query) {
+    pub fn run(&self, iter: &crate::bindings::toxoid_component::component::ecs::Iter) {
         let callback = unsafe { CALLBACKS[self.callback.cb_handle() as usize].as_ref() };
-        callback(query);
+        callback(iter);
+    }
+
+    pub fn cb_handle(&self) -> i64 {
+        self.callback.cb_handle()
+    }
+}
+
+pub struct Iter {
+    iter: ToxoidIter
+}
+
+impl Iter {
+    pub fn new(ptr: i64) -> Self {
+        Self { iter: ToxoidIter::new(ptr) }
+    }
+
+    pub fn next(&mut self) {
+        self.iter.next();
+    }
+
+    pub fn count(&self) -> i32 {
+        self.iter.count()
+    }
+
+    pub fn entities(&self) -> Vec<Entity> {
+        self.iter.entities().iter().map(|entity| Entity { entity: ToxoidEntity::from_id(entity.get_id()) }).collect()
     }
 }
 

@@ -42,6 +42,36 @@ enum Commands {
     },
 }
 
+fn build_guest(path: &str, out_path: &PathBuf, host_path: &PathBuf) -> Result<(), Box<dyn std::error::Error>> {
+    // Build the WASM file
+    let build_status = Command::new("cargo")
+        .args(&["component", "build"])
+        .current_dir(path)
+        .status()
+        .expect("Failed to build WASM");
+
+    // Ensure the build process is complete
+    if build_status.success() {
+        println!("Build completed successfully.");
+
+        // Introduce a small delay to ensure file handles are released
+        thread::sleep(Duration::from_millis(500));
+
+        // Move the WASM file to the final output path
+        println!("Moving WASM file from {} to {}...", out_path.display(), host_path.display());
+        fs::rename(out_path, host_path)
+            .expect("Failed to move WASM file");
+
+        // Connect to the server using TcpStream
+        let mut conn = std::net::TcpStream::connect(HOST_ADDRESS)?;
+        conn.write_all(format!("reload {}", "guest.wasm").as_bytes())?;
+        println!("Sent reload message to host...");
+    } else {
+        println!("Build failed, skipping file move.");
+    }
+    Ok(())
+}
+
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let cli = Cli::parse();
 
@@ -64,7 +94,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             let debounce_duration = Duration::from_secs(2);
             let mut last_event_time = Instant::now();
 
-            println!("Host running");
+            println!("Host running...");
+            println!("Building guest WASM...");
+            build_guest(path, out_path, host_path)?;
 
             for res in rx {
                 match res {
@@ -72,34 +104,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                         let now = Instant::now();
                         if now.duration_since(last_event_time) >= debounce_duration {
                             last_event_time = now;
-                            println!("File change detected, building WASM...");
-
-                            // Build the WASM file
-                            let build_status = Command::new("cargo")
-                                .args(&["component", "build"])
-                                .current_dir(path)
-                                .status()
-                                .expect("Failed to build WASM");
-
-                            // Ensure the build process is complete
-                            if build_status.success() {
-                                println!("Build completed successfully.");
-
-                                // Introduce a small delay to ensure file handles are released
-                                thread::sleep(Duration::from_millis(500));
-
-                                // Move the WASM file to the final output path
-                                println!("Moving WASM file from {} to {}...", out_path.display(), host_path.display());
-                                fs::rename(out_path, host_path)
-                                    .expect("Failed to move WASM file");
-
-                                // Connect to the server using TcpStream
-                                let mut conn = std::net::TcpStream::connect(HOST_ADDRESS)?;
-                                conn.write_all(format!("reload {}", "guest.wasm").as_bytes())?;
-                                println!("Sent reload message to host...");
-                            } else {
-                                println!("Build failed, skipping file move.");
-                            }
+                            println!("File change detected, rebuilding guest WASM...");
+                            build_guest(path, out_path, host_path)?;
                         }
                     }
                     Err(e) => println!("Watch error: {:?}", e),

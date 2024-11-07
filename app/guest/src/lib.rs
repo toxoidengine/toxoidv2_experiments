@@ -45,7 +45,7 @@ impl bindings::Guest for ToxoidWasmComponent {
                 println!("Iter X: {}, Iter Y: {}", x, y);
             });
 
-        let mut system = System::dsl("Position($this)", |query| println!("System query"));
+        let mut system = System::dsl("Position($this)", |iter| println!("System callback running from guest."));
         system.build();
     }
 }
