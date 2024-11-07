@@ -12,7 +12,7 @@ pub use crate::bindings::toxoid_component::component::ecs::{EntityDesc, Componen
 pub struct ToxoidWasmComponent;
 
 impl crate::bindings::exports::toxoid_component::component::callbacks::Guest for ToxoidWasmComponent {
-    fn run(query: crate::bindings::toxoid_component::component::ecs::Query) {
+    fn run(query: crate::bindings::toxoid_component::component::ecs::Query, handle: i64) {
         println!("WASM callback");
     }
 }
@@ -180,10 +180,17 @@ pub struct Callback {
     callback: ToxoidCallback
 }
 
+pub static mut CALLBACKS: once_cell::sync::Lazy<Vec<Box<dyn Fn(&Query)>>> = once_cell::sync::Lazy::new(|| Vec::new());
+
 impl Callback {
     pub fn new(callback_fn: fn(&Query)) -> Self {
-        let handle = Box::into_raw(Box::new(callback_fn));
-        Self { callback: ToxoidCallback::new(handle as i64) }
+        let handle = unsafe { CALLBACKS.push(Box::new(callback_fn)); CALLBACKS.len() - 1 };
+        Self { callback: ToxoidCallback::new(handle as i64) }   
+    }
+
+    pub fn run(&self, query: &Query) {
+        // let callback = unsafe { CALLBACKS[self.callback.cb_handle() as usize].as_ref() };
+        // callback(query);
     }
 }
 

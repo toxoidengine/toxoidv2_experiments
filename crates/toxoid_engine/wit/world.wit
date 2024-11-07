@@ -126,6 +126,7 @@ interface ecs {
     resource system {
         constructor(desc: system-desc);
         build: func();
+        callback: func() -> callback;
     }
 
     // component-create: func(desc: component-desc) -> ecs-entity-t;

@@ -42,7 +42,6 @@ pub struct CallbackProxy {
     ptr: *mut toxoid_engine::Callback
 }
 unsafe impl Send for CallbackProxy {}
-
 // StoreState is the state of the WASM store.
 pub struct StoreState {
     ctx: WasiCtx,
@@ -66,19 +65,31 @@ impl toxoid_component::component::ecs::HostCallback for StoreState {
         self.table.push::<CallbackProxy>(CallbackProxy { ptr: boxed_callback_ptr }).unwrap()
     }
 
-    fn run(&mut self, callback: wasmtime::component::Resource<CallbackProxy>, query: wasmtime::component::Resource<QueryProxy>) -> () {
-        let query_proxy = self.table.get(&query).unwrap() as &QueryProxy;
-        let query = unsafe { Box::from_raw(query_proxy.ptr) };
-        query.iter();
+    fn run(&mut self, _callback: wasmtime::component::Resource<CallbackProxy>, query: wasmtime::component::Resource<QueryProxy>) -> () {
+        let callback_proxy = self.table.get(&_callback).unwrap() as &CallbackProxy;
+        let callback = unsafe { Box::from_raw(callback_proxy.ptr) };
+        let callbacks = unsafe { TOXOID_COMPONENT_WORLD.as_mut().unwrap() };
+        let store = unsafe { &mut *STORE };
+        callbacks.interface1.call_run(store, query, callback.handle).unwrap();
     }
 
-    fn drop(&mut self, callback: Resource<toxoid_component::component::ecs::Callback>) -> Result<(), wasmtime::Error> {
+    fn cb_handle(&mut self, _callback: Resource<toxoid_component::component::ecs::Callback>) -> i64 {
+        let callback_proxy = self.table.get(&_callback).unwrap() as &CallbackProxy;
+        let callback = unsafe { Box::from_raw(callback_proxy.ptr) };
+        callback.handle
+    }
+
+    fn drop(&mut self, _callback: Resource<toxoid_component::component::ecs::Callback>) -> Result<(), wasmtime::Error> {
         Ok(())
     }
 }
 
 impl toxoid_component::component::ecs::HostSystem for StoreState {
     fn new(&mut self, desc: toxoid_component::component::ecs::SystemDesc) -> Resource<SystemProxy> {
+        let callback_proxy = self.table.get(&desc.callback).unwrap() as &CallbackProxy;
+        let callback = unsafe { Box::from_raw(callback_proxy.ptr) };
+        println!("Callback rep: {}", desc.callback.rep());
+        println!("Callback handle: {}", callback.handle);
         let query_desc = toxoid_engine::bindings::exports::toxoid::engine::ecs::QueryDesc {
             expr: desc.query_desc.expr,
         };
@@ -88,7 +99,7 @@ impl toxoid_component::component::ecs::HostSystem for StoreState {
             name: desc.name,
             query_desc,
             query: query_ptr as i64,
-            callback: desc.callback.rep() as i64,
+            callback: callback.handle,
         });
         let id = self
             .table
@@ -96,6 +107,7 @@ impl toxoid_component::component::ecs::HostSystem for StoreState {
                 ptr: Box::into_raw(Box::new(system))
             })
             .unwrap();
+        Box::into_raw(callback);
         id
     }
 
@@ -106,7 +118,7 @@ impl toxoid_component::component::ecs::HostSystem for StoreState {
         Box::into_raw(system);
     }
 
-    fn drop(&mut self, system: Resource<toxoid_component::component::ecs::System>) -> Result<(), wasmtime::Error> {
+    fn drop(&mut self, _system: Resource<toxoid_component::component::ecs::System>) -> Result<(), wasmtime::Error> {
         Ok(())
     }
 }
@@ -564,13 +576,13 @@ fn new_store() -> Store<StoreState> {
 
 // Create WASM Store
 pub static mut STORE: Lazy<Store<StoreState>> = Lazy::new(|| new_store());
+// Crate lazy initialized option
+pub static mut TOXOID_COMPONENT_WORLD: Option<ToxoidComponentWorld> = None;
 
 pub fn load_wasm_component(filename: &str) -> Result<()> {
     // Get WASM engine, linker and store
     let engine = &*ENGINE; // Ensure ENGINE is initialized
     let linker = &*LINKER; // Ensure LINKER is initialized
-    let store = unsafe { &mut *STORE }; // Ensure STORE is initialized
-
     // Reinitialize the store to unload the old WASM module
     // TODO: Create hashmap of stores to load multiple modules
     // where each WASM module has it's own memory and resources
@@ -589,5 +601,6 @@ pub fn load_wasm_component(filename: &str) -> Result<()> {
     let toxoid_component_world = ToxoidComponentWorld::instantiate(&mut *store, &component, &linker)?;
     // Call init
     toxoid_component_world.call_init(&mut *store)?;
+    unsafe { TOXOID_COMPONENT_WORLD = Some(toxoid_component_world) };
     Ok(())
 }

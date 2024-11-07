@@ -1594,6 +1594,17 @@ pub mod exports {
                     #[cfg(target_arch = "wasm32")] _rt::run_ctors_once();
                     T::build(SystemBorrow::lift(arg0 as u32 as usize).get());
                 }
+                #[doc(hidden)]
+                #[allow(non_snake_case)]
+                pub unsafe fn _export_method_system_callback_cabi<T: GuestSystem>(
+                    arg0: *mut u8,
+                ) -> i32 {
+                    #[cfg(target_arch = "wasm32")] _rt::run_ctors_once();
+                    let result0 = T::callback(
+                        SystemBorrow::lift(arg0 as u32 as usize).get(),
+                    );
+                    (result0).take_handle() as i32
+                }
                 pub trait Guest {
                     type ComponentType: GuestComponentType;
                     type Component: GuestComponent;
@@ -1900,6 +1911,7 @@ pub mod exports {
                     }
                     fn new(desc: SystemDesc) -> Self;
                     fn build(&self);
+                    fn callback(&self) -> Callback;
                 }
                 #[doc(hidden)]
                 macro_rules! __export_toxoid_engine_ecs_cabi {
@@ -2184,8 +2196,12 @@ pub mod exports {
                         #[export_name = "toxoid:engine/ecs#[method]system.build"] unsafe
                         extern "C" fn export_method_system_build(arg0 : * mut u8,) {
                         $($path_to_types)*:: _export_method_system_build_cabi::<<$ty as
-                        $($path_to_types)*:: Guest >::System > (arg0) } const _ : () = {
-                        #[doc(hidden)] #[export_name =
+                        $($path_to_types)*:: Guest >::System > (arg0) } #[export_name =
+                        "toxoid:engine/ecs#[method]system.callback"] unsafe extern "C" fn
+                        export_method_system_callback(arg0 : * mut u8,) -> i32 {
+                        $($path_to_types)*:: _export_method_system_callback_cabi::<<$ty
+                        as $($path_to_types)*:: Guest >::System > (arg0) } const _ : () =
+                        { #[doc(hidden)] #[export_name =
                         "toxoid:engine/ecs#[dtor]component-type"]
                         #[allow(non_snake_case)] unsafe extern "C" fn dtor(rep : * mut
                         u8) { $($path_to_types)*:: ComponentType::dtor::< <$ty as
@@ -2491,9 +2507,9 @@ pub(crate) use __export_toxoid_engine_world_impl as export;
 #[cfg(target_arch = "wasm32")]
 #[link_section = "component-type:wit-bindgen:0.31.0:toxoid:engine:toxoid-engine-world:encoded world"]
 #[doc(hidden)]
-pub static __WIT_BINDGEN_COMPONENT_TYPE: [u8; 3074] = *b"\
-\0asm\x0d\0\x01\0\0\x19\x16wit-component-encoding\x04\0\x07\xf8\x16\x01A\x02\x01\
-A\x02\x01B\x81\x01\x01w\x04\0\x0cecs-entity-t\x03\0\0\x01m\x10\x04u8-t\x05u16-t\x05\
+pub static __WIT_BINDGEN_COMPONENT_TYPE: [u8; 3115] = *b"\
+\0asm\x0d\0\x01\0\0\x19\x16wit-component-encoding\x04\0\x07\xa1\x17\x01A\x02\x01\
+A\x02\x01B\x83\x01\x01w\x04\0\x0cecs-entity-t\x03\0\0\x01m\x10\x04u8-t\x05u16-t\x05\
 u32-t\x05u64-t\x04i8-t\x05i16-t\x05i32-t\x05i64-t\x05f32-t\x05f64-t\x06bool-t\x08\
 string-t\x07array-t\x0au32array-t\x0af32array-t\x09pointer-t\x04\0\x0bmember-typ\
 e\x03\0\x02\x01ps\x01p}\x01r\x03\x04names\x0cmember-names\x04\x0cmember-types\x05\
@@ -2549,10 +2565,10 @@ ry.iter\x01E\x01@\x01\x04self\xc3\0\0\x7f\x04\0\x12[method]query.next\x01F\x01@\
 \0\x04\0\x15[constructor]callback\x01K\x01h\x11\x01@\x02\x04self\xcc\0\x05query\xc1\
 \0\x01\0\x04\0\x14[method]callback.run\x01M\x01i\x14\x01@\x01\x04desc\x13\0\xce\0\
 \x04\0\x13[constructor]system\x01O\x01h\x14\x01@\x01\x04self\xd0\0\x01\0\x04\0\x14\
-[method]system.build\x01Q\x04\x01\x11toxoid:engine/ecs\x05\0\x04\x01!toxoid:engi\
-ne/toxoid-engine-world\x04\0\x0b\x19\x01\0\x13toxoid-engine-world\x03\0\0\0G\x09\
-producers\x01\x0cprocessed-by\x02\x0dwit-component\x070.216.0\x10wit-bindgen-rus\
-t\x060.31.0";
+[method]system.build\x01Q\x01@\x01\x04self\xd0\0\0\xca\0\x04\0\x17[method]system\
+.callback\x01R\x04\x01\x11toxoid:engine/ecs\x05\0\x04\x01!toxoid:engine/toxoid-e\
+ngine-world\x04\0\x0b\x19\x01\0\x13toxoid-engine-world\x03\0\0\0G\x09producers\x01\
+\x0cprocessed-by\x02\x0dwit-component\x070.216.0\x10wit-bindgen-rust\x060.31.0";
 #[inline(never)]
 #[doc(hidden)]
 pub fn __link_custom_section_describing_imports() {

@@ -1461,6 +1461,25 @@ pub mod toxoid_component {
                     }
                 }
             }
+            impl Callback {
+                #[allow(unused_unsafe, clippy::all)]
+                pub fn cb_handle(&self) -> i64 {
+                    unsafe {
+                        #[cfg(target_arch = "wasm32")]
+                        #[link(wasm_import_module = "toxoid-component:component/ecs")]
+                        extern "C" {
+                            #[link_name = "[method]callback.cb-handle"]
+                            fn wit_import(_: i32) -> i64;
+                        }
+                        #[cfg(not(target_arch = "wasm32"))]
+                        fn wit_import(_: i32) -> i64 {
+                            unreachable!()
+                        }
+                        let ret = wit_import((self).handle() as i32);
+                        ret
+                    }
+                }
+            }
             impl System {
                 #[allow(unused_unsafe, clippy::all)]
                 pub fn new(desc: SystemDesc) -> Self {
@@ -1537,6 +1556,25 @@ pub mod toxoid_component {
                     }
                 }
             }
+            impl System {
+                #[allow(unused_unsafe, clippy::all)]
+                pub fn callback(&self) -> Callback {
+                    unsafe {
+                        #[cfg(target_arch = "wasm32")]
+                        #[link(wasm_import_module = "toxoid-component:component/ecs")]
+                        extern "C" {
+                            #[link_name = "[method]system.callback"]
+                            fn wit_import(_: i32) -> i32;
+                        }
+                        #[cfg(not(target_arch = "wasm32"))]
+                        fn wit_import(_: i32) -> i32 {
+                            unreachable!()
+                        }
+                        let ret = wit_import((self).handle() as i32);
+                        Callback::from_handle(ret as u32)
+                    }
+                }
+            }
         }
     }
 }
@@ -1555,24 +1593,25 @@ pub mod exports {
                 pub type Query = super::super::super::super::toxoid_component::component::ecs::Query;
                 #[doc(hidden)]
                 #[allow(non_snake_case)]
-                pub unsafe fn _export_run_cabi<T: Guest>(arg0: i32) {
+                pub unsafe fn _export_run_cabi<T: Guest>(arg0: i32, arg1: i64) {
                     #[cfg(target_arch = "wasm32")] _rt::run_ctors_once();
                     T::run(
                         super::super::super::super::toxoid_component::component::ecs::Query::from_handle(
                             arg0 as u32,
                         ),
+                        arg1,
                     );
                 }
                 pub trait Guest {
-                    fn run(query: Query);
+                    fn run(query: Query, handle: i64);
                 }
                 #[doc(hidden)]
                 macro_rules! __export_toxoid_component_component_callbacks_cabi {
                     ($ty:ident with_types_in $($path_to_types:tt)*) => {
                         const _ : () = { #[export_name =
                         "toxoid-component:component/callbacks#run"] unsafe extern "C" fn
-                        export_run(arg0 : i32,) { $($path_to_types)*::
-                        _export_run_cabi::<$ty > (arg0) } };
+                        export_run(arg0 : i32, arg1 : i64,) { $($path_to_types)*::
+                        _export_run_cabi::<$ty > (arg0, arg1) } };
                     };
                 }
                 #[doc(hidden)]
@@ -1841,9 +1880,9 @@ pub(crate) use __export_toxoid_component_world_impl as export;
 #[cfg(target_arch = "wasm32")]
 #[link_section = "component-type:wit-bindgen:0.31.0:toxoid-component:component:toxoid-component-world:encoded world"]
 #[doc(hidden)]
-pub static __WIT_BINDGEN_COMPONENT_TYPE: [u8; 3205] = *b"\
-\0asm\x0d\0\x01\0\0\x19\x16wit-component-encoding\x04\0\x07\xf8\x17\x01A\x02\x01\
-A\x07\x01B\x81\x01\x01w\x04\0\x0cecs-entity-t\x03\0\0\x01m\x10\x04u8-t\x05u16-t\x05\
+pub static __WIT_BINDGEN_COMPONENT_TYPE: [u8; 3296] = *b"\
+\0asm\x0d\0\x01\0\0\x19\x16wit-component-encoding\x04\0\x07\xd3\x18\x01A\x02\x01\
+A\x07\x01B\x85\x01\x01w\x04\0\x0cecs-entity-t\x03\0\0\x01m\x10\x04u8-t\x05u16-t\x05\
 u32-t\x05u64-t\x04i8-t\x05i16-t\x05i32-t\x05i64-t\x05f32-t\x05f64-t\x06bool-t\x08\
 string-t\x07array-t\x0au32array-t\x0af32array-t\x09pointer-t\x04\0\x0bmember-typ\
 e\x03\0\x02\x01ps\x01p}\x01r\x03\x04names\x0cmember-names\x04\x0cmember-types\x05\
@@ -1897,15 +1936,16 @@ d]query.iter\x01F\x01@\x01\x04self\xc4\0\0\x7f\x04\0\x12[method]query.next\x01G\
 @\x01\x04self\xc4\0\0z\x04\0\x13[method]query.count\x01H\x01p;\x01@\x01\x04self\xc4\
 \0\0\xc9\0\x04\0\x16[method]query.entities\x01J\x01@\x01\x06handlex\0\x12\x04\0\x15\
 [constructor]callback\x01K\x01h\x11\x01@\x02\x04self\xcc\0\x05query\xc2\0\x01\0\x04\
-\0\x14[method]callback.run\x01M\x01i\x15\x01@\x01\x04desc\x14\0\xce\0\x04\0\x13[\
-constructor]system\x01O\x01h\x15\x01@\x01\x04self\xd0\0\x01\0\x04\0\x14[method]s\
-ystem.build\x01Q\x03\x01\x1etoxoid-component:component/ecs\x05\0\x01@\0\x01\0\x04\
-\0\x04init\x01\x01\x02\x03\0\0\x05query\x01B\x05\x02\x03\x02\x01\x02\x04\0\x05qu\
-ery\x03\0\0\x01i\x01\x01@\x01\x05query\x02\x01\0\x04\0\x03run\x01\x03\x04\x01$to\
-xoid-component:component/callbacks\x05\x03\x04\x011toxoid-component:component/to\
-xoid-component-world\x04\0\x0b\x1c\x01\0\x16toxoid-component-world\x03\0\0\0G\x09\
-producers\x01\x0cprocessed-by\x02\x0dwit-component\x070.216.0\x10wit-bindgen-rus\
-t\x060.31.0";
+\0\x14[method]callback.run\x01M\x01@\x01\x04self\xcc\0\0x\x04\0\x1a[method]callb\
+ack.cb-handle\x01N\x01i\x15\x01@\x01\x04desc\x14\0\xcf\0\x04\0\x13[constructor]s\
+ystem\x01P\x01h\x15\x01@\x01\x04self\xd1\0\x01\0\x04\0\x14[method]system.build\x01\
+R\x01@\x01\x04self\xd1\0\0\x12\x04\0\x17[method]system.callback\x01S\x03\x01\x1e\
+toxoid-component:component/ecs\x05\0\x01@\0\x01\0\x04\0\x04init\x01\x01\x02\x03\0\
+\0\x05query\x01B\x05\x02\x03\x02\x01\x02\x04\0\x05query\x03\0\0\x01i\x01\x01@\x02\
+\x05query\x02\x06handlex\x01\0\x04\0\x03run\x01\x03\x04\x01$toxoid-component:com\
+ponent/callbacks\x05\x03\x04\x011toxoid-component:component/toxoid-component-wor\
+ld\x04\0\x0b\x1c\x01\0\x16toxoid-component-world\x03\0\0\0G\x09producers\x01\x0c\
+processed-by\x02\x0dwit-component\x070.216.0\x10wit-bindgen-rust\x060.31.0";
 #[inline(never)]
 #[doc(hidden)]
 pub fn __link_custom_section_describing_imports() {

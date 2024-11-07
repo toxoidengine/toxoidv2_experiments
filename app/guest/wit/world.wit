@@ -95,6 +95,7 @@ interface ecs {
     resource callback {
         constructor(handle: s64);
         run: func(query: query);
+        cb-handle: func() -> s64;
     }
 
     record system-desc {
@@ -106,12 +107,13 @@ interface ecs {
     resource system {
         constructor(desc: system-desc);
         build: func();
+        callback: func() -> callback;
     }
 }
 
 interface callbacks {
     use ecs.{query};
-    run: func(query: query);
+    run: func(query: query, handle: s64);
 }
 
 world toxoid-component-world {

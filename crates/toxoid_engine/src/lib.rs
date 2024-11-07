@@ -552,6 +552,11 @@ impl GuestSystem for System {
         }
     }
 
+    fn callback(&self) -> ecs::Callback {
+        // Callback::new(self.desc.borrow().ctx as *mut c_void)
+       unimplemented!()
+    }
+
     fn build(&self) {
         *self.entity.borrow_mut() = unsafe { ecs_system_init(WORLD.0, self.desc.as_ptr()) };
     }
