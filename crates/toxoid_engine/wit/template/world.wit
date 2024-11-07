@@ -110,14 +110,14 @@ interface ecs {
         {% if wasm %}
         entities: func() -> list<ecs-entity-t>;
         {% else %}
-        entities: func() -> list<u64>;
+        entities: func() -> list<ecs-entity-t>;
         {% endif %}
         // ptrs: func(component-query-index: u32) -> *mut *mut c_void;
     }
 
     resource callback {
         constructor(handle: s64);
-        run: func(query: query);
+        run: func(iter: iter);
         cb-handle: func() -> s64;
     }
 
@@ -146,20 +146,16 @@ interface ecs {
         {% endif %}
     }
 
-
-    // component-create: func(desc: component-desc) -> ecs-entity-t;
-    // component-get: func(name: string) -> ecs-entity-t;
-    // tag-create: func(tag-name: string) -> ecs-entity-t;
-    // prefab-create: func() -> ecs-entity-t;
-    // prefab-instance: func(prefab: ecs-entity-t) -> ecs-entity-t;
-    // entity-create: func() -> ecs-entity-t;
-    // singleton-add: func(component: ecs-entity-t);
-    // singleton-get: func(component: ecs-entity-t) -> component;
-    // singleton-remove: func(component: ecs-entity-t);
-    // entity-get-component: func(entity: ecs-entity-t, component: ecs-entity-t) -> component;
-    // entity-set-component: func(entity: ecs-entity-t, component: ecs-entity-t, value: component);
-    // entity-remove-component: func(entity: ecs-entity-t, component: ecs-entity-t);
-    // entity-has-component: func(entity: ecs-entity-t, component: ecs-entity-t) -> bool;
+    resource iter {
+        constructor(ptr: s64);
+        next: func() -> bool;
+        count: func() -> s32;
+        {% if wasm %}
+        entities: func() -> list<ecs-entity-t>;
+        {% else %}
+        entities: func() -> list<ecs-entity-t>;
+        {% endif %}
+    }
 }
 
 world toxoid-engine-world {

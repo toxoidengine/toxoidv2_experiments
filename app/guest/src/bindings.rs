@@ -546,6 +546,8 @@ pub mod toxoid_component {
             }
             impl Component {
                 #[allow(unused_unsafe, clippy::all)]
+                /// TODO: Change this to offset index instead of offset so that WASM guest does not have
+                /// direct access to host memory.
                 pub fn set_member_u8(&self, offset: u32, value: u8) {
                     unsafe {
                         #[cfg(target_arch = "wasm32")]
@@ -1479,7 +1481,7 @@ pub mod toxoid_component {
             }
             impl Callback {
                 #[allow(unused_unsafe, clippy::all)]
-                pub fn run(&self, query: Query) {
+                pub fn run(&self, iter: Iter) {
                     unsafe {
                         #[cfg(target_arch = "wasm32")]
                         #[link(wasm_import_module = "toxoid-component:component/ecs")]
@@ -1491,10 +1493,7 @@ pub mod toxoid_component {
                         fn wit_import(_: i32, _: i32) {
                             unreachable!()
                         }
-                        wit_import(
-                            (self).handle() as i32,
-                            (&query).take_handle() as i32,
-                        );
+                        wit_import((self).handle() as i32, (&iter).take_handle() as i32);
                     }
                 }
             }
@@ -2013,8 +2012,8 @@ pub(crate) use __export_toxoid_component_world_impl as export;
 #[cfg(target_arch = "wasm32")]
 #[link_section = "component-type:wit-bindgen:0.31.0:toxoid-component:component:toxoid-component-world:encoded world"]
 #[doc(hidden)]
-pub static __WIT_BINDGEN_COMPONENT_TYPE: [u8; 3449] = *b"\
-\0asm\x0d\0\x01\0\0\x19\x16wit-component-encoding\x04\0\x07\xec\x19\x01A\x02\x01\
+pub static __WIT_BINDGEN_COMPONENT_TYPE: [u8; 3448] = *b"\
+\0asm\x0d\0\x01\0\0\x19\x16wit-component-encoding\x04\0\x07\xeb\x19\x01A\x02\x01\
 A\x07\x01B\x90\x01\x01w\x04\0\x0cecs-entity-t\x03\0\0\x01m\x10\x04u8-t\x05u16-t\x05\
 u32-t\x05u64-t\x04i8-t\x05i16-t\x05i32-t\x05i64-t\x05f32-t\x05f64-t\x06bool-t\x08\
 string-t\x07array-t\x0au32array-t\x0af32array-t\x09pointer-t\x04\0\x0bmember-typ\
@@ -2068,14 +2067,14 @@ nt\x01\0\x1b\x04\0\x12[method]entity.get\x01A\x01@\x02\x04self?\x09component\x01
 y.build\x01G\x04\0\x12[method]query.iter\x01G\x01@\x01\x04self\xc5\0\0\x7f\x04\0\
 \x12[method]query.next\x01H\x01@\x01\x04self\xc5\0\0z\x04\0\x13[method]query.cou\
 nt\x01I\x01p<\x01@\x01\x04self\xc5\0\0\xca\0\x04\0\x16[method]query.entities\x01\
-K\x01@\x01\x06handlex\0\x12\x04\0\x15[constructor]callback\x01L\x01h\x11\x01@\x02\
-\x04self\xcd\0\x05query\xc3\0\x01\0\x04\0\x14[method]callback.run\x01N\x01@\x01\x04\
-self\xcd\0\0x\x04\0\x1a[method]callback.cb-handle\x01O\x01i\x15\x01@\x01\x04desc\
-\x14\0\xd0\0\x04\0\x13[constructor]system\x01Q\x01h\x15\x01@\x01\x04self\xd2\0\x01\
-\0\x04\0\x14[method]system.build\x01S\x01@\x01\x04self\xd2\0\0\x12\x04\0\x17[met\
-hod]system.callback\x01T\x01i\x16\x01@\x01\x03ptrx\0\xd5\0\x04\0\x11[constructor\
-]iter\x01V\x01h\x16\x01@\x01\x04self\xd7\0\0\x7f\x04\0\x11[method]iter.next\x01X\
-\x01@\x01\x04self\xd7\0\0z\x04\0\x12[method]iter.count\x01Y\x01@\x01\x04self\xd7\
+K\x01@\x01\x06handlex\0\x12\x04\0\x15[constructor]callback\x01L\x01h\x11\x01i\x16\
+\x01@\x02\x04self\xcd\0\x04iter\xce\0\x01\0\x04\0\x14[method]callback.run\x01O\x01\
+@\x01\x04self\xcd\0\0x\x04\0\x1a[method]callback.cb-handle\x01P\x01i\x15\x01@\x01\
+\x04desc\x14\0\xd1\0\x04\0\x13[constructor]system\x01R\x01h\x15\x01@\x01\x04self\
+\xd3\0\x01\0\x04\0\x14[method]system.build\x01T\x01@\x01\x04self\xd3\0\0\x12\x04\
+\0\x17[method]system.callback\x01U\x01@\x01\x03ptrx\0\xce\0\x04\0\x11[constructo\
+r]iter\x01V\x01h\x16\x01@\x01\x04self\xd7\0\0\x7f\x04\0\x11[method]iter.next\x01\
+X\x01@\x01\x04self\xd7\0\0z\x04\0\x12[method]iter.count\x01Y\x01@\x01\x04self\xd7\
 \0\0\xca\0\x04\0\x15[method]iter.entities\x01Z\x03\x01\x1etoxoid-component:compo\
 nent/ecs\x05\0\x01@\0\x01\0\x04\0\x04init\x01\x01\x02\x03\0\0\x04iter\x01B\x05\x02\
 \x03\x02\x01\x02\x04\0\x04iter\x03\0\0\x01i\x01\x01@\x02\x04iter\x02\x06handlex\x01\

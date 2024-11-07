@@ -2,6 +2,7 @@
 #![allow(warnings)]
 
 pub mod bindings;
+use bindings::exports::toxoid::engine::ecs::{EcsEntityT, GuestIter};
 use bindings::exports::toxoid::engine::ecs::{self, ComponentDesc, EntityDesc, Guest, GuestCallback, GuestComponent, GuestComponentType, GuestEntity, GuestQuery, GuestSystem, QueryDesc, SystemDesc};
 pub use toxoid_flecs::bindings::{ecs_add_id, ecs_entity_desc_t, ecs_entity_init, ecs_fini, ecs_get_mut_id, ecs_init, ecs_iter_t, ecs_lookup, ecs_make_pair, ecs_member_t, ecs_progress, ecs_query_desc_t, ecs_query_init, ecs_query_iter, ecs_query_next, ecs_query_t, ecs_struct_desc_t, ecs_struct_init, ecs_system_desc_t, ecs_system_init, ecs_system_t, ecs_world_t, EcsDependsOn, EcsOnUpdate};
 use std::{borrow::BorrowMut, mem::MaybeUninit};
@@ -42,6 +43,10 @@ pub struct System {
 
 pub struct Callback {
     pub handle: i64
+}
+
+pub struct Iter {
+    pub ptr: *mut c_void
 }
 
 pub struct EcsWorldPtr(pub *mut ecs_world_t);
@@ -476,7 +481,7 @@ impl GuestQuery for Query {
     }
 
     #[cfg(not(target_arch = "wasm32"))]
-    fn entities(&self) -> Vec<u64> {
+    fn entities(&self) -> Vec<EcsEntityT> {
         let entities = self.iter.borrow().entities;
         let entities_slice = unsafe { std::slice::from_raw_parts(entities, self.count() as usize) };
         entities_slice.to_vec()
@@ -553,8 +558,8 @@ impl GuestSystem for System {
     }
 
     fn build(&self) {
-        println!("Building system");
-        println!("Desc: {:#?}", self.desc.borrow());
+        // println!("Building system");
+        // println!("Desc: {:#?}", self.desc.borrow());
         *self.entity.borrow_mut() = unsafe { ecs_system_init(WORLD.0, self.desc.as_ptr()) };
     }
 }
@@ -568,8 +573,30 @@ impl GuestCallback for Callback {
         self.handle
     }
 
-    fn run(&self, query: ecs::Query) {
+    fn run(&self, query: ecs::Iter) {
         println!("Callback run");
+    }
+}
+
+impl GuestIter for Iter {
+    fn new(ptr: i64) -> Iter {
+        Iter { ptr: ptr as *mut c_void }
+    }
+
+    fn next(&self) -> bool {
+        unsafe { ecs_query_next(self.ptr as *mut ecs_iter_t) }
+    }
+
+    fn count(&self) -> i32 {
+        let iter = unsafe { *(self.ptr as *mut ecs_iter_t) };
+        iter.count
+    }
+
+    fn entities(&self) -> Vec<EcsEntityT> {
+        let iter = unsafe { *(self.ptr as *mut ecs_iter_t) };
+        let entities = iter.entities;
+        let entities_slice = unsafe { std::slice::from_raw_parts(entities, self.count() as usize) };
+        entities_slice.to_vec()
     }
 }
 
@@ -580,6 +607,7 @@ impl Guest for ToxoidApi {
     type Query = Query;
     type System = System;
     type Callback = Callback;
+    type Iter = Iter;
 }
 
 #[cfg(target_arch = "wasm32")]

@@ -43,6 +43,8 @@ interface ecs {
 
     resource component {
         constructor(ptr: s64);
+        // TODO: Change this to offset index instead of offset so that WASM guest does not have
+        // direct access to host memory.
         set-member-u8: func(offset: u32, value: u8);
         get-member-u8: func(offset: u32) -> u8;
         set-member-u16: func(offset: u32, value: u16);
@@ -94,7 +96,7 @@ interface ecs {
 
     resource callback {
         constructor(handle: s64);
-        run: func(query: query);
+        run: func(iter: iter);
         cb-handle: func() -> s64;
     }
 
