@@ -513,15 +513,18 @@ impl GuestQuery for Query {
 #[no_mangle]
 // Trampoline closure from Rust using C callback and binding_ctx field to call a Rust closure
 pub unsafe extern "C" fn query_trampoline(iter: *mut ecs_iter_t) {
+    // println!("Query trampoline called");
     let world = WORLD.0;
-    let callback = (*iter).binding_ctx as *mut c_void;
+    let callback = (*iter).ctx as *mut c_void;
+    println!("Callback: {:?}", callback);
+    let callback_ctx = (*iter).callback_ctx as *mut c_void;
+    println!("Callback ctx: {:?}", callback_ctx);
     if callback.is_null() {
         return;
     }
     // let iter = toxoid_api::Iter::from(iter as *mut c_void);
     // let callback_fn: fn(&toxoid_api::Iter) = std::mem::transmute(callback);
     // callback_fn(&iter); // Call the callback through the reference
-    println!("Query trampoline called");
 }
 
 impl GuestSystem for System {
@@ -565,6 +568,8 @@ impl GuestSystem for System {
     }
 
     fn build(&self) {
+        println!("Building system");
+        println!("Desc: {:#?}", self.desc.borrow());
         *self.entity.borrow_mut() = unsafe { ecs_system_init(WORLD.0, self.desc.as_ptr()) };
     }
 }
