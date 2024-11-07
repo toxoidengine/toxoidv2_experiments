@@ -688,6 +688,8 @@ pub unsafe extern "C" fn query_trampoline(iter: *mut toxoid_engine::ecs_iter_t) 
             .unwrap()
             .toxoid_component_component_callbacks()
             .call_run(store, iter_resource_id, handle)
-            .unwrap();
+            .unwrap_or_else(|e| {
+                println!("Error calling run: {:?}", e);
+            });
     }
 }

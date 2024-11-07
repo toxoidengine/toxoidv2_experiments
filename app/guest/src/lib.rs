@@ -27,25 +27,35 @@ impl bindings::Guest for ToxoidWasmComponent {
         let y = position.get_y();
         println!("X: {}, Y: {}", x, y);
 
-        let mut query = Query::dsl("Position($this)");
-        query.build();
-        query.iter();
-        query.next();
-        let count = query.count();
-        println!("Count: {}", count);
-        query
+        // let mut query = Query::dsl("Position($this)");
+        // query.build();
+        // query.iter();
+        // query.next();
+        // let count = query.count();
+        // println!("Count: {}", count);
+        // query
+        //     .entities()
+        //     .iter()
+        //     .for_each(|entity| {
+        //         println!("Entity: {}", entity.get_id());
+        //         let id = Position::get_id();
+        //         println!("ID: {}", id);
+        //         let x = entity.get::<Position>().get_x();
+        //         let y = entity.get::<Position>().get_y();
+        //         println!("Iter X: {}, Iter Y: {}", x, y);
+        //     });
+
+        let mut system = System::dsl("Position($this)", |iter| {
+            iter
             .entities()
             .iter()
             .for_each(|entity| {
-                println!("Entity: {}", entity.get_id());
-                let id = Position::get_id();
-                println!("ID: {}", id);
                 let x = entity.get::<Position>().get_x();
                 let y = entity.get::<Position>().get_y();
-                println!("Iter X: {}, Iter Y: {}", x, y);
+                println!("Entity: {}", entity.get_id());
+                println!("Position -  X: {}, Y: {}", x, y);
             });
-
-        let mut system = System::dsl("Position($this)", |iter| println!("System callback running from guest."));
+        });
         system.build();
     }
 }

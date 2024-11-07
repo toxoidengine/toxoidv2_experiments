@@ -13,6 +13,7 @@ pub struct ToxoidWasmComponent;
 
 impl crate::bindings::exports::toxoid_component::component::callbacks::Guest for ToxoidWasmComponent {
     fn run(iter: crate::bindings::toxoid_component::component::ecs::Iter, handle: i64) {
+        let iter = Iter::new(iter);
         let callback = unsafe { CALLBACKS[handle as usize].as_ref() };
         callback(&iter);
     }
@@ -153,24 +154,23 @@ impl System {
     // }
 
     #[cfg(target_arch = "wasm32")]
-    pub fn new(desc: Option<SystemDesc>, callback_fn: fn(&crate::bindings::toxoid_component::component::ecs::Iter)) -> Self {
+    pub fn new(desc: Option<SystemDesc>, callback_fn: fn(&Iter)) -> Self {
         // Register the callback in the guest environment
         let callback = Callback::new(callback_fn);
         // Create the Toxoid callback with the registered callback handle
         let callback = ToxoidCallback::new(callback.cb_handle());
         let query_desc = desc.as_ref().unwrap().query_desc.clone();
         let desc = desc.unwrap_or(SystemDesc { name: None, callback, query_desc });
-       
         Self { system: ToxoidSystem::new(desc) }
     }
 
     #[cfg(not(target_arch = "wasm32"))]
-    pub fn dsl(dsl: &str, callback: fn(&crate::bindings::toxoid_component::component::ecs::Iter)) -> Self {
+    pub fn dsl(dsl: &str, callback: fn(&Iter)) -> Self {
         unimplemented!()
     }
 
     #[cfg(target_arch = "wasm32")]
-    pub fn dsl(dsl: &str, callback_fn: fn(&crate::bindings::toxoid_component::component::ecs::Iter)) -> Self {
+    pub fn dsl(dsl: &str, callback_fn: fn(&Iter)) -> Self {
         // Register the callback in the guest environment
         let callback = Callback::new(callback_fn);
         // Create the Toxoid callback with the registered callback handle
@@ -189,15 +189,15 @@ pub struct Callback {
     callback: ToxoidCallback,
 }
 
-pub static mut CALLBACKS: once_cell::sync::Lazy<Vec<Box<dyn Fn(&crate::bindings::toxoid_component::component::ecs::Iter)>>> = once_cell::sync::Lazy::new(|| Vec::new());
+pub static mut CALLBACKS: once_cell::sync::Lazy<Vec<Box<dyn Fn(&Iter)>>> = once_cell::sync::Lazy::new(|| Vec::new());
 
 impl Callback {
-    pub fn new(callback_fn: fn(&crate::bindings::toxoid_component::component::ecs::Iter)) -> Self {
+    pub fn new(callback_fn: fn(&Iter)) -> Self {
         let handle = unsafe { CALLBACKS.push(Box::new(callback_fn)); CALLBACKS.len() - 1 };
         Self { callback: ToxoidCallback::new(handle as i64) }   
     }
 
-    pub fn run(&self, iter: &crate::bindings::toxoid_component::component::ecs::Iter) {
+    pub fn run(&self, iter: &Iter) {
         let callback = unsafe { CALLBACKS[self.callback.cb_handle() as usize].as_ref() };
         callback(iter);
     }
@@ -208,12 +208,12 @@ impl Callback {
 }
 
 pub struct Iter {
-    iter: ToxoidIter
+    iter: crate::bindings::toxoid_component::component::ecs::Iter
 }
 
 impl Iter {
-    pub fn new(ptr: i64) -> Self {
-        Self { iter: ToxoidIter::new(ptr) }
+    pub fn new(iter: crate::bindings::toxoid_component::component::ecs::Iter) -> Self {
+        Self { iter }
     }
 
     pub fn next(&mut self) {

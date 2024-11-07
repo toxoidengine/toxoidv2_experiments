@@ -84,20 +84,22 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 .stderr(Stdio::inherit())
                 .spawn()
                 .expect("Failed to run host");
+            println!("Host running...");
 
+            // Build the guest WASM file
+            println!("Building guest WASM...");
+            build_guest(path, out_path, host_path)?;
+            // Wait 5 seconds to watch for changes
+            thread::sleep(Duration::from_secs(5));
+
+            // Watch for file changes
             let (tx, rx) = channel();
             let mut watcher = RecommendedWatcher::new(tx, Config::default())?;
             watcher.watch(path.as_ref(), RecursiveMode::Recursive)?;
-
-            println!("Watching directory: {}", path);
-
             let debounce_duration = Duration::from_secs(2);
             let mut last_event_time = Instant::now();
-
-            println!("Host running...");
-            println!("Building guest WASM...");
-            build_guest(path, out_path, host_path)?;
-
+            println!("Watching directory: {}", path);
+            
             for res in rx {
                 match res {
                     Ok(Event { paths, .. }) if !paths.is_empty() => {
