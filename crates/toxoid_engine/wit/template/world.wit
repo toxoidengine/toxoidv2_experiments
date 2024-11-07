@@ -118,6 +118,7 @@ interface ecs {
     resource callback {
         constructor(handle: s64);
         run: func(query: query);
+        cb-handle: func() -> s64;
     }
 
     record system-desc {
@@ -138,8 +139,13 @@ interface ecs {
     resource system {
         constructor(desc: system-desc);
         build: func();
+        {% if wasm %}
         callback: func() -> callback;
+        {% else %}
+        callback: func() -> s64;
+        {% endif %}
     }
+
 
     // component-create: func(desc: component-desc) -> ecs-entity-t;
     // component-get: func(name: string) -> ecs-entity-t;

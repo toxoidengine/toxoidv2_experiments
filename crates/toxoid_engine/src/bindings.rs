@@ -1547,6 +1547,17 @@ pub mod exports {
                 }
                 #[doc(hidden)]
                 #[allow(non_snake_case)]
+                pub unsafe fn _export_method_callback_cb_handle_cabi<T: GuestCallback>(
+                    arg0: *mut u8,
+                ) -> i64 {
+                    #[cfg(target_arch = "wasm32")] _rt::run_ctors_once();
+                    let result0 = T::cb_handle(
+                        CallbackBorrow::lift(arg0 as u32 as usize).get(),
+                    );
+                    _rt::as_i64(result0)
+                }
+                #[doc(hidden)]
+                #[allow(non_snake_case)]
                 pub unsafe fn _export_constructor_system_cabi<T: GuestSystem>(
                     arg0: i32,
                     arg1: *mut u8,
@@ -1598,12 +1609,12 @@ pub mod exports {
                 #[allow(non_snake_case)]
                 pub unsafe fn _export_method_system_callback_cabi<T: GuestSystem>(
                     arg0: *mut u8,
-                ) -> i32 {
+                ) -> i64 {
                     #[cfg(target_arch = "wasm32")] _rt::run_ctors_once();
                     let result0 = T::callback(
                         SystemBorrow::lift(arg0 as u32 as usize).get(),
                     );
-                    (result0).take_handle() as i32
+                    _rt::as_i64(result0)
                 }
                 pub trait Guest {
                     type ComponentType: GuestComponentType;
@@ -1867,6 +1878,7 @@ pub mod exports {
                     }
                     fn new(handle: i64) -> Self;
                     fn run(&self, query: Query);
+                    fn cb_handle(&self) -> i64;
                 }
                 pub trait GuestSystem: 'static {
                     #[doc(hidden)]
@@ -1911,7 +1923,7 @@ pub mod exports {
                     }
                     fn new(desc: SystemDesc) -> Self;
                     fn build(&self);
-                    fn callback(&self) -> Callback;
+                    fn callback(&self) -> i64;
                 }
                 #[doc(hidden)]
                 macro_rules! __export_toxoid_engine_ecs_cabi {
@@ -2187,18 +2199,23 @@ pub mod exports {
                         export_method_callback_run(arg0 : * mut u8, arg1 : i32,) {
                         $($path_to_types)*:: _export_method_callback_run_cabi::<<$ty as
                         $($path_to_types)*:: Guest >::Callback > (arg0, arg1) }
-                        #[export_name = "toxoid:engine/ecs#[constructor]system"] unsafe
-                        extern "C" fn export_constructor_system(arg0 : i32, arg1 : * mut
-                        u8, arg2 : usize, arg3 : i64, arg4 : * mut u8, arg5 : usize, arg6
-                        : i64,) -> i32 { $($path_to_types)*::
-                        _export_constructor_system_cabi::<<$ty as $($path_to_types)*::
-                        Guest >::System > (arg0, arg1, arg2, arg3, arg4, arg5, arg6) }
-                        #[export_name = "toxoid:engine/ecs#[method]system.build"] unsafe
-                        extern "C" fn export_method_system_build(arg0 : * mut u8,) {
+                        #[export_name = "toxoid:engine/ecs#[method]callback.cb-handle"]
+                        unsafe extern "C" fn export_method_callback_cb_handle(arg0 : *
+                        mut u8,) -> i64 { $($path_to_types)*::
+                        _export_method_callback_cb_handle_cabi::<<$ty as
+                        $($path_to_types)*:: Guest >::Callback > (arg0) } #[export_name =
+                        "toxoid:engine/ecs#[constructor]system"] unsafe extern "C" fn
+                        export_constructor_system(arg0 : i32, arg1 : * mut u8, arg2 :
+                        usize, arg3 : i64, arg4 : * mut u8, arg5 : usize, arg6 : i64,) ->
+                        i32 { $($path_to_types)*:: _export_constructor_system_cabi::<<$ty
+                        as $($path_to_types)*:: Guest >::System > (arg0, arg1, arg2,
+                        arg3, arg4, arg5, arg6) } #[export_name =
+                        "toxoid:engine/ecs#[method]system.build"] unsafe extern "C" fn
+                        export_method_system_build(arg0 : * mut u8,) {
                         $($path_to_types)*:: _export_method_system_build_cabi::<<$ty as
                         $($path_to_types)*:: Guest >::System > (arg0) } #[export_name =
                         "toxoid:engine/ecs#[method]system.callback"] unsafe extern "C" fn
-                        export_method_system_callback(arg0 : * mut u8,) -> i32 {
+                        export_method_system_callback(arg0 : * mut u8,) -> i64 {
                         $($path_to_types)*:: _export_method_system_callback_cabi::<<$ty
                         as $($path_to_types)*:: Guest >::System > (arg0) } const _ : () =
                         { #[doc(hidden)] #[export_name =
@@ -2507,9 +2524,9 @@ pub(crate) use __export_toxoid_engine_world_impl as export;
 #[cfg(target_arch = "wasm32")]
 #[link_section = "component-type:wit-bindgen:0.31.0:toxoid:engine:toxoid-engine-world:encoded world"]
 #[doc(hidden)]
-pub static __WIT_BINDGEN_COMPONENT_TYPE: [u8; 3115] = *b"\
-\0asm\x0d\0\x01\0\0\x19\x16wit-component-encoding\x04\0\x07\xa1\x17\x01A\x02\x01\
-A\x02\x01B\x83\x01\x01w\x04\0\x0cecs-entity-t\x03\0\0\x01m\x10\x04u8-t\x05u16-t\x05\
+pub static __WIT_BINDGEN_COMPONENT_TYPE: [u8; 3157] = *b"\
+\0asm\x0d\0\x01\0\0\x19\x16wit-component-encoding\x04\0\x07\xcb\x17\x01A\x02\x01\
+A\x02\x01B\x85\x01\x01w\x04\0\x0cecs-entity-t\x03\0\0\x01m\x10\x04u8-t\x05u16-t\x05\
 u32-t\x05u64-t\x04i8-t\x05i16-t\x05i32-t\x05i64-t\x05f32-t\x05f64-t\x06bool-t\x08\
 string-t\x07array-t\x0au32array-t\x0af32array-t\x09pointer-t\x04\0\x0bmember-typ\
 e\x03\0\x02\x01ps\x01p}\x01r\x03\x04names\x0cmember-names\x04\x0cmember-types\x05\
@@ -2563,12 +2580,13 @@ ry.iter\x01E\x01@\x01\x04self\xc3\0\0\x7f\x04\0\x12[method]query.next\x01F\x01@\
 \x04self\xc3\0\0z\x04\0\x13[method]query.count\x01G\x01pw\x01@\x01\x04self\xc3\0\
 \0\xc8\0\x04\0\x16[method]query.entities\x01I\x01i\x11\x01@\x01\x06handlex\0\xca\
 \0\x04\0\x15[constructor]callback\x01K\x01h\x11\x01@\x02\x04self\xcc\0\x05query\xc1\
-\0\x01\0\x04\0\x14[method]callback.run\x01M\x01i\x14\x01@\x01\x04desc\x13\0\xce\0\
-\x04\0\x13[constructor]system\x01O\x01h\x14\x01@\x01\x04self\xd0\0\x01\0\x04\0\x14\
-[method]system.build\x01Q\x01@\x01\x04self\xd0\0\0\xca\0\x04\0\x17[method]system\
-.callback\x01R\x04\x01\x11toxoid:engine/ecs\x05\0\x04\x01!toxoid:engine/toxoid-e\
-ngine-world\x04\0\x0b\x19\x01\0\x13toxoid-engine-world\x03\0\0\0G\x09producers\x01\
-\x0cprocessed-by\x02\x0dwit-component\x070.216.0\x10wit-bindgen-rust\x060.31.0";
+\0\x01\0\x04\0\x14[method]callback.run\x01M\x01@\x01\x04self\xcc\0\0x\x04\0\x1a[\
+method]callback.cb-handle\x01N\x01i\x14\x01@\x01\x04desc\x13\0\xcf\0\x04\0\x13[c\
+onstructor]system\x01P\x01h\x14\x01@\x01\x04self\xd1\0\x01\0\x04\0\x14[method]sy\
+stem.build\x01R\x01@\x01\x04self\xd1\0\0x\x04\0\x17[method]system.callback\x01S\x04\
+\x01\x11toxoid:engine/ecs\x05\0\x04\x01!toxoid:engine/toxoid-engine-world\x04\0\x0b\
+\x19\x01\0\x13toxoid-engine-world\x03\0\0\0G\x09producers\x01\x0cprocessed-by\x02\
+\x0dwit-component\x070.216.0\x10wit-bindgen-rust\x060.31.0";
 #[inline(never)]
 #[doc(hidden)]
 pub fn __link_custom_section_describing_imports() {

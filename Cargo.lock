@@ -2074,6 +2074,7 @@ dependencies = [
 name = "toxoid_host"
 version = "0.1.0"
 dependencies = [
+ "toxoid_engine",
  "toxoid_wasm_runtime",
 ]
 

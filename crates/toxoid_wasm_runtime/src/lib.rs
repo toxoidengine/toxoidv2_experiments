@@ -110,6 +110,14 @@ impl toxoid_component::component::ecs::HostSystem for StoreState {
         Box::into_raw(callback);
         id
     }
+    
+    fn callback(&mut self, system: Resource<toxoid_component::component::ecs::System>) -> Resource<CallbackProxy> {
+        let system_proxy = self.table.get(&system).unwrap() as &SystemProxy;
+        let system = unsafe { Box::from_raw(system_proxy.ptr) };
+        let callback_handle = system.callback();
+        let callback = <toxoid_engine::Callback as toxoid_engine::bindings::exports::toxoid::engine::ecs::GuestCallback>::new(callback_handle);
+        self.table.push::<CallbackProxy>(CallbackProxy { ptr: Box::into_raw(Box::new(callback)) }).unwrap()
+    }
 
     fn build(&mut self, system: Resource<toxoid_component::component::ecs::System>) -> () {
         let system_proxy = self.table.get(&system).unwrap() as &SystemProxy;
@@ -201,7 +209,7 @@ impl toxoid_component::component::ecs::HostEntity for StoreState {
         Box::into_raw(entity);
     }
 
-    fn drop(&mut self, entity: Resource<toxoid_component::component::ecs::Entity>) -> Result<(), wasmtime::Error> {
+    fn drop(&mut self, _entity: Resource<toxoid_component::component::ecs::Entity>) -> Result<(), wasmtime::Error> {
         // let entity_proxy = self.table.get(&entity).unwrap() as &EntityProxy;
         // drop(unsafe { Box::from_raw(entity_proxy.ptr) });
         // self.table.delete::<EntityProxy>(entity).unwrap();
@@ -239,7 +247,7 @@ impl toxoid_component::component::ecs::HostComponentType for StoreState {
         id
     }
 
-    fn drop(&mut self, component: Resource<toxoid_component::component::ecs::ComponentType>) -> Result<(), wasmtime::Error> {
+    fn drop(&mut self, _component: Resource<toxoid_component::component::ecs::ComponentType>) -> Result<(), wasmtime::Error> {
         // let component_proxy = self.table.get(&component).unwrap() as &ComponentTypeProxy;
         // drop(unsafe { Box::from_raw(component_proxy.ptr) });
         // self.table.delete::<ComponentTypeProxy>(component).unwrap();
@@ -466,7 +474,7 @@ impl toxoid_component::component::ecs::HostComponent for StoreState {
         Box::into_raw(component);
     }
 
-    fn drop(&mut self, component: Resource<toxoid_component::component::ecs::Component>) -> Result<(), wasmtime::Error> {
+    fn drop(&mut self, _component: Resource<toxoid_component::component::ecs::Component>) -> Result<(), wasmtime::Error> {
         // let component_proxy = self.table.get(&component).unwrap() as &ComponentProxy;
         // drop(unsafe { Box::from_raw(component_proxy.ptr) });
         // self.table.delete::<ComponentProxy>(component).unwrap();

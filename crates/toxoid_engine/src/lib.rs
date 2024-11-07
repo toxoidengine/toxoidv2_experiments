@@ -36,7 +36,8 @@ pub struct Query {
 pub struct System {
     pub desc: RefCell<ecs_system_desc_t>,
     pub entity: RefCell<ecs_entity_t>,
-    pub system: RefCell<ecs_system_t>
+    pub system: RefCell<ecs_system_t>,
+    pub callback: RefCell<Callback>
 }
 
 pub struct Callback {
@@ -175,7 +176,7 @@ impl GuestComponent for Component {
 
     #[cfg(target_arch = "wasm32")]
     fn new(resource_id: u32) -> Component {
-        Component { ptr: resource_id as *const c_void }
+        Component { ptr: resource_id as *const c_void, field_offsets: vec![] }
     }
 
     // fn set_component_hash(&self, name: String) {
@@ -546,14 +547,20 @@ impl GuestSystem for System {
         System { 
             desc: RefCell::new(system_desc),
             entity: RefCell::new(entity), 
+            callback: RefCell::new(Callback::new(desc.callback)),
             system: RefCell::new(
                 unsafe { MaybeUninit::zeroed().assume_init() }
             )
         }
     }
 
+    #[cfg(not(target_arch = "wasm32"))]
+    fn callback(&self) -> i64 {
+       self.callback.borrow().handle
+    }
+
+    #[cfg(target_arch = "wasm32")]
     fn callback(&self) -> ecs::Callback {
-        // Callback::new(self.desc.borrow().ctx as *mut c_void)
        unimplemented!()
     }
 
@@ -565,6 +572,10 @@ impl GuestSystem for System {
 impl GuestCallback for Callback {
     fn new(handle: i64) -> Callback {
         Callback { handle }
+    }
+
+    fn cb_handle(&self) -> i64 {
+        self.handle
     }
 
     fn run(&self, query: ecs::Query) {

@@ -10,6 +10,7 @@ const GUEST_WASM_PATH: &str = "app/host/guest.wasm";
 #[cfg(not(target_arch = "wasm32"))]
 fn game_loop(delta_time: f32) {
     // println!("delta_time: {}", delta_time);
+    toxoid_engine::toxoid_progress(delta_time);
 }
 
 #[cfg(target_arch = "wasm32")]

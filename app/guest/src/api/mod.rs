@@ -189,8 +189,8 @@ impl Callback {
     }
 
     pub fn run(&self, query: &Query) {
-        // let callback = unsafe { CALLBACKS[self.callback.cb_handle() as usize].as_ref() };
-        // callback(query);
+        let callback = unsafe { CALLBACKS[self.callback.cb_handle() as usize].as_ref() };
+        callback(query);
     }
 }
 

@@ -9,3 +9,4 @@ edition = "2021"
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 toxoid_wasm_runtime = { path = "../toxoid_wasm_runtime" }
+toxoid_engine = { path = "../toxoid_engine" }
