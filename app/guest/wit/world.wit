@@ -109,11 +109,18 @@ interface ecs {
         build: func();
         callback: func() -> callback;
     }
+
+    resource iter {
+        constructor(ptr: s64);
+        next: func() -> bool;
+        count: func() -> s32;
+        entities: func() -> list<entity>;
+    }
 }
 
 interface callbacks {
-    use ecs.{query};
-    run: func(query: query, handle: s64);
+    use ecs.{iter};
+    run: func(iter: iter, handle: s64);
 }
 
 world toxoid-component-world {

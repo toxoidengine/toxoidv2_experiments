@@ -3,7 +3,7 @@
 
 pub mod bindings;
 use bindings::exports::toxoid::engine::ecs::{self, ComponentDesc, EntityDesc, Guest, GuestCallback, GuestComponent, GuestComponentType, GuestEntity, GuestQuery, GuestSystem, QueryDesc, SystemDesc};
-use toxoid_flecs::bindings::{ecs_add_id, ecs_entity_desc_t, ecs_entity_init, ecs_fini, ecs_get_mut_id, ecs_init, ecs_iter_t, ecs_lookup, ecs_make_pair, ecs_member_t, ecs_progress, ecs_query_desc_t, ecs_query_init, ecs_query_iter, ecs_query_next, ecs_query_t, ecs_struct_desc_t, ecs_struct_init, ecs_system_desc_t, ecs_system_init, ecs_system_t, ecs_world_t, EcsDependsOn, EcsOnUpdate};
+pub use toxoid_flecs::bindings::{ecs_add_id, ecs_entity_desc_t, ecs_entity_init, ecs_fini, ecs_get_mut_id, ecs_init, ecs_iter_t, ecs_lookup, ecs_make_pair, ecs_member_t, ecs_progress, ecs_query_desc_t, ecs_query_init, ecs_query_iter, ecs_query_next, ecs_query_t, ecs_struct_desc_t, ecs_struct_init, ecs_system_desc_t, ecs_system_init, ecs_system_t, ecs_world_t, EcsDependsOn, EcsOnUpdate};
 use std::{borrow::BorrowMut, mem::MaybeUninit};
 use core::ffi::c_void;
 use core::ffi::c_char;
@@ -44,7 +44,7 @@ pub struct Callback {
     pub handle: i64
 }
 
-pub struct EcsWorldPtr(*mut ecs_world_t);
+pub struct EcsWorldPtr(pub *mut ecs_world_t);
 unsafe impl Send for EcsWorldPtr {}
 unsafe impl Sync for EcsWorldPtr {}
 
@@ -67,7 +67,7 @@ enum FieldType {
     Pointer
 }
 
-static mut WORLD: Lazy<EcsWorldPtr> = Lazy::new(|| 
+pub static mut WORLD: Lazy<EcsWorldPtr> = Lazy::new(|| 
     EcsWorldPtr(unsafe { ecs_init() })
 );
 
@@ -510,22 +510,7 @@ impl GuestQuery for Query {
     // }
 }
 
-#[no_mangle]
-// Trampoline closure from Rust using C callback and binding_ctx field to call a Rust closure
-pub unsafe extern "C" fn query_trampoline(iter: *mut ecs_iter_t) {
-    // println!("Query trampoline called");
-    let world = WORLD.0;
-    let callback = (*iter).ctx as *mut c_void;
-    println!("Callback: {:?}", callback);
-    let callback_ctx = (*iter).callback_ctx as *mut c_void;
-    println!("Callback ctx: {:?}", callback_ctx);
-    if callback.is_null() {
-        return;
-    }
-    // let iter = toxoid_api::Iter::from(iter as *mut c_void);
-    // let callback_fn: fn(&toxoid_api::Iter) = std::mem::transmute(callback);
-    // callback_fn(&iter); // Call the callback through the reference
-}
+pub static mut QUERY_TRAMPOLINE: Option<unsafe extern "C" fn(*mut ecs_iter_t)> = None;
 
 impl GuestSystem for System {
     fn new(desc: SystemDesc) -> System {
@@ -546,7 +531,7 @@ impl GuestSystem for System {
         system_desc.query = query_desc;
         system_desc.ctx = desc.callback as *mut c_void;
         system_desc.callback_ctx = desc.callback as *mut c_void;
-        system_desc.callback = Some(query_trampoline);
+        system_desc.callback = Some(unsafe { QUERY_TRAMPOLINE.unwrap() });
         System { 
             desc: RefCell::new(system_desc),
             entity: RefCell::new(entity), 

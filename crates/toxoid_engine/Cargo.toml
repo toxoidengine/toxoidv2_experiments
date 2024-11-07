@@ -25,3 +25,8 @@ lto = true
 package = "toxoid:api"
 
 [package.metadata.component.dependencies]
+
+[features]
+default = []
+wasm-linking = []
+static-linking = []

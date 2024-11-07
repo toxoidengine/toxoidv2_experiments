@@ -12,7 +12,7 @@ pub use crate::bindings::toxoid_component::component::ecs::{EntityDesc, Componen
 pub struct ToxoidWasmComponent;
 
 impl crate::bindings::exports::toxoid_component::component::callbacks::Guest for ToxoidWasmComponent {
-    fn run(query: crate::bindings::toxoid_component::component::ecs::Query, handle: i64) {
+    fn run(query: crate::bindings::toxoid_component::component::ecs::Iter, handle: i64) {
         println!("WASM callback");
     }
 }

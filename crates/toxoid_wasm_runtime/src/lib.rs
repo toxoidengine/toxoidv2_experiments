@@ -610,5 +610,27 @@ pub fn load_wasm_component(filename: &str) -> Result<()> {
     // Call init
     toxoid_component_world.call_init(&mut *store)?;
     unsafe { TOXOID_COMPONENT_WORLD = Some(toxoid_component_world) };
+    unsafe { toxoid_engine::QUERY_TRAMPOLINE = Some(query_trampoline) };
     Ok(())
+}
+
+#[no_mangle]
+// Trampoline closure from Rust using C callback and binding_ctx field to call a Rust closure
+pub unsafe extern "C" fn query_trampoline(iter: *mut toxoid_engine::ecs_iter_t) {
+    // println!("Query trampoline called");
+    let world = toxoid_engine::WORLD.0;
+    let callback = (*iter).ctx as *mut core::ffi::c_void;
+    println!("Callback: {:?}", callback);
+    let callback_ctx = (*iter).callback_ctx as *mut core::ffi::c_void;
+    println!("Callback ctx: {:?}", callback_ctx);
+    if callback.is_null() {
+        return;
+    }
+    // #[cfg(feature = "static-linking")]
+    // #[cfg(not(feature = "static-linking"))]
+    let store = unsafe { &mut *STORE };
+    TOXOID_COMPONENT_WORLD
+        .unwrap()
+        .toxoid_component_component_callbacks()
+        .call_run(store, callback, callback_ctx);
 }
