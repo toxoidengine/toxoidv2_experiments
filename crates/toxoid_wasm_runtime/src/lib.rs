@@ -70,13 +70,17 @@ impl toxoid_component::component::ecs::HostIter for StoreState {
     fn next(&mut self, iter: Resource<IterProxy>) -> bool {
         let iter_proxy = self.table.get(&iter).unwrap() as &IterProxy;
         let iter = unsafe { Box::from_raw(iter_proxy.ptr) };
-        iter.next()
+        let result = iter.next();
+        Box::into_raw(iter);
+        result
     }
 
     fn count(&mut self, iter: Resource<IterProxy>) -> i32 {
         let iter_proxy = self.table.get(&iter).unwrap() as &IterProxy;
         let iter = unsafe { Box::from_raw(iter_proxy.ptr) };
-        iter.count()
+        let result = iter.count();
+        Box::into_raw(iter);
+        result
     }
 
     fn entities(&mut self, iter: Resource<IterProxy>) -> Vec<Resource<EntityProxy>>{
@@ -301,7 +305,6 @@ impl toxoid_component::component::ecs::HostComponentType for StoreState {
         // self.table.delete::<ComponentTypeProxy>(component).unwrap();
         Ok(())
     }
-
 }
 
 impl toxoid_component::component::ecs::HostComponent for StoreState {
@@ -668,16 +671,6 @@ pub fn load_wasm_component(filename: &str) -> Result<()> {
 #[no_mangle]
 // Trampoline closure from Rust using C callback and binding_ctx field to call a Rust closure
 pub unsafe extern "C" fn query_trampoline(iter: *mut toxoid_engine::ecs_iter_t) {
-    // println!("Query trampoline called");
-    // let world = toxoid_engine::WORLD.0;
-    // let callback = (*iter).ctx as *mut core::ffi::c_void;
-    // println!("Callback: {:?}", callback);
-    // let callback_ctx = (*iter).callback_ctx as *mut core::ffi::c_void;
-    // let callback_ctx = (*iter).callback_ctx as *mut core::ffi::c_void;
-    // println!("Callback ctx: {:?}", callback_ctx);
-    // if callback_ctx.is_null() {
-    //     return;
-    // }
     let handle = (*iter).callback_ctx as i64;
     let store = unsafe { &mut *STORE };
     let iter = Box::into_raw(Box::new(toxoid_engine::Iter::new(iter as i64)));

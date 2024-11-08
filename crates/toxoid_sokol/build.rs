@@ -109,9 +109,9 @@ fn main() {
     
     let mut build = cc::Build::new();
     // Flags
-    build
-        .flag_if_supported("-Wno-unused-parameter")
-        .flag_if_supported("-Wno-missing-field-initializers");
+    // build
+        // .flag_if_supported("-Wno-unused-parameter")
+        // .flag_if_supported("-Wno-missing-field-initializers");
 
     // Define sokol render backend
     if target.contains("emscripten") {

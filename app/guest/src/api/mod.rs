@@ -84,9 +84,10 @@ impl Entity {
         component
     }
 
-    pub fn add<T: Component + ComponentType + 'static>(&mut self) {
+    pub fn add<T: Component + ComponentType + 'static>(&mut self) -> &Self {
         let component_id = T::get_id();
         self.entity.add(component_id);
+        self
     }
 
     pub fn remove<T: Component + ComponentType + 'static>(&mut self) {
