@@ -1,6 +1,7 @@
 use std::net::{TcpListener, TcpStream};
 use std::io::{BufReader, prelude::*};
 use std::thread;
+use toxoid_api::*;
 
 // TODO: Make this configurable via ENV variable
 const HOST_ADDRESS: &str = "127.0.0.1:7878";
@@ -46,10 +47,15 @@ fn bootstrap() {
         let listener = TcpListener::bind(HOST_ADDRESS).unwrap();
         println!("Listening on {}", HOST_ADDRESS);
 
-        for stream in listener.incoming().filter_map(Result::ok) {
+        for stream in listener
+            .incoming()
+            .filter_map(Result::ok)
+        {
             let mut conn = BufReader::new(stream);
             let mut buffer = String::new();
-            conn.read_line(&mut buffer).unwrap();
+            conn
+                .read_line(&mut buffer)
+                .unwrap();
             if buffer.contains("reload") {
                 println!("Reloading WASM component...");
                 toxoid_wasm_runtime::load_wasm_component(GUEST_WASM_PATH)
@@ -68,7 +74,16 @@ fn bootstrap() {
     }
 }
 
+use toxoid_api::*;
+component! {
+    Velocity {
+        x: u32,
+        y: u32
+    }
+}
+
 pub fn init() {
+    println!("{}", Velocity::get_name());
     bootstrap();
     loop {}
 }

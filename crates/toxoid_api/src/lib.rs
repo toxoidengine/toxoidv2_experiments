@@ -4,19 +4,33 @@ use toxoid_engine::{Component as ToxoidComponent, ComponentType as ToxoidCompone
 use toxoid_wasm_component::bindings::{toxoid_component::component::ecs::{Component as ToxoidComponent, ComponentType as ToxoidComponentType, Entity as ToxoidEntity, Query as ToxoidQuery, ComponentDesc, EntityDesc, MemberType, QueryDesc}, Guest};
 use std::collections::HashMap;
 use once_cell::sync::Lazy;
+pub use toxoid_api_macro::component;
 
 pub static mut COMPONENT_CACHE: Lazy<HashMap<u64, ToxoidComponent>> = Lazy::new(|| HashMap::new());
 
+pub struct ToxoidWasmComponent;
+
+impl crate::bindings::exports::toxoid_component::component::callbacks::Guest for ToxoidWasmComponent {
+    fn run(iter: crate::bindings::toxoid_component::component::ecs::Iter, handle: i64) {
+        let iter = Iter::new(iter);
+        let callback = unsafe { CALLBACKS[handle as usize].as_ref() };
+        callback(&iter);
+    }
+}
+
+pub type ecs_entity_t = u64;
+
 pub trait ComponentType {
+    fn get_name() -> &'static str;
+    fn get_id() -> ecs_entity_t;
     // fn register() -> ecs_entity_t;
-    // fn get_name() -> &'static str;
     // fn get_hash() -> u64;
 }
 
 pub trait Component {
     // fn get_id(&self) -> u64;
     // #[cfg(all(target_arch="wasm32", target_os="unknown"))]
-    // fn set_ptr(&mut self, ptr: i64);
+    fn set_ptr(&mut self, ptr: *mut crate::bindings::toxoid_component::component::ecs::Component);
     // #[cfg(not(all(target_arch="wasm32", target_os="unknown")))]
     // fn set_ptr(&mut self, ptr: *mut c_void);
     // #[cfg(all(target_arch="wasm32", target_os="unknown"))]
@@ -41,27 +55,38 @@ impl Entity {
         Self { entity }
     }
 
+    pub fn named(name: &str) -> Self {
+        let desc = EntityDesc { name: Some(name.to_string()) };
+        #[cfg(not(target_arch = "wasm32"))]
+        let entity = ToxoidEntity::new(desc);
+        #[cfg(target_arch = "wasm32")]
+        let entity = ToxoidEntity::new(&desc);
+        Self { entity }
+    }
+
     pub fn get_id(&self) -> u64 {
         self.entity.get_id()
     }
 
-    pub fn get(&self, component_id: u64) -> ToxoidComponent {
-        unimplemented!()
-        // let component = self.entity.get(component_id);
-
-        // #[cfg(not(target_arch = "wasm32"))]
-        // ToxoidComponent::new(component)
-
-        // #[cfg(target_arch = "wasm32")]
-        // entity.get(component_id)
+    pub fn get<T: Component + ComponentType + Default + 'static>(&self) -> T {
+        let mut component= T::default();
+        #[cfg(not(target_arch = "wasm32"))]
+        let component_ptr = self.entity.get(T::get_id());
+        #[cfg(target_arch = "wasm32")]
+        let component_ptr = self.entity.get(T::get_id());
+        #[cfg(not(target_arch = "wasm32"))]
+        let toxoid_component = crate::bindings::toxoid_component::component::ecs::Component::new(component_ptr); 
+        #[cfg(target_arch = "wasm32")]
+        let toxoid_component = component_ptr;
+        let toxoid_component_ptr = Box::into_raw(Box::new(toxoid_component));
+        component.set_ptr(toxoid_component_ptr);
+        component
     }
 
-    pub fn add<T: Component + ComponentType + 'static>(&mut self) {
-        // let type_hash = T::get_hash();
-        // let component_id_split = toxoid_component_cache_get(type_hash);
-        // let component_id = combine_u32(component_id_split);
-        // toxoid_entity_add_component(self.entity.id, component_id);
-        // self.entity.add(component_id);
+    pub fn add<T: Component + ComponentType + 'static>(&mut self) -> &Self {
+        let component_id = T::get_id();
+        self.entity.add(component_id);
+        self
     }
 
     pub fn remove<T: Component + ComponentType + 'static>(&mut self) {
@@ -70,10 +95,6 @@ impl Entity {
         // let component_id = combine_u32(component_id_split);
         // toxoid_entity_remove_component(self.entity.id, component_id);
     }
-
-    // pub fn remove_component(&self, component_id: u64) {
-    //     self.entity.remove_component(component_id);
-    // }
 }
 
 pub struct Query {
@@ -88,6 +109,11 @@ impl Query {
         #[cfg(target_arch = "wasm32")]
         let query = ToxoidQuery::new(&desc);
         Self { query }
+    }
+
+    pub fn dsl(dsl: &str) -> Self {
+        let desc = QueryDesc { expr: dsl.to_string() };
+        Self::new(Some(desc))
     }
 
     pub fn build(&mut self) {
@@ -106,9 +132,100 @@ impl Query {
         self.query.count()
     }
 
+    #[cfg(not(target_arch = "wasm32"))]
     pub fn entities(&self) -> Vec<Entity> {
-        // self.query.entities().iter().map(|entity_id| Entity { entity: EntityToxoidEntity::from_id(entity_id) }).collect()
         unimplemented!()
+    }
+
+    #[cfg(target_arch = "wasm32")]
+    pub fn entities(&self) -> Vec<Entity> {
+        self.query.entities().iter().map(|entity| Entity { entity: ToxoidEntity::from_id(entity.get_id()) }).collect()
+    }
+}
+
+pub struct System {
+    system: ToxoidSystem
+}
+
+impl System {
+    // #[cfg(not(target_arch = "wasm32"))]
+    // pub fn new(desc: Option<SystemDesc>) -> Self {
+    //     unimplemented!()
+    // }
+
+    #[cfg(target_arch = "wasm32")]
+    pub fn new(desc: Option<SystemDesc>, callback_fn: fn(&Iter)) -> Self {
+        // Register the callback in the guest environment
+        let callback = Callback::new(callback_fn);
+        // Create the Toxoid callback with the registered callback handle
+        let callback = ToxoidCallback::new(callback.cb_handle());
+        let query_desc = desc.as_ref().unwrap().query_desc.clone();
+        let desc = desc.unwrap_or(SystemDesc { name: None, callback, query_desc });
+        Self { system: ToxoidSystem::new(desc) }
+    }
+
+    #[cfg(not(target_arch = "wasm32"))]
+    pub fn dsl(dsl: &str, callback: fn(&Iter)) -> Self {
+        unimplemented!()
+    }
+
+    #[cfg(target_arch = "wasm32")]
+    pub fn dsl(dsl: &str, callback_fn: fn(&Iter)) -> Self {
+        // Register the callback in the guest environment
+        let callback = Callback::new(callback_fn);
+        // Create the Toxoid callback with the registered callback handle
+        let callback = ToxoidCallback::new(callback.cb_handle());
+        println!("Callback handle: {}", callback.cb_handle());
+        let desc = SystemDesc { name: None, callback, query_desc: QueryDesc { expr: dsl.to_string() } };
+        Self::new(Some(desc), callback_fn)
+    }
+
+    pub fn build(&mut self) {
+        self.system.build();
+    }
+}
+
+pub struct Callback {
+    callback: ToxoidCallback,
+}
+
+pub static mut CALLBACKS: once_cell::sync::Lazy<Vec<Box<dyn Fn(&Iter)>>> = once_cell::sync::Lazy::new(|| Vec::new());
+
+impl Callback {
+    pub fn new(callback_fn: fn(&Iter)) -> Self {
+        let handle = unsafe { CALLBACKS.push(Box::new(callback_fn)); CALLBACKS.len() - 1 };
+        Self { callback: ToxoidCallback::new(handle as i64) }   
+    }
+
+    pub fn run(&self, iter: &Iter) {
+        let callback = unsafe { CALLBACKS[self.callback.cb_handle() as usize].as_ref() };
+        callback(iter);
+    }
+
+    pub fn cb_handle(&self) -> i64 {
+        self.callback.cb_handle()
+    }
+}
+
+pub struct Iter {
+    iter: crate::bindings::toxoid_component::component::ecs::Iter
+}
+
+impl Iter {
+    pub fn new(iter: crate::bindings::toxoid_component::component::ecs::Iter) -> Self {
+        Self { iter }
+    }
+
+    pub fn next(&mut self) {
+        self.iter.next();
+    }
+
+    pub fn count(&self) -> i32 {
+        self.iter.count()
+    }
+
+    pub fn entities(&self) -> Vec<Entity> {
+        self.iter.entities().iter().map(|entity| Entity { entity: ToxoidEntity::from_id(entity.get_id()) }).collect()
     }
 }
 

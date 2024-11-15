@@ -1,5 +1,4 @@
 #![allow(warnings)]
-
 #[cfg(not(target_arch = "wasm32"))]
 use toxoid_engine::{Component as ToxoidComponent, ComponentType as ToxoidComponentType, Entity as ToxoidEntity, Query as ToxoidQuery, System as ToxoidSystem, Callback as ToxoidCallback, Iter as ToxoidIter, bindings::exports::toxoid::engine::ecs::{GuestComponent, GuestComponentType, GuestEntity, GuestQuery, GuestSystem, GuestCallback, GuestIter}};
 #[cfg(target_arch = "wasm32")]
@@ -8,6 +7,7 @@ use crate::bindings::{toxoid_component::component::ecs::{Component as ToxoidComp
 pub use toxoid_engine::bindings::exports::toxoid::engine::ecs::{EntityDesc, ComponentDesc, QueryDesc, SystemDesc, MemberType};
 #[cfg(target_arch = "wasm32")]
 pub use crate::bindings::toxoid_component::component::ecs::{EntityDesc, ComponentDesc, QueryDesc, SystemDesc, MemberType};
+pub use toxoid_api_macro::component;
 
 pub struct ToxoidWasmComponent;
 

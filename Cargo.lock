@@ -2030,6 +2030,7 @@ name = "toxoid_api"
 version = "0.1.0"
 dependencies = [
  "once_cell",
+ "toxoid_api_macro",
  "toxoid_engine",
  "toxoid_wasm_component",
 ]
@@ -2074,6 +2075,7 @@ dependencies = [
 name = "toxoid_host"
 version = "0.1.0"
 dependencies = [
+ "toxoid_api",
  "toxoid_engine",
  "toxoid_wasm_runtime",
 ]

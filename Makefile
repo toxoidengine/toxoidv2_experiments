@@ -35,7 +35,7 @@ build:
 run:
 	cd app/host && cargo run
 
-run:
+run-cli:
 	cargo run --package toxoid_cli -- watch
 
 
