@@ -12,6 +12,8 @@ fn main() {
         std::env::set_var("CFLAGS", "-Wno-unused-command-line-argument");
     };
 
+    // Check of target is aarch64
+    let is_aarch64 = target.contains("aarch64");
     let bindings = bindgen::Builder::default()
         .clang_arg("-DFLECS_CUSTOM_BUILD")
         .clang_arg("-DFLECS_PERF_TRACE")
@@ -45,7 +47,8 @@ fn main() {
         .expect("Couldn't write bindings!");
     
     // Compile Flecs
-    cc::Build::new()
+    let mut build = cc::Build::new();
+    build
         .define("FLECS_CUSTOM_BUILD", None)
         .define("FLECS_PERF_TRACE", None)
         .define("FLECS_MODULE", None)
@@ -65,10 +68,15 @@ fn main() {
         .define("FLECS_LOG", None)
         .define("FLECS_APP", None)
         .define("FLECS_OS_API_IMPL", None)
-        .define("FLECS_HTTP", None)
-        .define("FLECS_REST", None)
+        // .define("FLECS_HTTP", None)
+        // .define("FLECS_REST", None)
         .define("FLECS_JOURNAL", None)
-        .define("NDEBUG", None)
+        .define("NDEBUG", None);
+    // Has a backtrace error otherwise. 
+    if is_aarch64 {
+        build.define("__wasm32__", None);
+    }
+    build
         .include("flecs.h")
         .file("flecs.c")
         .compile("flecs_core");

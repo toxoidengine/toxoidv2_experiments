@@ -12,7 +12,7 @@ pub mod bindings {
 }
 #[cfg(not(target_arch = "wasm32"))]
 pub mod bindings {
-    include!("./bindings_x64.rs");
+    include!("./bindings.rs");
 }
 
 use bindings::*;
