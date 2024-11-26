@@ -1,3 +1,5 @@
+#![allow(unused_must_use)]
+
 bindgen!({
     world: "toxoid-component-world",
     path: "../toxoid_wasm_component/wit",
