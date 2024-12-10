@@ -8,5 +8,5 @@
         "--message-format=json"
     ],
     // "rust-analyzer.cargo.target": "wasm32-wasip1"
-    "rust-analyzer.cargo.target": "wasm32-unknown-unknown"
+    // "rust-analyzer.cargo.target": "wasm32-unknown-unknown"
 }

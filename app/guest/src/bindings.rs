@@ -2010,7 +2010,7 @@ macro_rules! __export_toxoid_component_world_impl {
 #[doc(inline)]
 pub(crate) use __export_toxoid_component_world_impl as export;
 #[cfg(target_arch = "wasm32")]
-#[link_section = "component-type:wit-bindgen:0.31.0:toxoid-component:component:toxoid-component-world:encoded world"]
+#[link_section = "component-type:wit-bindgen:0.35.0:toxoid-component:component:toxoid-component-world:encoded world"]
 #[doc(hidden)]
 pub static __WIT_BINDGEN_COMPONENT_TYPE: [u8; 3448] = *b"\
 \0asm\x0d\0\x01\0\0\x19\x16wit-component-encoding\x04\0\x07\xeb\x19\x01A\x02\x01\
@@ -2075,13 +2075,13 @@ K\x01@\x01\x06handlex\0\x12\x04\0\x15[constructor]callback\x01L\x01h\x11\x01i\x1
 \0\x17[method]system.callback\x01U\x01@\x01\x03ptrx\0\xce\0\x04\0\x11[constructo\
 r]iter\x01V\x01h\x16\x01@\x01\x04self\xd7\0\0\x7f\x04\0\x11[method]iter.next\x01\
 X\x01@\x01\x04self\xd7\0\0z\x04\0\x12[method]iter.count\x01Y\x01@\x01\x04self\xd7\
-\0\0\xca\0\x04\0\x15[method]iter.entities\x01Z\x03\x01\x1etoxoid-component:compo\
-nent/ecs\x05\0\x01@\0\x01\0\x04\0\x04init\x01\x01\x02\x03\0\0\x04iter\x01B\x05\x02\
+\0\0\xca\0\x04\0\x15[method]iter.entities\x01Z\x03\0\x1etoxoid-component:compone\
+nt/ecs\x05\0\x01@\0\x01\0\x04\0\x04init\x01\x01\x02\x03\0\0\x04iter\x01B\x05\x02\
 \x03\x02\x01\x02\x04\0\x04iter\x03\0\0\x01i\x01\x01@\x02\x04iter\x02\x06handlex\x01\
-\0\x04\0\x03run\x01\x03\x04\x01$toxoid-component:component/callbacks\x05\x03\x04\
-\x011toxoid-component:component/toxoid-component-world\x04\0\x0b\x1c\x01\0\x16to\
-xoid-component-world\x03\0\0\0G\x09producers\x01\x0cprocessed-by\x02\x0dwit-comp\
-onent\x070.216.0\x10wit-bindgen-rust\x060.31.0";
+\0\x04\0\x03run\x01\x03\x04\0$toxoid-component:component/callbacks\x05\x03\x04\0\
+1toxoid-component:component/toxoid-component-world\x04\0\x0b\x1c\x01\0\x16toxoid\
+-component-world\x03\0\0\0G\x09producers\x01\x0cprocessed-by\x02\x0dwit-componen\
+t\x070.220.0\x10wit-bindgen-rust\x060.35.0";
 #[inline(never)]
 #[doc(hidden)]
 pub fn __link_custom_section_describing_imports() {

@@ -30,7 +30,7 @@ build-wit:
 
 build:
 	cd app/guest && cargo component build
-	cp target/wasm32-wasip1/debug/guest.wasm crates/toxoid_wasm_runtime/guest.wasm
+	cp target/wasm32-wasip1/debug/guest.wasm app/host/guest.wasm
 
 run:
 	cd app/host && cargo run

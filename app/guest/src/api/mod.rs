@@ -218,15 +218,26 @@ impl Iter {
     }
 
     pub fn next(&mut self) {
-        self.iter.next();
+        self
+            .iter
+            .next();
     }
 
     pub fn count(&self) -> i32 {
-        self.iter.count()
+        self
+            .iter
+            .count()
     }
 
     pub fn entities(&self) -> Vec<Entity> {
-        self.iter.entities().iter().map(|entity| Entity { entity: ToxoidEntity::from_id(entity.get_id()) }).collect()
+        self
+            .iter
+            .entities()
+            .iter()
+            .map(|entity| Entity { 
+                entity: ToxoidEntity::from_id(entity.get_id()) 
+            })
+            .collect()
     }
 }
 

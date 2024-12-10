@@ -1,12 +1,12 @@
 use std::net::{TcpListener, TcpStream};
 use std::io::{BufReader, prelude::*};
 use std::thread;
-use toxoid_api::*;
+// use toxoid_api::*;
 
 // TODO: Make this configurable via ENV variable
 const HOST_ADDRESS: &str = "127.0.0.1:7878";
 // TODO: Make this configurable via ENV variable
-const GUEST_WASM_PATH: &str = "app/host/guest.wasm";
+const GUEST_WASM_PATH: &str = "guest.wasm";
 
 #[cfg(not(target_arch = "wasm32"))]
 fn game_loop(delta_time: f32) {
@@ -74,16 +74,16 @@ fn bootstrap() {
     }
 }
 
-use toxoid_api::*;
-component! {
-    Velocity {
-        x: u32,
-        y: u32
-    }
-}
+// use toxoid_api::*;
+// component! {
+//     Velocity {
+//         x: u32,
+//         y: u32
+//     }
+// }
 
 pub fn init() {
-    println!("{}", Velocity::get_name());
+    // println!("{}", Velocity::get_name());
     bootstrap();
     loop {}
 }
