@@ -24,10 +24,14 @@ impl bindings::Guest for ToxoidWasmComponent {
                 .entities()
                 .iter()
                 .for_each(|entity| {
-                    let x = entity.get::<Position>()
+                    let mut position = entity.get::<Position>();
+                    let x = position
                         .get_x();
-                    let y = entity.get::<Position>()
+                    let y = position
                         .get_y();
+                    // Set position +1
+                    position.set_x(x + 1);
+                    position.set_y(y + 1);
                     println!("Entity: {}", entity.get_id());
                     println!("Position -  X: {}, Y: {}", x, y);
                 });
