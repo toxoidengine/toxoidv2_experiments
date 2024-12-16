@@ -1,10 +1,5 @@
 #![allow(warnings)]
-
-pub mod bindings;
-pub mod api;
 pub mod components;
-
-use api::*;
 use components::*;
 
 impl bindings::Guest for ToxoidWasmComponent {
@@ -25,11 +20,8 @@ impl bindings::Guest for ToxoidWasmComponent {
                 .iter()
                 .for_each(|entity| {
                     let mut position = entity.get::<Position>();
-                    let x = position
-                        .get_x();
-                    let y = position
-                        .get_y();
-                    // Set position +1
+                    let x = position.get_x();
+                    let y = position.get_y();
                     position.set_x(x + 1);
                     position.set_y(y + 1);
                     println!("Entity: {}", entity.get_id());

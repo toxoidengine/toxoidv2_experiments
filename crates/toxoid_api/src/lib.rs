@@ -1,12 +1,13 @@
+#![allow(warnings)]
 #[cfg(not(target_arch = "wasm32"))]
-use toxoid_engine::{Component as ToxoidComponent, ComponentType as ToxoidComponentType, Entity as ToxoidEntity, Query as ToxoidQuery, bindings::exports::toxoid::engine::ecs::{ComponentDesc, EntityDesc, GuestComponent, GuestComponentType, GuestEntity, GuestQuery, MemberType, QueryDesc}};
+use toxoid_engine::{Component as ToxoidComponent, ComponentType as ToxoidComponentType, Entity as ToxoidEntity, Query as ToxoidQuery, System as ToxoidSystem, Callback as ToxoidCallback, Iter as ToxoidIter, bindings::exports::toxoid::engine::ecs::{GuestComponent, GuestComponentType, GuestEntity, GuestQuery, GuestSystem, GuestCallback, GuestIter}};
 #[cfg(target_arch = "wasm32")]
-use toxoid_wasm_component::bindings::{toxoid_component::component::ecs::{Component as ToxoidComponent, ComponentType as ToxoidComponentType, Entity as ToxoidEntity, Query as ToxoidQuery, ComponentDesc, EntityDesc, MemberType, QueryDesc}, Guest};
-use std::collections::HashMap;
-use once_cell::sync::Lazy;
+use toxoid_wasm_component::bindings::{toxoid_component::component::ecs::{Component as ToxoidComponent, ComponentType as ToxoidComponentType, Entity as ToxoidEntity, Query as ToxoidQuery, System as ToxoidSystem, Callback as ToxoidCallback, Iter as ToxoidIter}, Guest};
+#[cfg(not(target_arch = "wasm32"))]
+pub use toxoid_engine::bindings::exports::toxoid::engine::ecs::{EntityDesc, ComponentDesc, QueryDesc, SystemDesc, MemberType};
+#[cfg(target_arch = "wasm32")]
+pub use toxoid_wasm_component::bindings::toxoid_component::component::ecs::{EntityDesc, ComponentDesc, QueryDesc, SystemDesc, MemberType};
 pub use toxoid_api_macro::component;
-
-pub static mut COMPONENT_CACHE: Lazy<HashMap<u64, ToxoidComponent>> = Lazy::new(|| HashMap::new());
 
 pub struct ToxoidWasmComponent;
 
@@ -217,15 +218,26 @@ impl Iter {
     }
 
     pub fn next(&mut self) {
-        self.iter.next();
+        self
+            .iter
+            .next();
     }
 
     pub fn count(&self) -> i32 {
-        self.iter.count()
+        self
+            .iter
+            .count()
     }
 
     pub fn entities(&self) -> Vec<Entity> {
-        self.iter.entities().iter().map(|entity| Entity { entity: ToxoidEntity::from_id(entity.get_id()) }).collect()
+        self
+            .iter
+            .entities()
+            .iter()
+            .map(|entity| Entity { 
+                entity: ToxoidEntity::from_id(entity.get_id()) 
+            })
+            .collect()
     }
 }
 

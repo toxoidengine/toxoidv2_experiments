@@ -1,13 +1,13 @@
 pub mod bindings;
-use bindings::Guest;
+// use bindings::Guest;
 
-pub struct ToxoidWasmComponent;
+// pub struct ToxoidWasmComponent;
 
-impl Guest for ToxoidWasmComponent {
-    fn init() {
-        println!("ToxoidWasmComponent init");
-    }
-}
+// impl Guest for ToxoidWasmComponent {
+//     fn init() {
+//         println!("ToxoidWasmComponent init");
+//     }
+// }
 
-#[cfg(target_arch = "wasm32")]
-bindings::export!(ToxoidWasmComponent with_types_in bindings);
+// #[cfg(target_arch = "wasm32")]
+// bindings::export!(ToxoidWasmComponent with_types_in bindings);

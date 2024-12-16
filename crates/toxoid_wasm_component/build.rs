@@ -22,6 +22,14 @@ fn main() {
         );
     }
 
+    // Add #[macro_export] to __export_toxoid_component_component_callbacks_cabi if not present
+    if !content.contains("#[macro_export] macro_rules! __export_toxoid_component_component_callbacks_cabi") {
+        content = content.replace(
+            "macro_rules! __export_toxoid_component_component_callbacks_cabi {",
+            "#[macro_export]\nmacro_rules! __export_toxoid_component_component_callbacks_cabi {"
+        );
+    }
+
     // Change `pub(crate)` to `pub` for __export_toxoid_component_world_impl re-export
     if content.contains("pub(crate) use __export_toxoid_component_world_impl as export;") {
         content = content.replace(
@@ -35,6 +43,14 @@ fn main() {
         content = content.replace(
             "pub(crate) use __export_world_toxoid_component_world_cabi;",
             "pub use __export_world_toxoid_component_world_cabi;"
+        );
+    }
+
+    // Change `pub(crate)` to `pub` for __export_toxoid_component_component_callbacks_cabi re-export
+    if content.contains("pub(crate) use __export_toxoid_component_component_callbacks_cabi;") {
+        content = content.replace(
+            "pub(crate) use __export_toxoid_component_component_callbacks_cabi;",
+            "pub use __export_toxoid_component_component_callbacks_cabi;"
         );
     }
 

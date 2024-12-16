@@ -8,6 +8,7 @@ pub trait Guest {
     fn init();
 }
 #[doc(hidden)]
+#[macro_export]
 macro_rules! __export_world_toxoid_component_world_cabi {
     ($ty:ident with_types_in $($path_to_types:tt)*) => {
         const _ : () = { #[export_name = "init"] unsafe extern "C" fn export_init() {
@@ -15,7 +16,7 @@ macro_rules! __export_world_toxoid_component_world_cabi {
     };
 }
 #[doc(hidden)]
-pub(crate) use __export_world_toxoid_component_world_cabi;
+pub use __export_world_toxoid_component_world_cabi;
 #[allow(dead_code)]
 pub mod toxoid_component {
     #[allow(dead_code)]
@@ -1738,7 +1739,8 @@ pub mod exports {
                     fn run(iter: Iter, handle: i64);
                 }
                 #[doc(hidden)]
-                macro_rules! __export_toxoid_component_component_callbacks_cabi {
+                #[macro_export]
+macro_rules! __export_toxoid_component_component_callbacks_cabi {
                     ($ty:ident with_types_in $($path_to_types:tt)*) => {
                         const _ : () = { #[export_name =
                         "toxoid-component:component/callbacks#run"] unsafe extern "C" fn
@@ -1747,7 +1749,7 @@ pub mod exports {
                     };
                 }
                 #[doc(hidden)]
-                pub(crate) use __export_toxoid_component_component_callbacks_cabi;
+                pub use __export_toxoid_component_component_callbacks_cabi;
             }
         }
     }
@@ -1995,6 +1997,7 @@ mod _rt {
 /// ```
 #[allow(unused_macros)]
 #[doc(hidden)]
+#[macro_export]
 macro_rules! __export_toxoid_component_world_impl {
     ($ty:ident) => {
         self::export!($ty with_types_in self);
@@ -2008,7 +2011,7 @@ macro_rules! __export_toxoid_component_world_impl {
     };
 }
 #[doc(inline)]
-pub(crate) use __export_toxoid_component_world_impl as export;
+pub use __export_toxoid_component_world_impl as export;
 #[cfg(target_arch = "wasm32")]
 #[link_section = "component-type:wit-bindgen:0.35.0:toxoid-component:component:toxoid-component-world:encoded world"]
 #[doc(hidden)]
