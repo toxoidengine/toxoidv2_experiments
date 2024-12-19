@@ -942,6 +942,7 @@ dependencies = [
 name = "guest"
 version = "0.1.0"
 dependencies = [
+ "toxoid_api",
  "toxoid_api_macro",
  "toxoid_engine",
  "wit-bindgen-rt 0.32.0",

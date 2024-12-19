@@ -1,22 +1,34 @@
 #![allow(warnings)]
+// Native
 #[cfg(not(target_arch = "wasm32"))]
 use toxoid_engine::{Component as ToxoidComponent, ComponentType as ToxoidComponentType, Entity as ToxoidEntity, Query as ToxoidQuery, System as ToxoidSystem, Callback as ToxoidCallback, Iter as ToxoidIter, bindings::exports::toxoid::engine::ecs::{GuestComponent, GuestComponentType, GuestEntity, GuestQuery, GuestSystem, GuestCallback, GuestIter}};
-#[cfg(target_arch = "wasm32")]
-use toxoid_wasm_component::bindings::{toxoid_component::component::ecs::{Component as ToxoidComponent, ComponentType as ToxoidComponentType, Entity as ToxoidEntity, Query as ToxoidQuery, System as ToxoidSystem, Callback as ToxoidCallback, Iter as ToxoidIter}, Guest};
 #[cfg(not(target_arch = "wasm32"))]
 pub use toxoid_engine::bindings::exports::toxoid::engine::ecs::{EntityDesc, ComponentDesc, QueryDesc, SystemDesc, MemberType};
+// WASM
+#[cfg(target_arch = "wasm32")]
+use toxoid_wasm_component::bindings::{toxoid_component::component::ecs::{Component as ToxoidComponent, ComponentType as ToxoidComponentType, Entity as ToxoidEntity, Query as ToxoidQuery, System as ToxoidSystem, Callback as ToxoidCallback, Iter as ToxoidIter}, Guest};
 #[cfg(target_arch = "wasm32")]
 pub use toxoid_wasm_component::bindings::toxoid_component::component::ecs::{EntityDesc, ComponentDesc, QueryDesc, SystemDesc, MemberType};
+#[cfg(target_arch = "wasm32")]
+pub use toxoid_wasm_component;
+// Both (Native + WASM)
 pub use toxoid_api_macro::component;
 
 pub struct ToxoidWasmComponent;
 
-impl crate::bindings::exports::toxoid_component::component::callbacks::Guest for ToxoidWasmComponent {
-    fn run(iter: crate::bindings::toxoid_component::component::ecs::Iter, handle: i64) {
+#[cfg(target_arch = "wasm32")]
+impl toxoid_wasm_component::bindings::exports::toxoid_component::component::callbacks::Guest for ToxoidWasmComponent {
+    fn run(iter: toxoid_wasm_component::bindings::toxoid_component::component::ecs::Iter, handle: i64) {
         let iter = Iter::new(iter);
         let callback = unsafe { CALLBACKS[handle as usize].as_ref() };
         callback(&iter);
     }
+}
+
+pub fn run_callback(iter: ToxoidIter, handle: i64) {
+    let iter = Iter::new(iter);
+    let callback = unsafe { CALLBACKS[handle as usize].as_ref() };
+    callback(&iter);
 }
 
 pub type ecs_entity_t = u64;
@@ -31,7 +43,8 @@ pub trait ComponentType {
 pub trait Component {
     // fn get_id(&self) -> u64;
     // #[cfg(all(target_arch="wasm32", target_os="unknown"))]
-    fn set_ptr(&mut self, ptr: *mut crate::bindings::toxoid_component::component::ecs::Component);
+    #[cfg(target_arch = "wasm32")]
+    fn set_ptr(&mut self, ptr: *mut toxoid_wasm_component::bindings::toxoid_component::component::ecs::Component);
     // #[cfg(not(all(target_arch="wasm32", target_os="unknown")))]
     // fn set_ptr(&mut self, ptr: *mut c_void);
     // #[cfg(all(target_arch="wasm32", target_os="unknown"))]
@@ -209,11 +222,11 @@ impl Callback {
 }
 
 pub struct Iter {
-    iter: crate::bindings::toxoid_component::component::ecs::Iter
+    iter: ToxoidIter
 }
 
 impl Iter {
-    pub fn new(iter: crate::bindings::toxoid_component::component::ecs::Iter) -> Self {
+    pub fn new(iter: ToxoidIter) -> Self {
         Self { iter }
     }
 

@@ -1,4 +1,5 @@
-use crate::api::*;
+use toxoid_api_macro::*;
+use toxoid_api::*;
 
 component! {
     Position {

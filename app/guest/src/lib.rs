@@ -1,9 +1,25 @@
 #![allow(warnings)]
 pub mod components;
 use components::*;
+use toxoid_api::*;
+use toxoid_wasm_component::bindings::{
+    self, 
+    exports::toxoid_component::component::callbacks::Guest as CallbacksGuest, 
+    Guest as WorldGuest,
+    toxoid_component::component::ecs::Iter
+};
 
-impl bindings::Guest for ToxoidWasmComponent {
+pub struct ToxoidWasmComponent;
+
+impl CallbacksGuest for ToxoidWasmComponent {
+    fn run(iter: Iter, handle: i64) {
+        run_callback(iter, handle);
+    }
+}
+
+impl WorldGuest for ToxoidWasmComponent {
     fn init() {
+        println!("Hello?");
         let mut entity = Entity::named("Test");
         entity.add::<Position>();
         let mut position = entity.get::<Position>();

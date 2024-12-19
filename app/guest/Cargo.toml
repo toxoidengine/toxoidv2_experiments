@@ -6,6 +6,7 @@ edition = "2021"
 [dependencies]
 wit-bindgen-rt = { version = "0.32.0", features = ["bitflags"] }
 toxoid_api_macro = { path = "../../crates/toxoid_api_macro" }
+toxoid_api = { path = "../../crates/toxoid_api" }
 
 [lib]
 crate-type = ["cdylib", "rlib"]
