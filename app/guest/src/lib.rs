@@ -2,17 +2,11 @@
 pub mod components;
 use components::*;
 use toxoid_api::*;
-use toxoid_wasm_component::bindings::{
-    self, 
-    exports::toxoid_component::component::callbacks::Guest as CallbacksGuest, 
-    Guest as WorldGuest,
-    toxoid_component::component::ecs::Iter
-};
 
 pub struct ToxoidWasmComponent;
 
 impl CallbacksGuest for ToxoidWasmComponent {
-    fn run(iter: Iter, handle: i64) {
+    fn run(iter: ToxoidIter, handle: i64) {
         run_callback(iter, handle);
     }
 }

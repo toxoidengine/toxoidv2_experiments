@@ -6,9 +6,26 @@ use toxoid_engine::{Component as ToxoidComponent, ComponentType as ToxoidCompone
 pub use toxoid_engine::bindings::exports::toxoid::engine::ecs::{EntityDesc, ComponentDesc, QueryDesc, SystemDesc, MemberType};
 // WASM
 #[cfg(target_arch = "wasm32")]
-use toxoid_wasm_component::bindings::{toxoid_component::component::ecs::{Component as ToxoidComponent, ComponentType as ToxoidComponentType, Entity as ToxoidEntity, Query as ToxoidQuery, System as ToxoidSystem, Callback as ToxoidCallback, Iter as ToxoidIter}, Guest};
-#[cfg(target_arch = "wasm32")]
-pub use toxoid_wasm_component::bindings::toxoid_component::component::ecs::{EntityDesc, ComponentDesc, QueryDesc, SystemDesc, MemberType};
+pub use toxoid_wasm_component::bindings::{
+    toxoid_component::component::ecs::{
+        Component as ToxoidComponent,
+        ComponentType as ToxoidComponentType,
+        Entity as ToxoidEntity,
+        Query as ToxoidQuery,
+        System as ToxoidSystem,
+        Callback as ToxoidCallback,
+        Iter as ToxoidIter,
+        EntityDesc,
+        ComponentDesc,
+        QueryDesc,
+        SystemDesc,
+        MemberType
+    },
+    self,
+    exports::toxoid_component::component::callbacks::Guest as CallbacksGuest,
+    Guest as WorldGuest,
+    Guest
+};
 #[cfg(target_arch = "wasm32")]
 pub use toxoid_wasm_component;
 // Both (Native + WASM)
