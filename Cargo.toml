@@ -8,8 +8,6 @@ members = [
      "crates/toxoid_host",
      "crates/toxoid_sokol",
      "app/host", 
-     "app/guest", "app/api_test",
+     "app/guest",
 ]
-exclude = [
-     "app/api_test",
-]
+exclude = []
