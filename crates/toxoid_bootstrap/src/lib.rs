@@ -59,7 +59,7 @@ fn bootstrap() {
                 .unwrap();
             if buffer.contains("reload") {
                 println!("Reloading WASM component...");
-                toxoid_wasm_runtime::load_wasm_component(GUEST_WASM_PATH)
+                toxoid_runtime::load_wasm_component(GUEST_WASM_PATH)
                     .unwrap_or_else(|e| println!("Failed to reload WASM component: {}", e));
             }
         }
@@ -68,7 +68,7 @@ fn bootstrap() {
     // Initial load of the main WASM component / game engine script
     if std::path::Path::new(GUEST_WASM_PATH).exists() {
         println!("Loading WASM component...");
-        toxoid_wasm_runtime::load_wasm_component(GUEST_WASM_PATH)
+        toxoid_runtime::load_wasm_component(GUEST_WASM_PATH)
             .unwrap_or_else(|e| println!("Failed to load WASM component: {}", e));
     } else {
         println!("WASM component not found at {}, modify the guest script source file or use `toxoid_cli build` to generate it", GUEST_WASM_PATH);

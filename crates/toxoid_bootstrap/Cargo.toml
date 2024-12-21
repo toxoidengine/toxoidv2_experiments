@@ -9,5 +9,5 @@ toxoid_api = { path = "../toxoid_api" }
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
-toxoid_wasm_runtime = { path = "../toxoid_wasm_runtime" }
+toxoid_runtime = { path = "../toxoid_runtime" }
 toxoid_host = { path = "../toxoid_host" }

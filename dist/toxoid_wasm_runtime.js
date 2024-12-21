@@ -761,13 +761,13 @@ class CppException extends EmscriptenEH {
 // end include: runtime_exceptions.js
 var wasmBinaryFile;
 if (Module['locateFile']) {
-  wasmBinaryFile = 'toxoid_wasm_runtime.wasm';
+  wasmBinaryFile = 'toxoid_runtime.wasm';
   if (!isDataURI(wasmBinaryFile)) {
     wasmBinaryFile = locateFile(wasmBinaryFile);
   }
 } else {
   // Use bundler-friendly `new URL(..., import.meta.url)` pattern; works in browsers too.
-  wasmBinaryFile = new URL('toxoid_wasm_runtime.wasm', import.meta.url).href;
+  wasmBinaryFile = new URL('toxoid_runtime.wasm', import.meta.url).href;
 }
 
 function getBinarySync(file) {
