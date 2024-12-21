@@ -14,6 +14,7 @@ fn game_loop(delta_time: f32) {
     toxoid_engine::toxoid_progress(delta_time);
 }
 
+// TODO: Make this Emscripten specific flag, not just WASM32 when we merge toxoid_host and toxoid_engine
 #[cfg(target_arch = "wasm32")]
 fn bootstrap() {
     // #[cfg(target_arch = "wasm32")]
@@ -74,7 +75,7 @@ fn bootstrap() {
     }
 }
 
-// use toxoid_api::*;
+use toxoid_api::*;
 // component! {
 //     Velocity {
 //         x: u32,
@@ -84,6 +85,11 @@ fn bootstrap() {
 
 pub fn init() {
     // println!("{}", Velocity::get_name());
+    let entity = Entity::new(Some(EntityDesc {
+        name: Some("Test entity".to_string())
+    }));
+    println!("Entity ID: {}", entity.get_id());
+    // entity.add_component(component.get_id());
     bootstrap();
     loop {}
 }

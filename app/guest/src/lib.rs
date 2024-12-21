@@ -13,7 +13,6 @@ impl CallbacksGuest for ToxoidWasmComponent {
 
 impl WorldGuest for ToxoidWasmComponent {
     fn init() {
-        println!("Hello?");
         let mut entity = Entity::named("Test");
         entity.add::<Position>();
         let mut position = entity.get::<Position>();
@@ -24,21 +23,21 @@ impl WorldGuest for ToxoidWasmComponent {
         let mut position = entity.get::<Position>();
         position.set_x(555);
         position.set_y(888);
-        System::dsl("Position($this)", |iter| {
-            iter
-                .entities()
-                .iter()
-                .for_each(|entity| {
-                    let mut position = entity.get::<Position>();
-                    let x = position.get_x();
-                    let y = position.get_y();
-                    position.set_x(x + 1);
-                    position.set_y(y + 1);
-                    println!("Entity: {}", entity.get_id());
-                    println!("Position -  X: {}, Y: {}", x, y);
-                });
-        })
-        .build();
+        // System::dsl("Position($this)", |iter| {
+        //     iter
+        //         .entities()
+        //         .iter()
+        //         .for_each(|entity| {
+        //             let mut position = entity.get::<Position>();
+        //             let x = position.get_x();
+        //             let y = position.get_y();
+        //             position.set_x(x + 1);
+        //             position.set_y(y + 1);
+        //             println!("Entity: {}", entity.get_id());
+        //             println!("Position -  X: {}, Y: {}", x, y);
+        //         });
+        // })
+        // .build();
     }
 }
 

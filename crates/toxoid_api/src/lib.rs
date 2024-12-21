@@ -1,9 +1,32 @@
 #![allow(warnings)]
 // Native
 #[cfg(not(target_arch = "wasm32"))]
-use toxoid_engine::{Component as ToxoidComponent, ComponentType as ToxoidComponentType, Entity as ToxoidEntity, Query as ToxoidQuery, System as ToxoidSystem, Callback as ToxoidCallback, Iter as ToxoidIter, bindings::exports::toxoid::engine::ecs::{GuestComponent, GuestComponentType, GuestEntity, GuestQuery, GuestSystem, GuestCallback, GuestIter}};
+pub use toxoid_engine::{
+    Component as ToxoidComponent,
+    ComponentType as ToxoidComponentType,
+    Entity as ToxoidEntity,
+    Query as ToxoidQuery,
+    System as ToxoidSystem,
+    Callback as ToxoidCallback,
+    Iter as ToxoidIter,
+    bindings::exports::toxoid::engine::ecs::{
+        GuestComponent,
+        GuestComponentType,
+        GuestEntity,
+        GuestQuery,
+        GuestSystem,
+        GuestCallback,
+        GuestIter,
+    },
+};
 #[cfg(not(target_arch = "wasm32"))]
-pub use toxoid_engine::bindings::exports::toxoid::engine::ecs::{EntityDesc, ComponentDesc, QueryDesc, SystemDesc, MemberType};
+pub use toxoid_engine::bindings::exports::toxoid::engine::ecs::{
+    EntityDesc,
+    ComponentDesc,
+    QueryDesc,
+    SystemDesc,
+    MemberType,
+};
 // WASM
 #[cfg(target_arch = "wasm32")]
 pub use toxoid_wasm_component::bindings::{
@@ -62,8 +85,8 @@ pub trait Component {
     // #[cfg(all(target_arch="wasm32", target_os="unknown"))]
     #[cfg(target_arch = "wasm32")]
     fn set_ptr(&mut self, ptr: *mut toxoid_wasm_component::bindings::toxoid_component::component::ecs::Component);
-    // #[cfg(not(all(target_arch="wasm32", target_os="unknown")))]
-    // fn set_ptr(&mut self, ptr: *mut c_void);
+    #[cfg(not(target_arch = "wasm32"))]
+    fn set_ptr(&mut self, ptr: *mut toxoid_engine::Component);
     // #[cfg(all(target_arch="wasm32", target_os="unknown"))]
     // fn get_ptr(&self) -> i64;
     // #[cfg(not(all(target_arch="wasm32", target_os="unknown")))]
@@ -100,15 +123,17 @@ impl Entity {
     }
 
     pub fn get<T: Component + ComponentType + Default + 'static>(&self) -> T {
-        let mut component= T::default();
+        let mut component = T::default();
         #[cfg(not(target_arch = "wasm32"))]
         let component_ptr = self.entity.get(T::get_id());
         #[cfg(target_arch = "wasm32")]
         let component_ptr = self.entity.get(T::get_id());
+        
         #[cfg(not(target_arch = "wasm32"))]
-        let toxoid_component = crate::bindings::toxoid_component::component::ecs::Component::new(component_ptr); 
+        let toxoid_component = toxoid_engine::Component::new(component_ptr);
         #[cfg(target_arch = "wasm32")]
         let toxoid_component = component_ptr;
+        
         let toxoid_component_ptr = Box::into_raw(Box::new(toxoid_component));
         component.set_ptr(toxoid_component_ptr);
         component
@@ -116,6 +141,9 @@ impl Entity {
 
     pub fn add<T: Component + ComponentType + 'static>(&mut self) -> &Self {
         let component_id = T::get_id();
+        #[cfg(not(target_arch = "wasm32"))]
+        self.entity.add(component_id);
+        #[cfg(target_arch = "wasm32")]
         self.entity.add(component_id);
         self
     }
@@ -260,12 +288,24 @@ impl Iter {
     }
 
     pub fn entities(&self) -> Vec<Entity> {
-        self
-            .iter
+        self.iter
             .entities()
             .iter()
-            .map(|entity| Entity { 
-                entity: ToxoidEntity::from_id(entity.get_id()) 
+            .map(|entity| {
+                #[cfg(not(target_arch = "wasm32"))]
+                {
+                    // In native mode, we get a u64 ID directly
+                    Entity {
+                        entity: ToxoidEntity { id: *entity }
+                    }
+                }
+                #[cfg(target_arch = "wasm32")]
+                {
+                    // In WASM mode, we're working with the guest component object
+                    Entity {
+                        entity: ToxoidEntity::from_id(entity.get_id())
+                    }
+                }
             })
             .collect()
     }
@@ -320,4 +360,3 @@ impl Iter {
     let value = component.get_member_u64(0) as u64;
     value 
 */
-
