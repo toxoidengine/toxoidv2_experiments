@@ -673,10 +673,8 @@ pub fn load_wasm_component(filename: &str) -> Result<()> {
 #[no_mangle]
 // Trampoline closure from Rust using C callback and binding_ctx field to call a Rust closure
 pub unsafe extern "C" fn query_trampoline(iter: *mut toxoid_host::ecs_iter_t) {
-    println!("Query trampoline called");
     let handle = (*iter).callback_ctx as i64;
     let is_guest = (*iter).ctx != std::ptr::null_mut();
-    println!("Is guest: {}", is_guest);
     if is_guest {
         let store = unsafe { &mut *STORE };
         let iter = Box::into_raw(Box::new(toxoid_host::Iter::new(iter as i64)));
@@ -692,8 +690,15 @@ pub unsafe extern "C" fn query_trampoline(iter: *mut toxoid_host::ecs_iter_t) {
                 });
         }
     } else {
-        let callback = unsafe { toxoid_api::CALLBACKS[handle as usize].as_ref() };
-        let iter_ref = unsafe { &*(iter as *mut toxoid_api::Iter) };
-        callback(iter_ref);
+        let callback = unsafe {
+            toxoid_api::CALLBACKS[handle as usize]
+                .as_ref()
+        };
+        let iter = toxoid_api::Iter {
+            iter: toxoid_api::ToxoidIter {
+                ptr: iter as *mut core::ffi::c_void
+            }
+        };
+        callback(&iter);
     }
 }

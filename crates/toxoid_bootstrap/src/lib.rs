@@ -103,21 +103,19 @@ pub fn init() {
     // Print x and y of velocity component
     println!("Velocity 2 - X: {}, Y: {}", velocity.get_x(), velocity.get_y());
     System::dsl("Velocity($this)", |iter| {
-        println!("Hello callback!");
-        // iter
-        //     .entities()
-        //     .iter()
-        //     .for_each(|entity| {
-        //         let mut velocity = entity.get::<Velocity>();
-        //         let x = velocity.get_x();
-        //         let y = velocity.get_y();
-        //         velocity.set_x(x + 1);
-        //         velocity.set_y(y + 1);
-        //         println!("Entity: {}", entity.get_id());
-        //         println!("Velocity -  X: {}, Y: {}", x, y);
-        //     });
+        iter
+            .entities()
+            .iter()
+            .for_each(|entity| {
+                let mut velocity = entity.get::<Velocity>();
+                let x = velocity.get_x();
+                let y = velocity.get_y();
+                velocity.set_x(x + 1);
+                velocity.set_y(y + 1);
+                println!("Entity: {}", entity.get_id());
+                println!("Velocity -  X: {}, Y: {}", x, y);
+            });
     })
     .build();
-    // println!("Entity ID: {}", entity.get_id());
     loop {}
 }

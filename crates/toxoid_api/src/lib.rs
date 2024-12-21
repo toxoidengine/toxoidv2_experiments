@@ -299,7 +299,7 @@ impl Callback {
 }
 
 pub struct Iter {
-    iter: ToxoidIter
+    pub iter: ToxoidIter
 }
 
 impl Iter {
