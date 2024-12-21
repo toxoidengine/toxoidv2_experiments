@@ -7,7 +7,8 @@
 - **Memory Model**: Works with handles/resources that abstract away direct memory access
 - **Entity Handling**: Returns complete `entity` resource objects that encapsulate the functionality
 
-```wit:toxoid_guest/wit/world.wit
+```wit
+// toxoid_guest/wit/world.wit
 // Entity returns a full resource object that can be safely used in WASM
 resource entity {
     constructor(init: entity-desc);
@@ -26,7 +27,8 @@ resource query {
 - **Memory Model**: Works with raw pointers and memory addresses
 - **Entity Handling**: Returns raw entity IDs and memory pointers
 
-```wit:toxoid_host/wit/world.wit
+```wit
+// toxoid_host/wit/world.wit
 resource entity {
     from-id: static func(id: u64) -> s64;  // Returns raw pointer
     get: func(component: ecs-entity-t) -> s64;  // Returns raw pointer
@@ -67,7 +69,8 @@ The host interface (`toxoid_host`) prioritizes performance and direct access:
 This separation ensures that WASM components can't accidentally corrupt memory while allowing native code to maintain full performance when needed.
 
 ## Example Implementation (ToxoidEntity):
-```rust:crates/toxoid_api/src/lib.rs
+```rust
+// crates/toxoid_api/src/lib.rs
 impl Iter {
     pub fn entities(&self) -> Vec<Entity> {
         self.iter
