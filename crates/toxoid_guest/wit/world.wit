@@ -97,13 +97,15 @@ interface ecs {
     resource callback {
         constructor(handle: s64);
         run: func(iter: iter);
+        // This is prefixed because resources already have a `handle` method.
         cb-handle: func() -> s64;
     }
 
     record system-desc {
         name: option<string>,
         callback: callback,
-        query-desc: query-desc
+        query-desc: query-desc,
+        is-guest: bool
     }
 
     resource system {

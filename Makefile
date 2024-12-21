@@ -24,9 +24,9 @@ submodule-add:
 
 build-wit:
 	cp app/guest/wit/world.wit crates/toxoid_guest/wit/world.wit
-	cd app/guest && cargo build && cargo component check
-	cd crates/toxoid_host && cargo build && cargo component check
-	cd crates/toxoid_guest && cargo build && cargo component check
+	cd app/guest && cargo component check && cargo build
+	cd crates/toxoid_host && cargo component check && cargo build
+	cd crates/toxoid_guest && cargo component check && cargo build
 
 build:
 	cd app/guest && cargo component build

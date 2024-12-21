@@ -534,7 +534,11 @@ impl GuestSystem for System {
         let mut query_desc: ecs_query_desc_t = unsafe { MaybeUninit::zeroed().assume_init() };
         query_desc.expr = c_string(&desc.query_desc.expr);
         system_desc.query = query_desc;
-        system_desc.ctx = desc.callback as *mut c_void;
+        if desc.is_guest {
+            system_desc.ctx = 1 as *mut c_void;
+        } else {
+            system_desc.ctx = std::ptr::null_mut();
+        }
         system_desc.callback_ctx = desc.callback as *mut c_void;
         system_desc.callback = Some(unsafe { QUERY_TRAMPOLINE.unwrap() });
         System { 

@@ -152,8 +152,8 @@ impl toxoid_component::component::ecs::HostSystem for StoreState {
         let system = <toxoid_host::System as toxoid_host::bindings::exports::toxoid::engine::ecs::GuestSystem>::new(toxoid_host::bindings::exports::toxoid::engine::ecs::SystemDesc {
             name: desc.name,
             query_desc,
-            query: query_ptr as i64,
             callback: callback.cb_handle(),
+            is_guest: true,
         });
         let id = self
             .table
@@ -673,18 +673,27 @@ pub fn load_wasm_component(filename: &str) -> Result<()> {
 #[no_mangle]
 // Trampoline closure from Rust using C callback and binding_ctx field to call a Rust closure
 pub unsafe extern "C" fn query_trampoline(iter: *mut toxoid_host::ecs_iter_t) {
+    println!("Query trampoline called");
     let handle = (*iter).callback_ctx as i64;
-    let store = unsafe { &mut *STORE };
-    let iter = Box::into_raw(Box::new(toxoid_host::Iter::new(iter as i64)));
-    let iter_resource_id = store.data_mut().table.push::<IterProxy>(IterProxy { ptr: iter }).unwrap();
-    unsafe {
-        TOXOID_COMPONENT_WORLD
-            .as_ref()
-            .unwrap()
-            .toxoid_component_component_callbacks()
-            .call_run(store, iter_resource_id, handle)
-            .unwrap_or_else(|e| {
-                println!("Error calling run: {:?}", e);
-            });
+    let is_guest = (*iter).ctx != std::ptr::null_mut();
+    println!("Is guest: {}", is_guest);
+    if is_guest {
+        let store = unsafe { &mut *STORE };
+        let iter = Box::into_raw(Box::new(toxoid_host::Iter::new(iter as i64)));
+        let iter_resource_id = store.data_mut().table.push::<IterProxy>(IterProxy { ptr: iter }).unwrap();
+        unsafe {
+            TOXOID_COMPONENT_WORLD
+                .as_ref()
+                .unwrap()
+                .toxoid_component_component_callbacks()
+                .call_run(store, iter_resource_id, handle)
+                .unwrap_or_else(|e| {
+                    println!("Error calling run: {:?}", e);
+                });
+        }
+    } else {
+        let callback = unsafe { toxoid_api::CALLBACKS[handle as usize].as_ref() };
+        let iter_ref = unsafe { &*(iter as *mut toxoid_api::Iter) };
+        callback(iter_ref);
     }
 }

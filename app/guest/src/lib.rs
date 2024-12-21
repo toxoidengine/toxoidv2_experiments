@@ -7,7 +7,7 @@ pub struct ToxoidWasmComponent;
 
 impl CallbacksGuest for ToxoidWasmComponent {
     fn run(iter: ToxoidIter, handle: i64) {
-        run_callback(iter, handle);
+        // run_callback(iter, handle);
     }
 }
 

@@ -1842,6 +1842,7 @@ name = "toxoid_runtime"
 version = "0.1.0"
 dependencies = [
  "once_cell",
+ "toxoid_api",
  "toxoid_host",
  "wasmtime",
  "wasmtime-wasi",

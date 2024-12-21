@@ -47,7 +47,6 @@ pub use toxoid_guest::bindings::{
     self,
     exports::toxoid_component::component::callbacks::Guest as CallbacksGuest,
     Guest as WorldGuest,
-    Guest
 };
 #[cfg(target_arch = "wasm32")]
 pub use toxoid_guest;
@@ -58,17 +57,12 @@ pub type ecs_entity_t = u64;
 
 pub struct ToxoidWasmComponent;
 
-#[cfg(target_arch = "wasm32")]
-impl toxoid_guest::bindings::exports::toxoid_component::component::callbacks::Guest for ToxoidWasmComponent {
-    fn run(iter: toxoid_guest::bindings::toxoid_component::component::ecs::Iter, handle: i64) {
-        let iter = Iter::new(iter);
-        let callback = unsafe { CALLBACKS[handle as usize].as_ref() };
-        callback(&iter);
-    }
-}
-
 pub fn run_callback(iter: ToxoidIter, handle: i64) {
     let iter = Iter::new(iter);
+    // Print all keys and values in the CALLBACKS vector
+    for (index, callback) in unsafe { CALLBACKS.iter().enumerate() } {
+        println!("Index: {}", index);
+    }
     let callback = unsafe { CALLBACKS[handle as usize].as_ref() };
     callback(&iter);
 }
@@ -243,13 +237,19 @@ impl System {
         // Create the Toxoid callback with the registered callback handle
         let callback = ToxoidCallback::new(callback.cb_handle());
         let query_desc = desc.as_ref().unwrap().query_desc.clone();
-        let desc = desc.unwrap_or(SystemDesc { name: None, callback, query_desc });
+        let desc = desc.unwrap_or(SystemDesc { name: None, callback, query_desc, is_guest: true });
         Self { system: ToxoidSystem::new(desc) }
     }
 
     #[cfg(not(target_arch = "wasm32"))]
-    pub fn dsl(dsl: &str, callback: fn(&Iter)) -> Self {
-        unimplemented!()
+    pub fn new(desc: Option<SystemDesc>, callback_fn: fn(&Iter)) -> Self {
+        // Register the callback in the guest environment
+        let callback = Callback::new(callback_fn);
+        // Create the Toxoid callback with the registered callback handle
+        let callback = ToxoidCallback::new(callback.cb_handle());
+        let query_desc = desc.as_ref().unwrap().query_desc.clone();
+        let desc = desc.unwrap_or(SystemDesc { name: None, callback: callback.cb_handle(), query_desc, is_guest: false });
+        Self { system: ToxoidSystem::new(desc) }
     }
 
     #[cfg(target_arch = "wasm32")]
@@ -258,8 +258,15 @@ impl System {
         let callback = Callback::new(callback_fn);
         // Create the Toxoid callback with the registered callback handle
         let callback = ToxoidCallback::new(callback.cb_handle());
-        println!("Callback handle: {}", callback.cb_handle());
-        let desc = SystemDesc { name: None, callback, query_desc: QueryDesc { expr: dsl.to_string() } };
+        let desc = SystemDesc { name: None, callback, is_guest: true, query_desc: QueryDesc { expr: dsl.to_string() } };
+        Self::new(Some(desc), callback_fn)
+    }
+
+    #[cfg(not(target_arch = "wasm32"))]
+    pub fn dsl(dsl: &str, callback_fn: fn(&Iter)) -> Self {
+        // Register the callback in the guest environment
+        let callback = Callback::new(callback_fn);
+        let desc = SystemDesc { name: None, callback: callback.cb_handle(), query_desc: QueryDesc { expr: dsl.to_string() }, is_guest: false };
         Self::new(Some(desc), callback_fn)
     }
 
@@ -277,6 +284,7 @@ pub static mut CALLBACKS: once_cell::sync::Lazy<Vec<Box<dyn Fn(&Iter)>>> = once_
 impl Callback {
     pub fn new(callback_fn: fn(&Iter)) -> Self {
         let handle = unsafe { CALLBACKS.push(Box::new(callback_fn)); CALLBACKS.len() - 1 };
+        println!("Callback handle: {}", handle);
         Self { callback: ToxoidCallback::new(handle as i64) }   
     }
 

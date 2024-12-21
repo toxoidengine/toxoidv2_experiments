@@ -35,9 +35,7 @@ fn bootstrap() {
             let current_time = std::time::Instant::now();
             delta_time = current_time.duration_since(last_time).as_secs_f32();
             last_time = current_time;
-            
             game_loop(delta_time);
-            
             std::thread::sleep(std::time::Duration::from_millis(16));
         }
     });
@@ -84,12 +82,42 @@ component! {
 }
 
 pub fn init() {
+    bootstrap();
     println!("{}", Velocity::get_name());
     let entity = Entity::new(Some(EntityDesc {
         name: Some("Test entity".to_string())
     }));
-    println!("Entity ID: {}", entity.get_id());
-    // entity.add_component(component.get_id());
-    bootstrap();
+    // Create entity with Velocity component
+    let mut entity = Entity::named("Test");
+    entity.add::<Velocity>();
+    let mut velocity = entity.get::<Velocity>();
+    velocity.set_x(777);
+    velocity.set_y(999);
+    // Print x and y of velocity component
+    println!("Velocity 1 - X: {}, Y: {}", velocity.get_x(), velocity.get_y());
+    let mut entity = Entity::new(None);
+    entity.add::<Velocity>();
+    let mut velocity = entity.get::<Velocity>();
+    velocity.set_x(555);
+    velocity.set_y(888);
+    // Print x and y of velocity component
+    println!("Velocity 2 - X: {}, Y: {}", velocity.get_x(), velocity.get_y());
+    System::dsl("Velocity($this)", |iter| {
+        println!("Hello callback!");
+        // iter
+        //     .entities()
+        //     .iter()
+        //     .for_each(|entity| {
+        //         let mut velocity = entity.get::<Velocity>();
+        //         let x = velocity.get_x();
+        //         let y = velocity.get_y();
+        //         velocity.set_x(x + 1);
+        //         velocity.set_y(y + 1);
+        //         println!("Entity: {}", entity.get_id());
+        //         println!("Velocity -  X: {}, Y: {}", x, y);
+        //     });
+    })
+    .build();
+    // println!("Entity ID: {}", entity.get_id());
     loop {}
 }

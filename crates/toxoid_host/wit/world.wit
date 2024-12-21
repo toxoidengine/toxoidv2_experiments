@@ -102,6 +102,7 @@ interface ecs {
     resource callback {
         constructor(handle: s64);
         run: func(iter: iter);
+        // This is prefixed because resources already have a `handle` method.
         cb-handle: func() -> s64;
     }
 
@@ -109,7 +110,7 @@ interface ecs {
         name: option<string>,
         callback: s64,
         query-desc: query-desc,
-        query: s64
+        is-guest: bool
     }
 
     resource system {
