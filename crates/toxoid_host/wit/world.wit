@@ -2,7 +2,6 @@ package toxoid:engine;
 
 interface ecs {
     type ecs-entity-t = u64;
-
     enum member-type {
         u8-t,
         u16-t,
@@ -43,9 +42,7 @@ interface ecs {
     }
 
     resource component {
-        
         constructor(ptr: s64);
-        
         set-member-u8: func(offset: u32, value: u8);
         get-member-u8: func(offset: u32) -> u8;
         set-member-u16: func(offset: u32, value: u16);
@@ -84,12 +81,8 @@ interface ecs {
     resource entity {
         constructor(desc: entity-desc);
         get-id: func() -> ecs-entity-t;
-        
         from-id: static func(id: u64) -> s64;
-        
-        
         get: func(component: ecs-entity-t) -> s64;
-        
         add: func(component: ecs-entity-t);
         // remove: func(component: ecs-entity-t);
     }
@@ -101,9 +94,7 @@ interface ecs {
         iter: func();
         next: func() -> bool;
         count: func() -> s32;
-        
         entities: func() -> list<ecs-entity-t>;
-        
         // ptrs: func(component-query-index: u32) -> *mut *mut c_void;
     }
 
@@ -115,28 +106,21 @@ interface ecs {
 
     record system-desc {
         name: option<string>,
-        
         callback: s64,
-        
         query-desc: query-desc,
-        
         query: s64
-        
     }
 
     resource system {
         constructor(desc: system-desc);
         build: func();
-        
         callback: func() -> s64;
-        
     }
 
     resource iter {
         constructor(ptr: s64);
         next: func() -> bool;
         count: func() -> s32;
-        
         entities: func() -> list<ecs-entity-t>;
         
     }
