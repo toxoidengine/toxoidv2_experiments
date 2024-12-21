@@ -1,4 +1,3 @@
-use toxoid_api_macro::*;
 use toxoid_api::*;
 
 component! {

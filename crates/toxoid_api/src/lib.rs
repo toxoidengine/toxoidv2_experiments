@@ -51,6 +51,10 @@ pub use toxoid_guest::bindings::{
 };
 #[cfg(target_arch = "wasm32")]
 pub use toxoid_guest;
+// Both (Native + WASM)
+pub use toxoid_api_macro::component;
+
+pub type ecs_entity_t = u64;
 
 pub struct ToxoidWasmComponent;
 
@@ -69,7 +73,29 @@ pub fn run_callback(iter: ToxoidIter, handle: i64) {
     callback(&iter);
 }
 
-pub type ecs_entity_t = u64;
+// TODO: Create a WIT global function to get the component id directly instead of creating a component type
+// with the same name and fields as an existing component type, which is a lot of overhead
+#[cfg(target_arch = "wasm32")]
+pub fn get_component_id(component_name: &str, member_names: Vec<String>, member_types: Vec<u8>) -> ecs_entity_t {
+    let component_type = ToxoidComponentType::new(&ComponentDesc {
+        name: component_name.to_string(),
+        member_names: member_names,
+        member_types: member_types,
+    });
+    component_type.get_id()
+}
+
+// TODO: Create a WIT global function to get the component id directly instead of creating a component type
+// with the same name and fields as an existing component type, which is a lot of overhead
+#[cfg(not(target_arch = "wasm32"))]
+pub fn get_component_id(component_name: &str, member_names: Vec<String>, member_types: Vec<u8>) -> ecs_entity_t {
+    let component_type = ToxoidComponentType::new(ComponentDesc {
+        name: component_name.to_string(),
+        member_names: member_names,
+        member_types: member_types,
+    });
+    component_type.get_id()
+}
 
 pub trait ComponentType {
     fn get_name() -> &'static str;

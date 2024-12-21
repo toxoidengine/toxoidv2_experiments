@@ -382,13 +382,7 @@ pub fn component(input: TokenStream) -> TokenStream {
             };
             let type_get_id_fn = quote! {
                 fn get_id() -> u64 {
-                    use toxoid_api::{ToxoidComponentType, ComponentDesc};
-                    let component_type = ToxoidComponentType::new(&ComponentDesc {
-                        name: #struct_name_str.to_string(),
-                        member_names: vec![#(#field_names_str.to_string()),*],
-                        member_types: vec![#(#field_types_code),*],
-                    }); 
-                    component_type.get_id()
+                    toxoid_api::get_component_id(#struct_name_str, vec![#(#field_names_str.to_string()),*], vec![#(#field_types_code),*])
                 }
             };
             quote! {

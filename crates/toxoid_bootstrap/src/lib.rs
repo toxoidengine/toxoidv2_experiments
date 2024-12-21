@@ -76,15 +76,15 @@ fn bootstrap() {
 }
 
 use toxoid_api::*;
-// component! {
-//     Velocity {
-//         x: u32,
-//         y: u32
-//     }
-// }
+component! {
+    Velocity {
+        x: u32,
+        y: u32
+    }
+}
 
 pub fn init() {
-    // println!("{}", Velocity::get_name());
+    println!("{}", Velocity::get_name());
     let entity = Entity::new(Some(EntityDesc {
         name: Some("Test entity".to_string())
     }));
