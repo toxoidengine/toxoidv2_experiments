@@ -1633,7 +1633,7 @@ dependencies = [
 [[package]]
 name = "sokol"
 version = "0.1.0"
-source = "git+https://github.com/floooh/sokol-rust#8b2662d529848557e3690a18839f6f8496fc5a99"
+source = "git+https://github.com/floooh/sokol-rust#aecbf75fe5ae4c68c0d3229c65a834efa8337da5"
 dependencies = [
  "cc",
 ]
@@ -1817,6 +1817,7 @@ version = "0.1.0"
 dependencies = [
  "toxoid_api",
  "toxoid_host",
+ "toxoid_render",
  "toxoid_runtime",
  "toxoid_sokol",
 ]
@@ -1881,6 +1882,7 @@ dependencies = [
  "bindgen",
  "cc",
  "objc",
+ "once_cell",
  "sokol",
  "toxoid_api",
  "toxoid_render",

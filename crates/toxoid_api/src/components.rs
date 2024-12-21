@@ -14,5 +14,8 @@ component! {
         g: f32,
         b: f32,
         a: f32
+    },
+    Rect {
+        foo: bool
     }
 }

@@ -73,66 +73,105 @@ fn bootstrap() {
     }
 }
 
-use toxoid_api::*;
-component! {
-    Velocity {
-        x: u32,
-        y: u32
-    }
-}
-
 extern "C" fn sokol_init() {
     // Initialization code for Sokol
-    println!("Sokol initialized");
+    // println!("Sokol initialized");
+    toxoid_sokol::sokol_init();
+    // use toxoid_api::*;
+    // use toxoid_api::components::*;
+    // use toxoid_sokol::SokolRenderer2D;
+    // use toxoid_render::Renderer2D;
+    // let mut entity = Entity::new(Some(EntityDesc {
+    //     name: Some("Test entity".to_string())
+    // }));
+    // entity.add::<Rect>();
+    // entity.add::<Position>();
+    // entity.add::<Size>();
+    // entity.add::<Color>();
+    // let mut size = entity.get::<Size>();
+    // size.set_width(100);
+    // size.set_height(100);
+    // let mut color = entity.get::<Color>();
+    // color.set_r(1.0);
+    // color.set_g(1.0);
+    // color.set_b(1.0);
+    // color.set_a(1.0);
+    
+    // System::dsl("Rect, Position, Size, Color", |iter| {
+    //     iter
+    //         .entities()
+    //         .iter()
+    //         .for_each(|entity| {
+    //             let mut rect = entity.get::<Rect>();
+    //             let mut pos = entity.get::<Position>();
+    //             let mut size = entity.get::<Size>();
+    //             let mut color = entity.get::<Color>();
+    //             println!("Hello render rect system!");
+    //             // SokolRenderer2D::begin();
+    //             // SokolRenderer2D::draw_filled_rect(&pos, &size, &color);
+    //             // let renderer_2d = &mut *toxoid_sokol::RENDERER_2D.lock().unwrap();
+    //             // renderer_2d.end();
+    //         });
+    // })
+    // .build();
 }
 
 extern "C" fn sokol_frame() {
     // Frame update code for Sokol
-    println!("Sokol frame updated");
+    // println!("Sokol frame updated");
 }
 
 extern "C" fn sokol_event(event: *const toxoid_sokol::sokol::app::Event) {
     // Event handling code for Sokol
-    println!("Sokol event received");
+    // println!("Sokol event received");
 }
 
+// use toxoid_api::*;
+// component! {
+//     Velocity {
+//         x: u32,
+//         y: u32
+//     }
+// }
 
 pub fn init() {
     bootstrap();
-    println!("{}", Velocity::get_name());
-    let entity = Entity::new(Some(EntityDesc {
-        name: Some("Test entity".to_string())
-    }));
-    // Create entity with Velocity component
-    let mut entity = Entity::named("Test");
-    entity.add::<Velocity>();
-    let mut velocity = entity.get::<Velocity>();
-    velocity.set_x(777);
-    velocity.set_y(999);
-    // Print x and y of velocity component
-    println!("Velocity 1 - X: {}, Y: {}", velocity.get_x(), velocity.get_y());
-    let mut entity = Entity::new(None);
-    entity.add::<Velocity>();
-    let mut velocity = entity.get::<Velocity>();
-    velocity.set_x(555);
-    velocity.set_y(888);
-    // Print x and y of velocity component
-    println!("Velocity 2 - X: {}, Y: {}", velocity.get_x(), velocity.get_y());
-    System::dsl("Velocity($this)", |iter| {
-        iter
-            .entities()
-            .iter()
-            .for_each(|entity| {
-                let mut velocity = entity.get::<Velocity>();
-                let x = velocity.get_x();
-                let y = velocity.get_y();
-                velocity.set_x(x + 1);
-                velocity.set_y(y + 1);
-                println!("Entity: {}", entity.get_id());
-                println!("Velocity -  X: {}, Y: {}", x, y);
-            });
-    })
-    .build();
     toxoid_sokol::init(sokol_init, sokol_frame, sokol_event);
+    
+    // println!("{}", Velocity::get_name());
+    // let entity = Entity::new(Some(EntityDesc {
+    //     name: Some("Test entity".to_string())
+    // }));
+    // // Create entity with Velocity component
+    // let mut entity = Entity::named("Test");
+    // entity.add::<Velocity>();
+    // let mut velocity = entity.get::<Velocity>();
+    // velocity.set_x(777);
+    // velocity.set_y(999);
+    // // Print x and y of velocity component
+    // println!("Velocity 1 - X: {}, Y: {}", velocity.get_x(), velocity.get_y());
+    // let mut entity = Entity::new(None);
+    // entity.add::<Velocity>();
+    // let mut velocity = entity.get::<Velocity>();
+    // velocity.set_x(555);
+    // velocity.set_y(888);
+    // // Print x and y of velocity component
+    // println!("Velocity 2 - X: {}, Y: {}", velocity.get_x(), velocity.get_y());
+    // System::dsl("Velocity($this)", |iter| {
+    //     iter
+    //         .entities()
+    //         .iter()
+    //         .for_each(|entity| {
+    //             let mut velocity = entity.get::<Velocity>();
+    //             let x = velocity.get_x();
+    //             let y = velocity.get_y();
+    //             velocity.set_x(x + 1);
+    //             velocity.set_y(y + 1);
+    //             println!("Entity: {}", entity.get_id());
+    //             println!("Velocity -  X: {}, Y: {}", x, y);
+    //         });
+    // })
+    // .build();
+    
     loop {}
 }
