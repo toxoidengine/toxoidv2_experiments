@@ -51,8 +51,6 @@ pub use toxoid_guest::bindings::{
 };
 #[cfg(target_arch = "wasm32")]
 pub use toxoid_guest;
-// Both (Native + WASM)
-pub use toxoid_api_macro::component;
 
 pub struct ToxoidWasmComponent;
 
