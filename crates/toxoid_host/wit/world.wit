@@ -2,6 +2,7 @@ package toxoid:engine;
 
 interface ecs {
     type ecs-entity-t = u64;
+    
     enum member-type {
         u8-t,
         u16-t,
@@ -122,7 +123,6 @@ interface ecs {
         next: func() -> bool;
         count: func() -> s32;
         entities: func() -> list<ecs-entity-t>;
-        
     }
 }
 
