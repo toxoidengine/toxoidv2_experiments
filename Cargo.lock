@@ -2032,7 +2032,7 @@ dependencies = [
  "once_cell",
  "toxoid_api_macro",
  "toxoid_engine",
- "toxoid_wasm_component",
+ "toxoid_guest",
 ]
 
 [[package]]
@@ -2072,6 +2072,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "toxoid_guest"
+version = "0.1.0"
+dependencies = [
+ "once_cell",
+ "wit-bindgen-rt",
+]
+
+[[package]]
 name = "toxoid_host"
 version = "0.1.0"
 dependencies = [
@@ -2087,14 +2095,6 @@ dependencies = [
  "bindgen",
  "cc",
  "sokol",
-]
-
-[[package]]
-name = "toxoid_wasm_component"
-version = "0.1.0"
-dependencies = [
- "once_cell",
- "wit-bindgen-rt",
 ]
 
 [[package]]

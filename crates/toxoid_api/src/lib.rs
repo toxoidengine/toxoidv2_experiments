@@ -29,7 +29,7 @@ pub use toxoid_engine::bindings::exports::toxoid::engine::ecs::{
 };
 // WASM
 #[cfg(target_arch = "wasm32")]
-pub use toxoid_wasm_component::bindings::{
+pub use toxoid_guest::bindings::{
     toxoid_component::component::ecs::{
         Component as ToxoidComponent,
         ComponentType as ToxoidComponentType,
@@ -50,15 +50,15 @@ pub use toxoid_wasm_component::bindings::{
     Guest
 };
 #[cfg(target_arch = "wasm32")]
-pub use toxoid_wasm_component;
+pub use toxoid_guest;
 // Both (Native + WASM)
 pub use toxoid_api_macro::component;
 
 pub struct ToxoidWasmComponent;
 
 #[cfg(target_arch = "wasm32")]
-impl toxoid_wasm_component::bindings::exports::toxoid_component::component::callbacks::Guest for ToxoidWasmComponent {
-    fn run(iter: toxoid_wasm_component::bindings::toxoid_component::component::ecs::Iter, handle: i64) {
+impl toxoid_guest::bindings::exports::toxoid_component::component::callbacks::Guest for ToxoidWasmComponent {
+    fn run(iter: toxoid_guest::bindings::toxoid_component::component::ecs::Iter, handle: i64) {
         let iter = Iter::new(iter);
         let callback = unsafe { CALLBACKS[handle as usize].as_ref() };
         callback(&iter);
@@ -84,7 +84,7 @@ pub trait Component {
     // fn get_id(&self) -> u64;
     // #[cfg(all(target_arch="wasm32", target_os="unknown"))]
     #[cfg(target_arch = "wasm32")]
-    fn set_ptr(&mut self, ptr: *mut toxoid_wasm_component::bindings::toxoid_component::component::ecs::Component);
+    fn set_ptr(&mut self, ptr: *mut toxoid_guest::bindings::toxoid_component::component::ecs::Component);
     #[cfg(not(target_arch = "wasm32"))]
     fn set_ptr(&mut self, ptr: *mut toxoid_engine::Component);
     // #[cfg(all(target_arch="wasm32", target_os="unknown"))]

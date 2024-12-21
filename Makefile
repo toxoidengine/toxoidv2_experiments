@@ -23,10 +23,10 @@ submodule-add:
 	git add crates/toxoid_sokol/lib/sokol_gp
 
 build-wit:
-	cp app/guest/wit/world.wit crates/toxoid_wasm_component/wit/world.wit
+	cp app/guest/wit/world.wit crates/toxoid_guest/wit/world.wit
 	cd app/guest && cargo build && cargo component check
 	cd crates/toxoid_engine && cargo build && cargo component check
-	cd crates/toxoid_wasm_component && cargo build && cargo component check
+	cd crates/toxoid_guest && cargo build && cargo component check
 
 build:
 	cd app/guest && cargo component build

@@ -2,12 +2,12 @@
 
 ## Key Architectural Differences
 
-### toxoid_wasm_component/wit/world.wit (Guest Interface)
+### toxoid_guest/wit/world.wit (Guest Interface)
 - **Purpose**: Provides a safe interface for WASM components to interact with host resources
 - **Memory Model**: Works with handles/resources that abstract away direct memory access
 - **Entity Handling**: Returns complete `entity` resource objects that encapsulate the functionality
 
-```wit:toxoid_wasm_component/wit/world.wit
+```wit:toxoid_guest/wit/world.wit
 // Entity returns a full resource object that can be safely used in WASM
 resource entity {
     constructor(init: entity-desc);
@@ -54,7 +54,7 @@ resource query {
 
 ## Safety Considerations
 
-The WASM guest interface (`toxoid_wasm_component`) provides several safety guarantees:
+The WASM guest interface (`toxoid_guest`) provides several safety guarantees:
 1. No direct memory access
 2. Resource-based abstraction for all operations
 3. Safe entity and component handles

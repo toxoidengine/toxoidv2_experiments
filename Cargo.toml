@@ -3,7 +3,7 @@ name = "toxoid_app"
 members = [      
      "crates/toxoid_cli",
      "crates/toxoid_wasm_runtime",
-     "crates/toxoid_wasm_component",
+     "crates/toxoid_guest",
      "crates/toxoid_api", 
      "crates/toxoid_host",
      "crates/toxoid_sokol",

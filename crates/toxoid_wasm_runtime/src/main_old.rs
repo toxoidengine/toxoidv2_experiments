@@ -6,7 +6,7 @@ bindgen!({
 
 bindgen!({
     world: "toxoid-component-world",
-    path: "../toxoid_wasm_component/wit",
+    path: "../toxoid_guest/wit",
     with: {
         // Specify that our host resource is going to point to the `ComponentProxy`
         // which is defined just below this macro.
@@ -139,7 +139,7 @@ fn main() -> Result<()> {
     let store = unsafe { &mut *STORE }; // Ensure STORE is initialized
 
     // Load the component from disk
-    let bytes = std::fs::read("toxoid_wasm_component.wasm")?;
+    let bytes = std::fs::read("toxoid_guest.wasm")?;
     // Create WASM Component
     let component = Component::new(&engine, bytes)?;
     let toxoid_component_world = ToxoidComponentWorld::instantiate(&mut *store, &component, &linker)?;

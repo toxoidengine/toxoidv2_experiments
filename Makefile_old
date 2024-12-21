@@ -14,8 +14,8 @@ build-wasi:
 	cp target/wasm32-wasip1/debug/toxoid_api.wasm crates/toxoid_wasm_runtime/toxoid_api.wasm
 
 build-component:
-	cd crates/toxoid_wasm_component && cargo component build
-	cp target/wasm32-wasip1/debug/toxoid_wasm_component.wasm crates/toxoid_wasm_runtime/toxoid_wasm_component.wasm
+	cd crates/toxoid_guest && cargo component build
+	cp target/wasm32-wasip1/debug/toxoid_guest.wasm crates/toxoid_wasm_runtime/toxoid_guest.wasm
 
 run:
 	make build-wasi
