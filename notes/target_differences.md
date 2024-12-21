@@ -21,12 +21,12 @@ resource query {
 }
 ```
 
-### toxoid_engine/wit/world.wit (Host Interface)
+### toxoid_host/wit/world.wit (Host Interface)
 - **Purpose**: Provides direct interface for native code to interact with the ECS
 - **Memory Model**: Works with raw pointers and memory addresses
 - **Entity Handling**: Returns raw entity IDs and memory pointers
 
-```wit:toxoid_engine/wit/world.wit
+```wit:toxoid_host/wit/world.wit
 resource entity {
     from-id: static func(id: u64) -> s64;  // Returns raw pointer
     get: func(component: ecs-entity-t) -> s64;  // Returns raw pointer
@@ -59,7 +59,7 @@ The WASM guest interface (`toxoid_guest`) provides several safety guarantees:
 2. Resource-based abstraction for all operations
 3. Safe entity and component handles
 
-The host interface (`toxoid_engine`) prioritizes performance and direct access:
+The host interface (`toxoid_host`) prioritizes performance and direct access:
 1. Raw pointer access for native code
 2. Direct ECS entity ID manipulation
 3. Minimal abstraction overhead

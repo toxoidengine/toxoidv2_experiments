@@ -936,7 +936,7 @@ version = "0.1.0"
 dependencies = [
  "toxoid_api",
  "toxoid_api_macro",
- "toxoid_engine",
+ "toxoid_host",
  "wit-bindgen-rt",
 ]
 
@@ -2031,8 +2031,8 @@ version = "0.1.0"
 dependencies = [
  "once_cell",
  "toxoid_api_macro",
- "toxoid_engine",
  "toxoid_guest",
+ "toxoid_host",
 ]
 
 [[package]]
@@ -2048,7 +2048,7 @@ name = "toxoid_bootstrap"
 version = "0.1.0"
 dependencies = [
  "toxoid_api",
- "toxoid_engine",
+ "toxoid_host",
  "toxoid_wasm_runtime",
 ]
 
@@ -2059,16 +2059,6 @@ dependencies = [
  "clap",
  "clap_derive",
  "notify",
-]
-
-[[package]]
-name = "toxoid_engine"
-version = "0.1.0"
-dependencies = [
- "once_cell",
- "tera",
- "toxoid_flecs",
- "wit-bindgen-rt",
 ]
 
 [[package]]
@@ -2089,6 +2079,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "toxoid_host"
+version = "0.1.0"
+dependencies = [
+ "once_cell",
+ "tera",
+ "toxoid_flecs",
+ "wit-bindgen-rt",
+]
+
+[[package]]
 name = "toxoid_sokol"
 version = "0.1.0"
 dependencies = [
@@ -2102,7 +2102,7 @@ name = "toxoid_wasm_runtime"
 version = "0.1.0"
 dependencies = [
  "once_cell",
- "toxoid_engine",
+ "toxoid_host",
  "wasmtime",
  "wasmtime-wasi",
 ]

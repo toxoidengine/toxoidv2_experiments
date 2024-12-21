@@ -15,38 +15,38 @@ bindgen!({
     },
 });
 
-use toxoid_engine::bindings::exports::toxoid::engine::ecs::{GuestCallback, GuestComponent, GuestComponentType, GuestEntity, GuestIter, GuestQuery, GuestSystem};
+use toxoid_host::bindings::exports::toxoid::engine::ecs::{GuestCallback, GuestComponent, GuestComponentType, GuestEntity, GuestIter, GuestQuery, GuestSystem};
 use wasmtime::component::{bindgen, Component, Linker, Resource, ResourceTable};
 use wasmtime::{Engine, Result, Store};
 use wasmtime_wasi::{WasiCtx, WasiView, WasiCtxBuilder};
 use once_cell::sync::Lazy;
 
 pub struct ComponentTypeProxy {
-    ptr: *mut toxoid_engine::ComponentType
+    ptr: *mut toxoid_host::ComponentType
 }
 unsafe impl Send for ComponentTypeProxy {}
 pub struct ComponentProxy {
-    ptr: *mut toxoid_engine::Component
+    ptr: *mut toxoid_host::Component
 }
 unsafe impl Send for ComponentProxy {}
 pub struct EntityProxy {
-    ptr: *mut toxoid_engine::Entity
+    ptr: *mut toxoid_host::Entity
 }
 unsafe impl Send for EntityProxy {}
 pub struct QueryProxy {
-    ptr: *mut toxoid_engine::Query
+    ptr: *mut toxoid_host::Query
 }
 unsafe impl Send for QueryProxy {}
 pub struct SystemProxy {
-    ptr: *mut toxoid_engine::System
+    ptr: *mut toxoid_host::System
 }
 unsafe impl Send for SystemProxy {}
 pub struct CallbackProxy {
-    ptr: *mut toxoid_engine::Callback
+    ptr: *mut toxoid_host::Callback
 }
 unsafe impl Send for CallbackProxy {}
 pub struct IterProxy {
-    ptr: *mut toxoid_engine::Iter
+    ptr: *mut toxoid_host::Iter
 }
 unsafe impl Send for IterProxy {}
 // StoreState is the state of the WASM store.
@@ -66,7 +66,7 @@ impl toxoid_component::component::ecs::Host for StoreState {}
 
 impl toxoid_component::component::ecs::HostIter for StoreState {
     fn new(&mut self, ptr: i64) -> Resource<IterProxy> {
-        self.table.push::<IterProxy>(IterProxy { ptr: ptr as *mut toxoid_engine::Iter }).unwrap()
+        self.table.push::<IterProxy>(IterProxy { ptr: ptr as *mut toxoid_host::Iter }).unwrap()
     }   
 
     fn next(&mut self, iter: Resource<IterProxy>) -> bool {
@@ -91,7 +91,7 @@ impl toxoid_component::component::ecs::HostIter for StoreState {
         let entity_ids = iter.entities();
         let ids = entity_ids.iter().map(|entity_id| {
             // Create entity
-            let entity = toxoid_engine::Entity::from_id(*entity_id) as *mut toxoid_engine::Entity;
+            let entity = toxoid_host::Entity::from_id(*entity_id) as *mut toxoid_host::Entity;
 
             // Push component to resource table
             let id = self
@@ -113,7 +113,7 @@ impl toxoid_component::component::ecs::HostIter for StoreState {
 
 impl toxoid_component::component::ecs::HostCallback for StoreState {
     fn new(&mut self, handle: i64) -> Resource<CallbackProxy> {
-        let callback = <toxoid_engine::Callback as toxoid_engine::bindings::exports::toxoid::engine::ecs::GuestCallback>::new(handle);
+        let callback = <toxoid_host::Callback as toxoid_host::bindings::exports::toxoid::engine::ecs::GuestCallback>::new(handle);
         let boxed_callback = Box::new(callback);
         let boxed_callback_ptr = Box::into_raw(boxed_callback);
         self.table.push::<CallbackProxy>(CallbackProxy { ptr: boxed_callback_ptr }).unwrap()
@@ -144,12 +144,12 @@ impl toxoid_component::component::ecs::HostSystem for StoreState {
         let callback = unsafe { Box::from_raw(callback_proxy.ptr) };
         println!("Callback rep: {}", desc.callback.rep());
         println!("Callback handle: {}", callback.handle);
-        let query_desc = toxoid_engine::bindings::exports::toxoid::engine::ecs::QueryDesc {
+        let query_desc = toxoid_host::bindings::exports::toxoid::engine::ecs::QueryDesc {
             expr: desc.query_desc.expr,
         };
-        let query = toxoid_engine::Query::new(query_desc.clone());
+        let query = toxoid_host::Query::new(query_desc.clone());
         let query_ptr = Box::into_raw(Box::new(query));
-        let system = <toxoid_engine::System as toxoid_engine::bindings::exports::toxoid::engine::ecs::GuestSystem>::new(toxoid_engine::bindings::exports::toxoid::engine::ecs::SystemDesc {
+        let system = <toxoid_host::System as toxoid_host::bindings::exports::toxoid::engine::ecs::GuestSystem>::new(toxoid_host::bindings::exports::toxoid::engine::ecs::SystemDesc {
             name: desc.name,
             query_desc,
             query: query_ptr as i64,
@@ -169,7 +169,7 @@ impl toxoid_component::component::ecs::HostSystem for StoreState {
         let system_proxy = self.table.get(&system).unwrap() as &SystemProxy;
         let system = unsafe { Box::from_raw(system_proxy.ptr) };
         let callback_handle = system.callback();
-        let callback = <toxoid_engine::Callback as toxoid_engine::bindings::exports::toxoid::engine::ecs::GuestCallback>::new(callback_handle);
+        let callback = <toxoid_host::Callback as toxoid_host::bindings::exports::toxoid::engine::ecs::GuestCallback>::new(callback_handle);
         self.table.push::<CallbackProxy>(CallbackProxy { ptr: Box::into_raw(Box::new(callback)) }).unwrap()
     }
 
@@ -187,7 +187,7 @@ impl toxoid_component::component::ecs::HostSystem for StoreState {
 
 impl toxoid_component::component::ecs::HostEntity for StoreState {
     fn new(&mut self, desc: toxoid_component::component::ecs::EntityDesc) -> Resource<EntityProxy> {
-        let entity = toxoid_engine::Entity::new(toxoid_engine::bindings::exports::toxoid::engine::ecs::EntityDesc {
+        let entity = toxoid_host::Entity::new(toxoid_host::bindings::exports::toxoid::engine::ecs::EntityDesc {
             name: desc.name,
         });
         // Create boxed component
@@ -224,7 +224,7 @@ impl toxoid_component::component::ecs::HostEntity for StoreState {
         Box::into_raw(entity);
 
         // Create component
-        let component = toxoid_engine::Component::new(component);
+        let component = toxoid_host::Component::new(component);
 
         // Create boxed component
         let boxed_component = Box::new(component);
@@ -247,7 +247,7 @@ impl toxoid_component::component::ecs::HostEntity for StoreState {
 
     #[cfg(not(feature = "wasm"))]
     fn from_id(&mut self, id: u64) -> Resource<EntityProxy> {
-        let entity = toxoid_engine::Entity::from_id(id) as *mut toxoid_engine::Entity; 
+        let entity = toxoid_host::Entity::from_id(id) as *mut toxoid_host::Entity; 
         self.table.push::<EntityProxy>(EntityProxy { ptr: entity }).unwrap()
     }
 
@@ -274,7 +274,7 @@ impl toxoid_component::component::ecs::HostEntity for StoreState {
 impl toxoid_component::component::ecs::HostComponentType for StoreState {
     fn new(&mut self, desc: toxoid_component::component::ecs::ComponentDesc) -> Resource<ComponentTypeProxy> {
         // Create component
-        let component = toxoid_engine::ComponentType::new(toxoid_engine::bindings::exports::toxoid::engine::ecs::ComponentDesc {
+        let component = toxoid_host::ComponentType::new(toxoid_host::bindings::exports::toxoid::engine::ecs::ComponentDesc {
             name: desc.name,
             member_names: desc.member_names,
             member_types: desc.member_types,
@@ -286,7 +286,7 @@ impl toxoid_component::component::ecs::HostComponentType for StoreState {
         let id = self
             .table
             .push::<ComponentTypeProxy>(ComponentTypeProxy { 
-                ptr: boxed_component_ptr as *mut toxoid_engine::ComponentType
+                ptr: boxed_component_ptr as *mut toxoid_host::ComponentType
             })
             .unwrap();
         id
@@ -311,7 +311,7 @@ impl toxoid_component::component::ecs::HostComponentType for StoreState {
 
 impl toxoid_component::component::ecs::HostComponent for StoreState {
     fn new(&mut self, component_id: i64) -> Resource<ComponentProxy> {
-        let component = toxoid_engine::Component::new(component_id);
+        let component = toxoid_host::Component::new(component_id);
         let boxed_component = Box::new(component);
         let boxed_component_ptr = Box::into_raw(boxed_component);
         self.table.push::<ComponentProxy>(ComponentProxy { ptr: boxed_component_ptr }).unwrap()
@@ -537,7 +537,7 @@ impl toxoid_component::component::ecs::HostComponent for StoreState {
 
 impl toxoid_component::component::ecs::HostQuery for StoreState {
     fn new(&mut self, query_desc: toxoid_component::component::ecs::QueryDesc) -> Resource<toxoid_component::component::ecs::Query> {
-        let query = toxoid_engine::Query::new(toxoid_engine::bindings::exports::toxoid::engine::ecs::QueryDesc { expr: query_desc.expr });
+        let query = toxoid_host::Query::new(toxoid_host::bindings::exports::toxoid::engine::ecs::QueryDesc { expr: query_desc.expr });
         let ptr = Box::into_raw(Box::new(query));
         let query_resource = self.table.push(QueryProxy { ptr }).unwrap();
         query_resource
@@ -584,7 +584,7 @@ impl toxoid_component::component::ecs::HostQuery for StoreState {
         let entity_ids = query.entities();
         let ids = entity_ids.iter().map(|entity_id| {
             // Create entity
-            let entity = toxoid_engine::Entity::from_id(*entity_id) as *mut toxoid_engine::Entity;
+            let entity = toxoid_host::Entity::from_id(*entity_id) as *mut toxoid_host::Entity;
 
             // Push component to resource table
             let id = self
@@ -652,7 +652,7 @@ pub fn load_wasm_component(filename: &str) -> Result<()> {
     }
     let store = unsafe { &mut *STORE }; // Ensure STORE is initialized
     // Reset the world
-    toxoid_engine::toxoid_reset();
+    toxoid_host::toxoid_reset();
 
     // Load the component from disk
     let bytes = std::fs::read(filename)?;
@@ -662,7 +662,7 @@ pub fn load_wasm_component(filename: &str) -> Result<()> {
     unsafe { 
         // Set the world and trampoline
         TOXOID_COMPONENT_WORLD = Some(ToxoidComponentWorld::instantiate(&mut *store, &component, &linker)?); 
-        toxoid_engine::QUERY_TRAMPOLINE = Some(query_trampoline);
+        toxoid_host::QUERY_TRAMPOLINE = Some(query_trampoline);
           // Finally call init on the WASM component
         TOXOID_COMPONENT_WORLD.as_mut().unwrap().call_init(&mut *store)?;
     };
@@ -672,10 +672,10 @@ pub fn load_wasm_component(filename: &str) -> Result<()> {
 
 #[no_mangle]
 // Trampoline closure from Rust using C callback and binding_ctx field to call a Rust closure
-pub unsafe extern "C" fn query_trampoline(iter: *mut toxoid_engine::ecs_iter_t) {
+pub unsafe extern "C" fn query_trampoline(iter: *mut toxoid_host::ecs_iter_t) {
     let handle = (*iter).callback_ctx as i64;
     let store = unsafe { &mut *STORE };
-    let iter = Box::into_raw(Box::new(toxoid_engine::Iter::new(iter as i64)));
+    let iter = Box::into_raw(Box::new(toxoid_host::Iter::new(iter as i64)));
     let iter_resource_id = store.data_mut().table.push::<IterProxy>(IterProxy { ptr: iter }).unwrap();
     unsafe {
         TOXOID_COMPONENT_WORLD

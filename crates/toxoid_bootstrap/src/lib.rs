@@ -11,10 +11,10 @@ const GUEST_WASM_PATH: &str = "guest.wasm";
 #[cfg(not(target_arch = "wasm32"))]
 fn game_loop(delta_time: f32) {
     // println!("delta_time: {}", delta_time);
-    toxoid_engine::toxoid_progress(delta_time);
+    toxoid_host::toxoid_progress(delta_time);
 }
 
-// TODO: Make this Emscripten specific flag, not just WASM32 when we merge toxoid_bootstrap and toxoid_engine
+// TODO: Make this Emscripten specific flag, not just WASM32 when we merge toxoid_bootstrap and toxoid_host
 #[cfg(target_arch = "wasm32")]
 fn bootstrap() {
     // #[cfg(target_arch = "wasm32")]

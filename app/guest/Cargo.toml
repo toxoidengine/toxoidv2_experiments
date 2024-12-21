@@ -25,4 +25,4 @@ package = "component:toxoid-component"
 
 # Native dependencies
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
-toxoid_engine = { path = "../../crates/toxoid_engine" }
+toxoid_host = { path = "../../crates/toxoid_host" }

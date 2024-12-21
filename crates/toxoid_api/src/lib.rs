@@ -1,7 +1,7 @@
 #![allow(warnings)]
 // Native
 #[cfg(not(target_arch = "wasm32"))]
-pub use toxoid_engine::{
+pub use toxoid_host::{
     Component as ToxoidComponent,
     ComponentType as ToxoidComponentType,
     Entity as ToxoidEntity,
@@ -20,7 +20,7 @@ pub use toxoid_engine::{
     },
 };
 #[cfg(not(target_arch = "wasm32"))]
-pub use toxoid_engine::bindings::exports::toxoid::engine::ecs::{
+pub use toxoid_host::bindings::exports::toxoid::engine::ecs::{
     EntityDesc,
     ComponentDesc,
     QueryDesc,
@@ -86,7 +86,7 @@ pub trait Component {
     #[cfg(target_arch = "wasm32")]
     fn set_ptr(&mut self, ptr: *mut toxoid_guest::bindings::toxoid_component::component::ecs::Component);
     #[cfg(not(target_arch = "wasm32"))]
-    fn set_ptr(&mut self, ptr: *mut toxoid_engine::Component);
+    fn set_ptr(&mut self, ptr: *mut toxoid_host::Component);
     // #[cfg(all(target_arch="wasm32", target_os="unknown"))]
     // fn get_ptr(&self) -> i64;
     // #[cfg(not(all(target_arch="wasm32", target_os="unknown")))]
@@ -130,7 +130,7 @@ impl Entity {
         let component_ptr = self.entity.get(T::get_id());
         
         #[cfg(not(target_arch = "wasm32"))]
-        let toxoid_component = toxoid_engine::Component::new(component_ptr);
+        let toxoid_component = toxoid_host::Component::new(component_ptr);
         #[cfg(target_arch = "wasm32")]
         let toxoid_component = component_ptr;
         
@@ -331,7 +331,7 @@ impl Iter {
     query.build();
     query.iter();
     query.next();
-    // toxoid_engine::toxoid_progress(1.0);
+    // toxoid_host::toxoid_progress(1.0);
     let count = query.count();
     println!("{:?}", count); 
 */
