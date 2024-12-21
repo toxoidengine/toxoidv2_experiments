@@ -358,7 +358,7 @@ pub fn component(input: TokenStream) -> TokenStream {
             let field_names_str = field_names.clone().map(|f| f.clone().unwrap().to_string());
             let field_types_code = field_types.clone().map(|f| get_type_code(f));
             // let register_component_tokens = quote! {
-            //     use toxoid_api::{ToxoidComponentType, ComponentDesc};
+            //     use {ToxoidComponentType, ComponentDesc};
             //     let id = ToxoidComponentType::new(&Toxoid        ComponentDesc {
             //         name: #struct_name_str.to_string(),
             //         member_names: vec![#(#field_names_str),*],
@@ -382,7 +382,7 @@ pub fn component(input: TokenStream) -> TokenStream {
             };
             let type_get_id_fn = quote! {
                 fn get_id() -> u64 {
-                    toxoid_api::get_component_id(#struct_name_str, vec![#(#field_names_str.to_string()),*], vec![#(#field_types_code),*])
+                    get_component_id(#struct_name_str, vec![#(#field_names_str.to_string()),*], vec![#(#field_types_code),*])
                 }
             };
             quote! {
@@ -390,7 +390,7 @@ pub fn component(input: TokenStream) -> TokenStream {
                 #[repr(C)]
                 pub struct #name {
                     // #[serde(skip)]
-                    ptr: *mut toxoid_api::ToxoidComponent,
+                    ptr: *mut ToxoidComponent,
                     singleton: bool,
                     id: ecs_entity_t,
                     #(#struct_fields)*
@@ -416,7 +416,7 @@ pub fn component(input: TokenStream) -> TokenStream {
                     //     combine_u32(unsafe { &self.component.lookup(toxoid_make_c_string(#type_name)) }) 
                     // }
 
-                    fn set_ptr(&mut self, ptr: *mut toxoid_api::ToxoidComponent) {
+                    fn set_ptr(&mut self, ptr: *mut ToxoidComponent) {
                         self.ptr = ptr;
                     }
 

@@ -81,6 +81,22 @@ component! {
     }
 }
 
+extern "C" fn sokol_init() {
+    // Initialization code for Sokol
+    println!("Sokol initialized");
+}
+
+extern "C" fn sokol_frame() {
+    // Frame update code for Sokol
+    println!("Sokol frame updated");
+}
+
+extern "C" fn sokol_event(event: *const toxoid_sokol::sokol::app::Event) {
+    // Event handling code for Sokol
+    println!("Sokol event received");
+}
+
+
 pub fn init() {
     bootstrap();
     println!("{}", Velocity::get_name());
@@ -117,5 +133,6 @@ pub fn init() {
             });
     })
     .build();
+    toxoid_sokol::init(sokol_init, sokol_frame, sokol_event);
     loop {}
 }

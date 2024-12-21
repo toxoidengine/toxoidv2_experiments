@@ -7,6 +7,11 @@ use std::path::{PathBuf, Path};
 fn main() {
     // Rebuild on build.rs change
     println!("cargo:rerun-if-changed=build.rs");
+    if cfg!(target_os = "macos") {
+        println!("cargo:rustc-link-lib=framework=OpenGL");
+        println!("cargo:rustc-link-lib=framework=Cocoa");
+        println!("cargo:rustc-link-lib=framework=QuartzCore");
+    }
 
     // Get the current directory so we can find the sokol headers
     let manifest_dir = var("CARGO_MANIFEST_DIR").unwrap();
