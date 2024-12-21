@@ -1,2 +1,2 @@
 # toxoid_api
-Abstraction layer between the native / host side of the toxoid engine and the guest side. 
+Abstraction layer for the toxoid engine API / ECS API that works on both the native / host side and the scripting / guest side through conditional compilation flags. 
