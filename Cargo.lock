@@ -985,7 +985,7 @@ name = "host"
 version = "0.1.0"
 dependencies = [
  "guest",
- "toxoid_host",
+ "toxoid_bootstrap",
 ]
 
 [[package]]
@@ -2044,6 +2044,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "toxoid_bootstrap"
+version = "0.1.0"
+dependencies = [
+ "toxoid_api",
+ "toxoid_engine",
+ "toxoid_wasm_runtime",
+]
+
+[[package]]
 name = "toxoid_cli"
 version = "0.1.0"
 dependencies = [
@@ -2077,15 +2086,6 @@ version = "0.1.0"
 dependencies = [
  "once_cell",
  "wit-bindgen-rt",
-]
-
-[[package]]
-name = "toxoid_host"
-version = "0.1.0"
-dependencies = [
- "toxoid_api",
- "toxoid_engine",
- "toxoid_wasm_runtime",
 ]
 
 [[package]]

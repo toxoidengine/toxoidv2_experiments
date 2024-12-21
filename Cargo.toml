@@ -5,7 +5,7 @@ members = [
      "crates/toxoid_wasm_runtime",
      "crates/toxoid_guest",
      "crates/toxoid_api", 
-     "crates/toxoid_host",
+     "crates/toxoid_bootstrap",
      "crates/toxoid_sokol",
      "app/host", 
      "app/guest",

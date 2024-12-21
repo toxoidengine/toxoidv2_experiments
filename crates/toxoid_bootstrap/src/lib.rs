@@ -14,7 +14,7 @@ fn game_loop(delta_time: f32) {
     toxoid_engine::toxoid_progress(delta_time);
 }
 
-// TODO: Make this Emscripten specific flag, not just WASM32 when we merge toxoid_host and toxoid_engine
+// TODO: Make this Emscripten specific flag, not just WASM32 when we merge toxoid_bootstrap and toxoid_engine
 #[cfg(target_arch = "wasm32")]
 fn bootstrap() {
     // #[cfg(target_arch = "wasm32")]
