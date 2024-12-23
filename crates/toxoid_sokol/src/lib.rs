@@ -94,7 +94,7 @@ pub extern "C" fn sokol_init() {
 }
 
 extern "C" fn sokol_cleanup() {
-    unsafe { sgp_shutdown(); }
+    // unsafe { sgp_shutdown(); }
     sg::shutdown()
 }
 

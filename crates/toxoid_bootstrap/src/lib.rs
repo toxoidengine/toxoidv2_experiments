@@ -76,7 +76,7 @@ fn bootstrap() {
 extern "C" fn sokol_init() {
     // Initialization code for Sokol
     // println!("Sokol initialized");
-    toxoid_sokol::sokol_init();
+    toxoid_sokol::init(sokol_init, sokol_frame, sokol_event);
     // use toxoid_api::*;
     // use toxoid_api::components::*;
     // use toxoid_sokol::SokolRenderer2D;
@@ -135,7 +135,7 @@ extern "C" fn sokol_event(event: *const toxoid_sokol::sokol::app::Event) {
 // }
 
 pub fn init() {
-    bootstrap();
+    // bootstrap();
     toxoid_sokol::init(sokol_init, sokol_frame, sokol_event);
     
     // println!("{}", Velocity::get_name());
