@@ -53,7 +53,7 @@ pub extern "C" fn sokol_init() {
         let mut desc = sgp_desc {
             max_commands: 0,
             max_vertices: 0,
-            pixel_format: 0,
+            color_format: 0,
             depth_format: 0,
             sample_count: 0,
         };

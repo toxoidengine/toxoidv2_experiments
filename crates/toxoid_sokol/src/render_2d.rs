@@ -23,14 +23,14 @@ pub struct SokolRenderTarget {
     pub pass: sg::Pass,
 }
 
-pub struct SpineOffscreenCtx {
-    pub ctx: sspine_context,
-    pub img: sg::Image,
-    pub attachments: sg::Attachments,
-    pub pass_action: sg::PassAction,
-}
+// pub struct SpineOffscreenCtx {
+//     pub ctx: sspine_context,
+//     pub img: sg::Image,
+//     pub attachments: sg::Attachments,
+//     pub pass_action: sg::PassAction,
+// }
 
-fn filter_from_c_int(value: ::std::os::raw::c_int) -> Option<sg::Filter> {
+fn filter_from_c_int(value: u32) -> Option<sg::Filter> {
     match value {
         0 => Some(sg::Filter::Default),
         1 => Some(sg::Filter::Default),
@@ -41,7 +41,7 @@ fn filter_from_c_int(value: ::std::os::raw::c_int) -> Option<sg::Filter> {
     }
 }
 
-fn wrap_from_c_int(value: ::std::os::raw::c_int) -> Option<sg::Wrap> {
+fn wrap_from_c_int(value: u32) -> Option<sg::Wrap> {
     match value {
         0 => Some(sg::Wrap::Default),
         1 => Some(sg::Wrap::Repeat),
@@ -408,7 +408,7 @@ impl Renderer2D for SokolRenderer2D {
             if blend_mode == 0 {
                 sgp_set_blend_mode(sgp_blend_mode_SGP_BLENDMODE_BLEND);
             } else {
-                sgp_set_blend_mode(blend_mode as i32);
+                sgp_set_blend_mode(blend_mode as u32);
             }
             // Get scale factor for resolution
             let (window_width, window_height) = SokolRenderer2D::window_size();

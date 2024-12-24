@@ -17,8 +17,8 @@ cc = "1.0"
 objc = "0.2"
 
 [build-dependencies]
-bindgen = "0.69.1"
-cc = "1.0.83"
+bindgen = "0.71.1"
+cc = "1.0"
 
 [features]
 default = [
