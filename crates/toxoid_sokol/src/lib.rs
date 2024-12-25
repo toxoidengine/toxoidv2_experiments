@@ -18,13 +18,13 @@ use bindings::*;
 use sokol::{app as sapp, gfx as sg, glue as sglue};
 // use core::ffi::c_int;
 // use core::ffi::c_char;
-// use once_cell::sync::Lazy;
 // use std::sync::Mutex;
 // use sokol::app::{Event, EventType};
 use sokol::app::Event;
-use toxoid_render::Renderer2D;
+use once_cell::sync::Lazy;
 
-// pub static RENDERER_2D: Lazy<Mutex<SokolRenderer2D>> = Lazy::new(|| Mutex::new(SokolRenderer2D::new()));
+// Global pass action for Sokol
+pub static PASS_ACTION: Lazy<sg::PassAction> = Lazy::new(|| sg::PassAction::new());
 
 #[cfg(target_os = "emscripten")]
 extern "C" {
@@ -59,39 +59,7 @@ pub extern "C" fn sokol_init() {
             sample_count: 0,
         };
         sgp_setup(&mut desc);
-        println!("Sokol GP initialized");
-
-        let pass_action = sg::PassAction::new();
-        let (window_width, window_height) = SokolRenderer2D::window_size();
-        // Begin recording draw commands for a frame buffer of size (width, height).
-        sgp_begin(window_width as i32, window_height as i32);
-        // Set frame buffer drawing region to (0,0,width,height).
-        sgp_viewport(0, 0, window_width as i32, window_height as i32);
-        // Set drawing coordinate space to (left=0, right=width, top=0, bottom=height).
-        sgp_project(0.0, window_width as f32, 0.0, window_height as f32);
-        // Clear the frame buffer.
-        sgp_set_color(1., 1., 1., 1.);
-        sgp_clear();
-        // Draw a filled rectangle
-        let scale_factor = window_width as f32 / crate::GAME_WIDTH as f32;
-        sgp_reset_color();
-        sgp_set_color(1., 0., 0., 1.);
-        sgp_draw_filled_rect(0 as f32 * scale_factor, 0 as f32 * scale_factor, 100 as f32 * scale_factor, 100 as f32 * scale_factor);
-        // Begin a render pass.
-        sg::begin_pass(&sg::Pass {
-            action: pass_action,
-            swapchain: sglue::swapchain(),
-            ..Default::default()
-        });
-        // Dispatch all draw commands to Sokol GFX.
-        sgp_flush(); 
-        // Finish a draw command queue, clearing it.
-        sgp_end();
-        // End render pass.
-        sg::end_pass();
-        // Commit Sokol render.
-        sg::commit();
-
+        
         // // Initialize SImGui
         // #[cfg(feature = "imgui")] 
         // {

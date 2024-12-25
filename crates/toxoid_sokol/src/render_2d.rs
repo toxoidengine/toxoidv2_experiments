@@ -181,12 +181,12 @@ impl Renderer2D for SokolRenderer2D {
         }
     }
 
-    fn end(&self) {
+    fn end() {
         // Get the size of the window
         let (window_width, window_height) = (sapp::width(), sapp::height());
         // Begin a render pass.
         sg::begin_pass(&sg::Pass {
-            action: self.pass_action,
+            action: *crate::PASS_ACTION,
             swapchain: sglue::swapchain(),
             ..Default::default()
         });

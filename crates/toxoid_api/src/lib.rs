@@ -1,5 +1,7 @@
 #![allow(warnings)]
 pub mod components;
+pub use components::*;
+
 // Native
 #[cfg(not(target_arch = "wasm32"))]
 pub use toxoid_host::{

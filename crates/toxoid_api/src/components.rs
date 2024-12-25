@@ -1,6 +1,9 @@
 use crate::*;
 
 component! {
+    // Singletons
+
+    // Components
     Position {
         x: u32,
         y: u32
@@ -15,7 +18,16 @@ component! {
         b: f32,
         a: f32
     },
+
+    // Object Type Tags
+    // TODO: Replace these with tags that have no fields
     Rect {
+        foo: bool
+    },
+
+    // State Representation Tags
+    // TODO: Replace these with tags that have no fields
+    Renderable {
         foo: bool
     }
 }
