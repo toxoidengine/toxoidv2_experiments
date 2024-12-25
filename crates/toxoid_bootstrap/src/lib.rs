@@ -7,7 +7,7 @@ mod watch;
 pub fn init() {
     renderer::init();
     // game_loop::init();
-    // systems::init();
+    systems::init();
     entities::init();
     // watch::init();
     loop {}
