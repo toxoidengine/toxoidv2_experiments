@@ -44,6 +44,23 @@ pub fn init() {
             Renderable(0)
      */
 
+    let mut entity = Entity::new(Some(EntityDesc {
+        name: Some("Test entity".to_string())
+    }));
+    entity.add::<Rect>();
+    entity.add::<Position>();
+    entity.add::<Size>();
+    entity.add::<Color>();
+    entity.add::<Renderable>();
+    let mut size = entity.get::<Size>();
+    size.set_width(100);
+    size.set_height(100);
+    let mut color = entity.get::<Color>();
+    color.set_r(1.);
+    color.set_g(0.);
+    color.set_b(0.);
+    color.set_a(1.);
+
     System::dsl("Rect, Position, Size, Color, Renderable", |iter| {
         println!("Hello render rect system!");
         iter

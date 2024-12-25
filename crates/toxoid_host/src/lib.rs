@@ -129,7 +129,7 @@ fn fnv1a_hash_str(s: &str) -> u64 {
     })
 }
 
-pub static mut COMPONENT_CACHE: Lazy<HashMap<u64, Component>> = Lazy::new(|| HashMap::new());
+// pub static mut COMPONENT_CACHE: Lazy<HashMap<u64, Component>> = Lazy::new(|| HashMap::new());
 
 impl GuestComponentType for ComponentType {
     fn new(desc: ComponentDesc) -> ComponentType {

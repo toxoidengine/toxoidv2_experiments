@@ -86,6 +86,12 @@ pub fn get_component_id(component_name: &str, member_names: Vec<String>, member_
 // with the same name and fields as an existing component type, which is a lot of overhead
 #[cfg(not(target_arch = "wasm32"))]
 pub fn get_component_id(component_name: &str, member_names: Vec<String>, member_types: Vec<u8>) -> ecs_entity_t {
+    // TODO: Instead of initializing a toxoid component type
+    // we should have a conditional to check that it already exists.
+    // This is already happening under the hood in Flecs, but we don't need to pass 
+    // all these parameters in and instantiate a new component type.
+    // Haven't checked the overhead but we definitely want to come back and optimize 
+    // these unnecessary operations.
     let component_type = ToxoidComponentType::new(ComponentDesc {
         name: component_name.to_string(),
         member_names: member_names,
