@@ -73,7 +73,11 @@ enum FieldType {
 }
 
 pub static mut WORLD: Lazy<EcsWorldPtr> = Lazy::new(|| 
-    EcsWorldPtr(unsafe { ecs_init() })
+    EcsWorldPtr(unsafe { 
+        let world = ecs_init();
+        // toxoid_flecs::bindings::ecs_set_threads(world, 4);
+        world
+    })
 );
 
 // Progress the world - game loop tick

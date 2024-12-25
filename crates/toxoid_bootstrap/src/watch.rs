@@ -31,15 +31,17 @@ fn watch() {
             }
         }
     });
-
+    
     // Initial load of the main WASM component / game engine script
-    if std::path::Path::new(GUEST_WASM_PATH).exists() {
-        println!("Loading WASM component...");
-        toxoid_runtime::load_wasm_component(GUEST_WASM_PATH)
-            .unwrap_or_else(|e| println!("Failed to load WASM component: {}", e));
-    } else {
-        println!("WASM component not found at {}, modify the guest script source file or use `toxoid_cli build` to generate it", GUEST_WASM_PATH);
-    }
+    // TODO: Some kind of deadlock on this when grabbing the engine and trying to
+    // run Sokol / render loop / sapp at the same time...
+    // if std::path::Path::new(GUEST_WASM_PATH).exists() {
+    //     println!("Loading WASM component...");
+    //     toxoid_runtime::load_wasm_component(GUEST_WASM_PATH)
+    //         .unwrap_or_else(|e| println!("Failed to load WASM component: {}", e));
+    // } else {
+    //     println!("WASM component not found at {}, modify the guest script source file or use `toxoid_cli build` to generate it", GUEST_WASM_PATH);
+    // }
 }
 
 pub fn init() {

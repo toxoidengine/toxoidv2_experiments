@@ -26,23 +26,36 @@
 use toxoid_sokol::SokolRenderer2D;
 use toxoid_render::Renderer2D;
 use toxoid_api::*;
+use toxoid_api::components::*;
 
 pub fn init() {    
     unsafe {
         toxoid_host::QUERY_TRAMPOLINE = Some(toxoid_runtime::query_trampoline);
     }
+    /*
+    TODO:
+        Figure out why this is happening -
+        error: unresolved identifier 'Rect'
+        expr: Rect, Position, Size, Color, Renderable
+            > Rect($this),
+            Position(0),
+            Size(0),
+            Color(0),
+            Renderable(0)
+     */
 
-    // System::dsl("Rect, Position, Size, Color, Renderable", |iter| {
-    //     println!("Hello render rect system!");
-    //     iter
-    //         .entities()
-    //         .iter()
-    //         .for_each(|entity| {
-    //             let mut rect = entity.get::<Rect>();
-    //             let mut pos = entity.get::<Position>();
-    //             let mut size = entity.get::<Size>();
-    //             let mut color = entity.get::<Color>();
-    //             SokolRenderer2D::draw_filled_rect(&pos, &size, &color);
-    //         });
-    // }).build();
+    System::dsl("Rect, Position, Size, Color, Renderable", |iter| {
+        println!("Hello render rect system!");
+        iter
+            .entities()
+            .iter()
+            .for_each(|entity| {
+                println!("Hello render rect system!");
+                // let mut rect = entity.get::<Rect>();
+                // let mut pos = entity.get::<Position>();
+                // let mut size = entity.get::<Size>();
+                // let mut color = entity.get::<Color>();
+                // SokolRenderer2D::draw_filled_rect(&pos, &size, &color);
+            });
+    }).build();
 }
