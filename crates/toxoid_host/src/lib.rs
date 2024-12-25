@@ -77,8 +77,8 @@ pub static mut WORLD: Lazy<EcsWorldPtr> = Lazy::new(||
 );
 
 // Progress the world - game loop tick
-pub fn toxoid_progress(fps: f32) -> bool {
-    unsafe { ecs_progress(WORLD.0, 1.0) }
+pub fn toxoid_progress(delta_time: f32) -> bool {
+    unsafe { ecs_progress(WORLD.0, delta_time) }
 }
 
 // Reset the world - delete all entities

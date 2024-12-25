@@ -28,18 +28,21 @@ use toxoid_render::Renderer2D;
 use toxoid_api::*;
 
 pub fn init() {    
-    System::dsl("Rect, Position, Size, Color, Renderable", |iter| {
-        println!("Hello render rect system!");
-        iter
-            .entities()
-            .iter()
-            .for_each(|entity| {
-                let mut rect = entity.get::<Rect>();
-                let mut pos = entity.get::<Position>();
-                let mut size = entity.get::<Size>();
-                let mut color = entity.get::<Color>();
-                SokolRenderer2D::draw_filled_rect(&pos, &size, &color);
-            });
-    })
-    .build();
+    unsafe {
+        toxoid_host::QUERY_TRAMPOLINE = Some(toxoid_runtime::query_trampoline);
+    }
+
+    // System::dsl("Rect, Position, Size, Color, Renderable", |iter| {
+    //     println!("Hello render rect system!");
+    //     iter
+    //         .entities()
+    //         .iter()
+    //         .for_each(|entity| {
+    //             let mut rect = entity.get::<Rect>();
+    //             let mut pos = entity.get::<Position>();
+    //             let mut size = entity.get::<Size>();
+    //             let mut color = entity.get::<Color>();
+    //             SokolRenderer2D::draw_filled_rect(&pos, &size, &color);
+    //         });
+    // }).build();
 }

@@ -662,7 +662,6 @@ pub fn load_wasm_component(filename: &str) -> Result<()> {
     unsafe { 
         // Set the world and trampoline
         TOXOID_COMPONENT_WORLD = Some(ToxoidComponentWorld::instantiate(&mut *store, &component, &linker)?); 
-        toxoid_host::QUERY_TRAMPOLINE = Some(query_trampoline);
           // Finally call init on the WASM component
         TOXOID_COMPONENT_WORLD.as_mut().unwrap().call_init(&mut *store)?;
     };

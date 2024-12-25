@@ -15,4 +15,4 @@ pub mod bindings {
     include!("./bindings.rs");
 }
 
-use bindings::*;
+pub use bindings::*;

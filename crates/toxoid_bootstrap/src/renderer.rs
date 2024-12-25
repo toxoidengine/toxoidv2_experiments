@@ -11,11 +11,9 @@ extern "C" fn sokol_init() {
 extern "C" fn sokol_frame() {
     // Frame update code for Sokol
     // SokolRenderer2D::begin();
-    // toxoid_host::toxoid_progress(delta_time);
-    // toxoid_host::toxoid_progress(1.);
+    // let delta_time = toxoid_sokol::sokol::app::frame_duration();
+    // toxoid_host::toxoid_progress(delta_time as f32);
     // SokolRenderer2D::end();
-    // println!("Sokol frame updated");
-    // toxoid_sokol::sokol_frame();
 }
 
 extern "C" fn sokol_event(event: *const toxoid_sokol::sokol::app::Event) {
@@ -33,6 +31,13 @@ extern "C" fn sokol_event(event: *const toxoid_sokol::sokol::app::Event) {
 // }
 
 pub fn init() {
+    std::thread::spawn(move || {
+        loop {
+            let delta_time = toxoid_sokol::sokol::app::frame_duration();
+            toxoid_host::toxoid_progress(delta_time as f32);
+            std::thread::sleep(std::time::Duration::from_millis(16));
+        }
+    });
     toxoid_sokol::init(sokol_init, sokol_frame, sokol_event);
     // println!("{}", Velocity::get_name());
     // let entity = Entity::new(Some(EntityDesc {
