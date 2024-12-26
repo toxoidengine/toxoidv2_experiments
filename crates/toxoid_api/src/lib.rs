@@ -123,7 +123,12 @@ pub trait Component {
 }
 
 pub struct Entity {
-    entity: ToxoidEntity
+    entity: ToxoidEntity,
+    // Track component pointers that need to be freed
+    #[cfg(not(target_arch = "wasm32"))]
+    components: Vec<*mut toxoid_host::Component>,
+    #[cfg(target_arch = "wasm32")]
+    components: Vec<*mut toxoid_guest::bindings::toxoid_component::component::ecs::Component>,
 }
 
 impl Entity {
@@ -133,7 +138,10 @@ impl Entity {
         let entity = ToxoidEntity::new(desc);
         #[cfg(target_arch = "wasm32")]
         let entity = ToxoidEntity::new(&desc);
-        Self { entity }
+        Self { 
+            entity,
+            components: Vec::new()
+        }
     }
 
     pub fn named(name: &str) -> Self {
@@ -142,18 +150,18 @@ impl Entity {
         let entity = ToxoidEntity::new(desc);
         #[cfg(target_arch = "wasm32")]
         let entity = ToxoidEntity::new(&desc);
-        Self { entity }
+        Self { 
+            entity,
+            components: Vec::new()
+        }
     }
 
     pub fn get_id(&self) -> u64 {
         self.entity.get_id()
     }
 
-    pub fn get<T: Component + ComponentType + Default + 'static>(&self) -> T {
+    pub fn get<T: Component + ComponentType + Default + 'static>(&mut self) -> T {
         let mut component = T::default();
-        #[cfg(not(target_arch = "wasm32"))]
-        let component_ptr = self.entity.get(T::get_id());
-        #[cfg(target_arch = "wasm32")]
         let component_ptr = self.entity.get(T::get_id());
         
         #[cfg(not(target_arch = "wasm32"))]
@@ -162,6 +170,8 @@ impl Entity {
         let toxoid_component = component_ptr;
         
         let toxoid_component_ptr = Box::into_raw(Box::new(toxoid_component));
+        // Track the pointer
+        self.components.push(toxoid_component_ptr);
         component.set_ptr(toxoid_component_ptr);
         component
     }
@@ -180,6 +190,17 @@ impl Entity {
         // let component_id_split = toxoid_component_cache_get(type_hash);
         // let component_id = combine_u32(component_id_split);
         // toxoid_entity_remove_component(self.entity.id, component_id);
+    }
+}
+
+impl Drop for Entity {
+    fn drop(&mut self) {
+        // Clean up all component pointers
+        for ptr in self.components.drain(..) {
+            unsafe {
+                let _ = Box::from_raw(ptr);
+            }
+        }
     }
 }
 
@@ -337,7 +358,8 @@ impl Iter {
                 {
                     // In native mode, we get a u64 ID directly
                     Entity {
-                        entity: ToxoidEntity { id: *entity }
+                        entity: ToxoidEntity { id: *entity },
+                        components: Vec::new()
                     }
                 }
                 #[cfg(target_arch = "wasm32")]

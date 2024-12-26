@@ -62,17 +62,16 @@ pub fn init() {
     color.set_a(1.);
 
     System::dsl("Rect, Position, Size, Color, Renderable", |iter| {
-        println!("Hello render rect system!");
-        iter
+        iter``
             .entities()
-            .iter()
+            .iter_mut()
             .for_each(|entity| {
-                println!("Hello render rect system!");
-                // let mut rect = entity.get::<Rect>();
-                // let mut pos = entity.get::<Position>();
-                // let mut size = entity.get::<Size>();
-                // let mut color = entity.get::<Color>();
-                // SokolRenderer2D::draw_filled_rect(&pos, &size, &color);
+                let mut pos = entity.get::<Position>();
+                let mut size = entity.get::<Size>();
+                let mut color = entity.get::<Color>();
+                SokolRenderer2D::draw_filled_rect(&pos, &size, &color);
+                pos.set_x(pos.get_x() + 1);
+                pos.set_y(pos.get_y() + 1);
             });
     }).build();
 }
