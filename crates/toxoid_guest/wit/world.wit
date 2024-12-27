@@ -103,6 +103,7 @@ interface ecs {
 
     record system-desc {
         name: option<string>,
+        tick-rate: option<s32>,
         callback: callback,
         query-desc: query-desc,
         is-guest: bool

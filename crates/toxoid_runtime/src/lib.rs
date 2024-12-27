@@ -154,6 +154,7 @@ impl toxoid_component::component::ecs::HostSystem for StoreState {
             query_desc,
             callback: callback.cb_handle(),
             is_guest: true,
+            tick_rate: desc.tick_rate
         });
         let id = self
             .table

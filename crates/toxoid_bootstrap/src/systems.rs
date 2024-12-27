@@ -61,8 +61,8 @@ pub fn init() {
     color.set_b(0.);
     color.set_a(1.);
 
-    System::dsl("Rect, Position, Size, Color, Renderable", |iter| {
-        iter``
+    System::dsl("Rect, Position, Size, Color, Renderable", Some(60), |iter| {
+        iter
             .entities()
             .iter_mut()
             .for_each(|entity| {
@@ -73,5 +73,6 @@ pub fn init() {
                 pos.set_x(pos.get_x() + 1);
                 pos.set_y(pos.get_y() + 1);
             });
-    }).build();
+    })
+        .build();
 }

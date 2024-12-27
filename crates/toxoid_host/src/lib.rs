@@ -535,6 +535,8 @@ impl GuestSystem for System {
         // Create system descriptor
         let mut system_desc: ecs_system_desc_t = unsafe { MaybeUninit::zeroed().assume_init() };
         system_desc.entity = entity;
+        // system_desc.rate = desc.tick_rate.unwrap_or(60);
+        system_desc.rate = 0;
         let mut query_desc: ecs_query_desc_t = unsafe { MaybeUninit::zeroed().assume_init() };
         query_desc.expr = c_string(&desc.query_desc.expr);
         system_desc.query = query_desc;

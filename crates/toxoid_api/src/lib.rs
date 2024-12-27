@@ -124,11 +124,11 @@ pub trait Component {
 
 pub struct Entity {
     entity: ToxoidEntity,
-    // Track component pointers that need to be freed
-    #[cfg(not(target_arch = "wasm32"))]
-    components: Vec<*mut toxoid_host::Component>,
-    #[cfg(target_arch = "wasm32")]
-    components: Vec<*mut toxoid_guest::bindings::toxoid_component::component::ecs::Component>,
+     // Track component pointers that need to be freed
+     #[cfg(not(target_arch = "wasm32"))]
+     components: Vec<*mut toxoid_host::Component>,
+     #[cfg(target_arch = "wasm32")]
+     components: Vec<*mut toxoid_guest::bindings::toxoid_component::component::ecs::Component>,
 }
 
 impl Entity {
@@ -246,7 +246,10 @@ impl Query {
 
     #[cfg(target_arch = "wasm32")]
     pub fn entities(&self) -> Vec<Entity> {
-        self.query.entities().iter().map(|entity| Entity { entity: ToxoidEntity::from_id(entity.get_id()) }).collect()
+        self.query.entities().iter().map(|entity| Entity { 
+            entity: ToxoidEntity::from_id(entity.get_id()) ,
+            components: Vec::new()
+        }).collect()
     }
 }
 
@@ -267,7 +270,13 @@ impl System {
         // Create the Toxoid callback with the registered callback handle
         let callback = ToxoidCallback::new(callback.cb_handle());
         let query_desc = desc.as_ref().unwrap().query_desc.clone();
-        let desc = desc.unwrap_or(SystemDesc { name: None, callback, query_desc, is_guest: true });
+        let desc = desc.unwrap_or(SystemDesc { 
+            name: None, 
+            callback, 
+            query_desc, 
+            is_guest: true, 
+            tick_rate: None 
+        });
         Self { system: ToxoidSystem::new(desc) }
     }
 
@@ -278,25 +287,43 @@ impl System {
         // Create the Toxoid callback with the registered callback handle
         let callback = ToxoidCallback::new(callback.cb_handle());
         let query_desc = desc.as_ref().unwrap().query_desc.clone();
-        let desc = desc.unwrap_or(SystemDesc { name: None, callback: callback.cb_handle(), query_desc, is_guest: false });
+        let desc = desc.unwrap_or(SystemDesc { 
+            name: None, 
+            callback: callback.cb_handle(), 
+            query_desc, 
+            is_guest: false, 
+            tick_rate: None 
+        });
         Self { system: ToxoidSystem::new(desc) }
     }
 
     #[cfg(target_arch = "wasm32")]
-    pub fn dsl(dsl: &str, callback_fn: fn(&Iter)) -> Self {
+    pub fn dsl(dsl: &str, SystemDesc: Option<SystemDesc>, callback_fn: fn(&Iter)) -> Self {
         // Register the callback in the guest environment
         let callback = Callback::new(callback_fn);
         // Create the Toxoid callback with the registered callback handle
         let callback = ToxoidCallback::new(callback.cb_handle());
-        let desc = SystemDesc { name: None, callback, is_guest: true, query_desc: QueryDesc { expr: dsl.to_string() } };
+        let desc = SystemDesc { 
+            name: None, 
+            callback, 
+            tick_rate: None, 
+            is_guest: true, 
+            query_desc: QueryDesc { expr: dsl.to_string() } 
+        };
         Self::new(Some(desc), callback_fn)
     }
 
     #[cfg(not(target_arch = "wasm32"))]
-    pub fn dsl(dsl: &str, callback_fn: fn(&Iter)) -> Self {
+    pub fn dsl(dsl: &str, tick_rate: Option<i32>, callback_fn: fn(&Iter)) -> Self {
         // Register the callback in the guest environment
         let callback = Callback::new(callback_fn);
-        let desc = SystemDesc { name: None, callback: callback.cb_handle(), query_desc: QueryDesc { expr: dsl.to_string() }, is_guest: false };
+        let desc = SystemDesc { 
+            name: None, 
+            callback: callback.cb_handle(), 
+            query_desc: QueryDesc { expr: dsl.to_string() }, 
+            is_guest: false,
+            tick_rate: tick_rate
+        };
         Self::new(Some(desc), callback_fn)
     }
 
@@ -366,7 +393,8 @@ impl Iter {
                 {
                     // In WASM mode, we're working with the guest component object
                     Entity {
-                        entity: ToxoidEntity::from_id(entity.get_id())
+                        entity: ToxoidEntity::from_id(entity.get_id()),
+                        components: Vec::new()
                     }
                 }
             })
