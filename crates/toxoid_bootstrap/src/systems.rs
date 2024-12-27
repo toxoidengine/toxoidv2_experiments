@@ -60,8 +60,8 @@ pub fn init() {
     color.set_g(0.);
     color.set_b(0.);
     color.set_a(1.);
-
-    System::dsl("Rect, Position, Size, Color, Renderable", Some(60), |iter| {
+    
+    System::dsl("Rect, Position, Size, Color, Renderable", None, |iter| {
         iter
             .entities()
             .iter_mut()
@@ -70,8 +70,6 @@ pub fn init() {
                 let mut size = entity.get::<Size>();
                 let mut color = entity.get::<Color>();
                 SokolRenderer2D::draw_filled_rect(&pos, &size, &color);
-                pos.set_x(pos.get_x() + 1);
-                pos.set_y(pos.get_y() + 1);
             });
     })
         .build();

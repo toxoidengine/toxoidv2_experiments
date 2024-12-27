@@ -1,27 +1,53 @@
 
-use toxoid_sokol::SokolRenderer2D;
+use toxoid_sokol::{SokolRenderer2D, sokol::app::{EventType, Event, frame_duration}};
 use toxoid_render::Renderer2D;
 
+#[no_mangle]
 extern "C" fn sokol_init() {
     // Initialization code for Sokol
     // println!("Sokol initialized");
     toxoid_sokol::sokol_init();
 }
 
+#[no_mangle]
 extern "C" fn sokol_frame() {
     // Frame update code for Sokol
     SokolRenderer2D::begin();
-    let delta_time = toxoid_sokol::sokol::app::frame_duration();
+    let delta_time = frame_duration();
     toxoid_host::toxoid_progress(delta_time as f32);
     SokolRenderer2D::end();
 }
 
-extern "C" fn sokol_event(event: *const toxoid_sokol::sokol::app::Event) {
+#[no_mangle]
+extern "C" fn sokol_event(event: *const Event) {
     // Event handling code for Sokol
     // println!("Sokol event received");
     // toxoid_sokol::sokol_event(event);
+    let event = unsafe { *event };
+    match event._type {
+        EventType::KeyDown => {
+           println!("Key down: {:?}", event.key_code);
+        },
+        EventType::KeyUp => {
+            println!("Key up: {:?}", event.key_code);
+        },
+        // EventType::MouseDown => {
+        //     println!("Mouse down: {:?}", event.mouse_button);
+        // },
+        // EventType::MouseUp => {
+        //     println!("Mouse up: {:?}", event.mouse_button);
+        // },
+        // EventType::MouseMove => {
+        //     println!("Mouse move: {:?}", event.mouse_pos);
+        // },
+        // EventType::MouseWheel => {
+        //     println!("Mouse wheel: {:?}", event.mouse_wheel);
+        // },
+        _ => {}
+    }
 }
 
+#[no_mangle]
 extern "C" fn sokol_cleanup() {
     // Cleanup code for Sokol
     // println!("Sokol cleanup");

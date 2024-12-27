@@ -4,7 +4,7 @@
 pub mod bindings;
 use bindings::exports::toxoid::engine::ecs::{EcsEntityT, GuestIter};
 use bindings::exports::toxoid::engine::ecs::{self, ComponentDesc, EntityDesc, Guest, GuestCallback, GuestComponent, GuestComponentType, GuestEntity, GuestQuery, GuestSystem, QueryDesc, SystemDesc};
-pub use toxoid_flecs::bindings::{ecs_add_id, ecs_entity_desc_t, ecs_entity_init, ecs_fini, ecs_get_mut_id, ecs_init, ecs_iter_t, ecs_lookup, ecs_make_pair, ecs_member_t, ecs_progress, ecs_query_desc_t, ecs_query_init, ecs_query_iter, ecs_query_next, ecs_query_t, ecs_struct_desc_t, ecs_struct_init, ecs_system_desc_t, ecs_system_init, ecs_system_t, ecs_world_t, EcsDependsOn, EcsOnUpdate};
+pub use toxoid_flecs::bindings::{ecs_add_id, ecs_entity_desc_t, ecs_entity_init, ecs_fini, ecs_get_mut_id, ecs_init, ecs_iter_t, ecs_lookup, ecs_make_pair, ecs_member_t, ecs_progress, ecs_query_desc_t, ecs_query_init, ecs_query_iter, ecs_query_next, ecs_query_t, ecs_struct_desc_t, ecs_struct_init, ecs_system_desc_t, ecs_system_init, ecs_system_t, ecs_world_t, EcsDependsOn, EcsOnUpdate, ecs_set_rate};
 use std::{borrow::BorrowMut, mem::MaybeUninit};
 use core::ffi::c_void;
 use core::ffi::c_char;
@@ -535,8 +535,7 @@ impl GuestSystem for System {
         // Create system descriptor
         let mut system_desc: ecs_system_desc_t = unsafe { MaybeUninit::zeroed().assume_init() };
         system_desc.entity = entity;
-        // system_desc.rate = desc.tick_rate.unwrap_or(60);
-        system_desc.rate = 0;
+        system_desc.rate = desc.tick_rate.unwrap_or(1);
         let mut query_desc: ecs_query_desc_t = unsafe { MaybeUninit::zeroed().assume_init() };
         query_desc.expr = c_string(&desc.query_desc.expr);
         system_desc.query = query_desc;
@@ -569,6 +568,9 @@ impl GuestSystem for System {
 
     fn build(&self) {
         *self.entity.borrow_mut() = unsafe { ecs_system_init(WORLD.0, self.desc.as_ptr()) };
+        // Set tickrate using world, system id, description, and 0 (to use frames as a source)
+        unsafe { ecs_set_rate(WORLD.0, *self.entity.borrow(), self.desc.borrow().rate, 0) };
+        
     }
 }
 

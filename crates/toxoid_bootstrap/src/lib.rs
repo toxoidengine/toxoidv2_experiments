@@ -1,5 +1,5 @@
-mod renderer;
-mod game_loop;
+mod sokol;
+// mod game_loop;
 mod systems;
 mod entities;
 mod watch;
@@ -9,5 +9,5 @@ pub fn init() {
     entities::init();
     systems::init();
     watch::init();
-    renderer::init();
+    sokol::init();
 }

@@ -2,7 +2,13 @@ use crate::*;
 
 component! {
     // Singletons
-
+    KeyboardInput {
+        up: bool,
+        down: bool,
+        left: bool,
+        right: bool, 
+    },
+    
     // Components
     Position {
         x: u32,
@@ -30,4 +36,8 @@ component! {
     Renderable {
         foo: bool
     }
+}
+
+pub fn init() {
+    // Position::register();
 }
