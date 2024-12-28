@@ -1,5 +1,5 @@
 
-use toxoid_sokol::{SokolRenderer2D, sokol::app::{EventType, Event, frame_duration}};
+use toxoid_sokol::{SokolRenderer2D, sokol::app::frame_duration};
 use toxoid_render::Renderer2D;
 
 #[no_mangle]
@@ -19,35 +19,6 @@ extern "C" fn sokol_frame() {
 }
 
 #[no_mangle]
-extern "C" fn sokol_event(event: *const Event) {
-    // Event handling code for Sokol
-    // println!("Sokol event received");
-    // toxoid_sokol::sokol_event(event);
-    let event = unsafe { *event };
-    match event._type {
-        EventType::KeyDown => {
-           println!("Key down: {:?}", event.key_code);
-        },
-        EventType::KeyUp => {
-            println!("Key up: {:?}", event.key_code);
-        },
-        // EventType::MouseDown => {
-        //     println!("Mouse down: {:?}", event.mouse_button);
-        // },
-        // EventType::MouseUp => {
-        //     println!("Mouse up: {:?}", event.mouse_button);
-        // },
-        // EventType::MouseMove => {
-        //     println!("Mouse move: {:?}", event.mouse_pos);
-        // },
-        // EventType::MouseWheel => {
-        //     println!("Mouse wheel: {:?}", event.mouse_wheel);
-        // },
-        _ => {}
-    }
-}
-
-#[no_mangle]
 extern "C" fn sokol_cleanup() {
     // Cleanup code for Sokol
     // println!("Sokol cleanup");
@@ -62,7 +33,7 @@ extern "C" fn sokol_cleanup() {
 // }
 
 pub fn init() {
-    toxoid_sokol::init(sokol_init, sokol_frame, sokol_event);
+    toxoid_sokol::init(sokol_init, sokol_frame, crate::input::sokol_event);
     // println!("{}", Velocity::get_name());
     // let entity = Entity::new(Some(EntityDesc {
     //     name: Some("Test entity".to_string())

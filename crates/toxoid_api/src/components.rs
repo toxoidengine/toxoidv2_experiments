@@ -25,7 +25,7 @@ component! {
         a: f32
     },
 
-    // Object Type Tags
+    // Tags
     // TODO: Replace these with tags that have no fields
     Rect {
         foo: bool
@@ -39,5 +39,15 @@ component! {
 }
 
 pub fn init() {
-    // Position::register();
+    // Register singletons
+    KeyboardInput::register();
+
+    // Register components
+    Position::register();
+    Size::register();
+    Color::register();
+
+    // Register tags
+    Rect::register();
+    Renderable::register();
 }

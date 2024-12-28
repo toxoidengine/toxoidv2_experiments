@@ -1,13 +1,14 @@
-mod sokol;
-// mod game_loop;
+mod renderer;
+mod input;
 mod systems;
 mod entities;
 mod watch;
+// mod game_loop;
 
 pub fn init() {
-    // game_loop::init();
     entities::init();
     systems::init();
     watch::init();
-    sokol::init();
+    renderer::init();
+    // game_loop::init();
 }

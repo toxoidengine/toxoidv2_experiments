@@ -103,7 +103,7 @@ pub fn get_component_id(component_name: &str, member_names: Vec<String>, member_
 pub trait ComponentType {
     fn get_name() -> &'static str;
     fn get_id() -> ecs_entity_t;
-    // fn register() -> ecs_entity_t;
+    fn register() -> ecs_entity_t;
     // fn get_hash() -> u64;
 }
 
@@ -275,7 +275,7 @@ impl System {
             callback, 
             query_desc, 
             is_guest: true, 
-            tick_rate: None 
+            tick_rate: None
         });
         Self { system: ToxoidSystem::new(desc) }
     }
@@ -322,7 +322,7 @@ impl System {
             callback: callback.cb_handle(), 
             query_desc: QueryDesc { expr: dsl.to_string() }, 
             is_guest: false,
-            tick_rate: tick_rate
+            tick_rate
         };
         Self::new(Some(desc), callback_fn)
     }
