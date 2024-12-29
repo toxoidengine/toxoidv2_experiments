@@ -4,7 +4,7 @@
 pub mod bindings;
 use bindings::exports::toxoid::engine::ecs::{EcsEntityT, GuestIter};
 use bindings::exports::toxoid::engine::ecs::{self, ComponentDesc, EntityDesc, Guest, GuestCallback, GuestComponent, GuestComponentType, GuestEntity, GuestQuery, GuestSystem, QueryDesc, SystemDesc};
-pub use toxoid_flecs::bindings::{ecs_add_id, ecs_entity_desc_t, ecs_entity_init, ecs_fini, ecs_get_mut_id, ecs_init, ecs_iter_t, ecs_lookup, ecs_make_pair, ecs_member_t, ecs_progress, ecs_query_desc_t, ecs_query_init, ecs_query_iter, ecs_query_next, ecs_query_t, ecs_struct_desc_t, ecs_struct_init, ecs_system_desc_t, ecs_system_init, ecs_system_t, ecs_world_t, EcsDependsOn, EcsOnUpdate, ecs_set_rate};
+pub use toxoid_flecs::bindings::{ecs_add_id, ecs_entity_desc_t, ecs_entity_init, ecs_fini, ecs_get_mut_id, ecs_init, ecs_iter_t, ecs_lookup, ecs_make_pair, ecs_member_t, ecs_progress, ecs_query_desc_t, ecs_query_init, ecs_query_iter, ecs_query_next, ecs_query_t, ecs_struct_desc_t, ecs_struct_init, ecs_system_desc_t, ecs_system_init, ecs_system_t, ecs_world_t, EcsDependsOn, EcsOnUpdate, ecs_set_rate, ecs_get_id, ecs_remove_id};
 use std::{borrow::BorrowMut, mem::MaybeUninit};
 use core::ffi::c_void;
 use core::ffi::c_char;
@@ -429,28 +429,13 @@ impl GuestEntity for Entity {
         }
     }
 
-    #[cfg(not(target_arch = "wasm32"))]
     fn from_id(id: u64) -> i64 {
         Box::into_raw(Box::new(Entity { id })) as i64
     }
 
-    #[cfg(target_arch = "wasm32")]
-    fn from_id(id: u64) -> Entity {
-        Entity { id }
-    }
-
-    #[cfg(not(target_arch = "wasm32"))]
     fn get(&self, component: ecs_entity_t) -> i64 {
         unsafe {
             ecs_get_mut_id(WORLD.0, self.id, component) as i64
-        }
-    }
-
-    #[cfg(target_arch = "wasm32")]
-    fn get(&self, component: ecs_entity_t) -> bindings::exports::toxoid::engine::ecs::Component {
-        unsafe {
-            let ptr = ecs_get_mut_id(WORLD.0, self.id, component);
-            bindings::exports::toxoid::engine::ecs::Component::new(Component { id: component, ptr })
         }
     }
 }
@@ -484,18 +469,10 @@ impl GuestQuery for Query {
         self.iter.borrow().count
     }
 
-    #[cfg(not(target_arch = "wasm32"))]
     fn entities(&self) -> Vec<EcsEntityT> {
         let entities = self.iter.borrow().entities;
         let entities_slice = unsafe { std::slice::from_raw_parts(entities, self.count() as usize) };
         entities_slice.to_vec()
-    }
-
-    #[cfg(target_arch = "wasm32")]
-    fn entities(&self) -> Vec<Entity> {
-        let entities = self.iter.borrow().entities;
-        let entities_slice = std::slice::from_raw_parts(entities, self.count() as usize);
-        entities_slice.iter().map(|entity| Entity { id: *entity }).collect()
     }
 
     // fn field(&self, index: u32) -> *const c_void {
@@ -556,14 +533,8 @@ impl GuestSystem for System {
         }
     }
 
-    #[cfg(not(target_arch = "wasm32"))]
     fn callback(&self) -> i64 {
        self.callback.borrow().handle
-    }
-
-    #[cfg(target_arch = "wasm32")]
-    fn callback(&self) -> ecs::Callback {
-       unimplemented!()
     }
 
     fn build(&self) {
@@ -618,7 +589,16 @@ impl Guest for ToxoidApi {
     type System = System;
     type Callback = Callback;
     type Iter = Iter;
-}
 
-#[cfg(target_arch = "wasm32")]
-bindings::export!(ToxoidApi with_types_in bindings);
+    fn add_singleton(component: ecs_entity_t) {
+        unsafe { ecs_add_id(WORLD.0, component, component) };   
+    }
+
+    fn get_singleton(component: ecs_entity_t) -> i64 {
+        unsafe { ecs_get_mut_id(WORLD.0, component, component) as i64 }
+    }
+
+    fn remove_singleton(component: ecs_entity_t) {
+        unsafe { ecs_remove_id(WORLD.0, component, component) };
+    }
+}

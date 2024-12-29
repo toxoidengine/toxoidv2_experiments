@@ -15,7 +15,9 @@ bindgen!({
     },
 });
 
-use toxoid_host::bindings::exports::toxoid::engine::ecs::{GuestCallback, GuestComponent, GuestComponentType, GuestEntity, GuestIter, GuestQuery, GuestSystem};
+use std::collections::HashMap;
+use toxoid_host::bindings::exports::toxoid::engine::ecs::{Guest, GuestCallback, GuestComponent, GuestComponentType, GuestEntity, GuestIter, GuestQuery, GuestSystem};
+use toxoid_host::ToxoidApi;
 use wasmtime::component::{bindgen, Component, Linker, Resource, ResourceTable};
 use wasmtime::{Engine, Result, Store};
 use wasmtime_wasi::{WasiCtx, WasiView, WasiCtxBuilder};
@@ -62,7 +64,40 @@ impl WasiView for StoreState {
     fn table(&mut self) -> &mut ResourceTable { &mut self.table }
 }
 
-impl toxoid_component::component::ecs::Host for StoreState {}
+static mut SINGLETON_MAP: Lazy<HashMap<toxoid_component::component::ecs::EcsEntityT, Resource<ComponentProxy>>> = Lazy::new(|| HashMap::new());
+
+impl toxoid_component::component::ecs::Host for StoreState {
+    fn add_singleton(&mut self, component: toxoid_component::component::ecs::EcsEntityT) {
+        ToxoidApi::add_singleton(component);
+        let ptr = ToxoidApi::get_singleton(component);
+        let resource = self.table.push::<ComponentProxy>(ComponentProxy { ptr: ptr as *mut toxoid_host::Component }).unwrap();
+        unsafe {
+            SINGLETON_MAP.insert(component, resource);
+        }
+    }
+
+    fn get_singleton(&mut self, component: toxoid_component::component::ecs::EcsEntityT) -> Resource<ComponentProxy> {
+        // let singleton = ToxoidApi::get_singleton(component);
+        let singleton = unsafe { SINGLETON_MAP.get(&component).unwrap() };
+        // Get from resource table
+        let resource = self.table.get(&singleton).unwrap() as &ComponentProxy;
+        // Push to resource table
+        let id = self
+            .table
+            .push::<ComponentProxy>(ComponentProxy { 
+                ptr: resource.ptr
+            })
+            .expect("Failed to push component to table");
+        id
+    }
+
+    fn remove_singleton(&mut self, component: toxoid_component::component::ecs::EcsEntityT) {
+        ToxoidApi::remove_singleton(component);
+        unsafe {
+            SINGLETON_MAP.remove(&component);
+        }
+    }
+}
 
 impl toxoid_component::component::ecs::HostIter for StoreState {
     fn new(&mut self, ptr: i64) -> Resource<IterProxy> {
@@ -212,7 +247,6 @@ impl toxoid_component::component::ecs::HostEntity for StoreState {
         id
     }
 
-    #[cfg(not(feature = "wasm"))]
     fn get(&mut self, entity: Resource<toxoid_component::component::ecs::Entity>, component: toxoid_component::component::ecs::EcsEntityT) -> Resource<ComponentProxy> {
         // Safely retrieve the entity proxy
         let entity_proxy = self.table.get(&entity).expect("Entity not found in table") as &EntityProxy;
@@ -241,20 +275,9 @@ impl toxoid_component::component::ecs::HostEntity for StoreState {
         id
     }
 
-    #[cfg(feature = "wasm")]
-    fn get(&mut self, entity: Resource<toxoid_component::component::ecs::Entity>, component: toxoid_component::component::ecs::EcsEntityT) -> Resource<ComponentProxy> {
-        unimplemented!()
-    }
-
-    #[cfg(not(feature = "wasm"))]
     fn from_id(&mut self, id: u64) -> Resource<EntityProxy> {
         let entity = toxoid_host::Entity::from_id(id) as *mut toxoid_host::Entity; 
         self.table.push::<EntityProxy>(EntityProxy { ptr: entity }).unwrap()
-    }
-
-    #[cfg(feature = "wasm")]
-    fn from_id(&mut self, id: u64) -> Resource<EntityProxy> {
-        unimplemented!()
     }
 
     fn add(&mut self, entity: Resource<toxoid_component::component::ecs::Entity>, component: toxoid_component::component::ecs::EcsEntityT) -> () {

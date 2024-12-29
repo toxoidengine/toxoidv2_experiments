@@ -121,6 +121,10 @@ interface ecs {
         count: func() -> s32;
         entities: func() -> list<entity>;
     }
+
+    add-singleton: func(component: ecs-entity-t);
+    get-singleton: func(component: ecs-entity-t) -> component;
+    remove-singleton: func(component: ecs-entity-t);
 }
 
 interface callbacks {

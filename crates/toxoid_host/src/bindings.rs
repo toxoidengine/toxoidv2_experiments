@@ -1806,6 +1806,25 @@ pub mod exports {
                     let len2 = l1;
                     _rt::cabi_dealloc(base2, len2 * 8, 8);
                 }
+                #[doc(hidden)]
+                #[allow(non_snake_case)]
+                pub unsafe fn _export_add_singleton_cabi<T: Guest>(arg0: i64) {
+                    #[cfg(target_arch = "wasm32")] _rt::run_ctors_once();
+                    T::add_singleton(arg0 as u64);
+                }
+                #[doc(hidden)]
+                #[allow(non_snake_case)]
+                pub unsafe fn _export_get_singleton_cabi<T: Guest>(arg0: i64) -> i64 {
+                    #[cfg(target_arch = "wasm32")] _rt::run_ctors_once();
+                    let result0 = T::get_singleton(arg0 as u64);
+                    _rt::as_i64(result0)
+                }
+                #[doc(hidden)]
+                #[allow(non_snake_case)]
+                pub unsafe fn _export_remove_singleton_cabi<T: Guest>(arg0: i64) {
+                    #[cfg(target_arch = "wasm32")] _rt::run_ctors_once();
+                    T::remove_singleton(arg0 as u64);
+                }
                 pub trait Guest {
                     type ComponentType: GuestComponentType;
                     type Component: GuestComponent;
@@ -1814,6 +1833,9 @@ pub mod exports {
                     type Callback: GuestCallback;
                     type System: GuestSystem;
                     type Iter: GuestIter;
+                    fn add_singleton(component_id: EcsEntityT);
+                    fn get_singleton(component_id: EcsEntityT) -> i64;
+                    fn remove_singleton(component_id: EcsEntityT);
                 }
                 pub trait GuestComponentType: 'static {
                     #[doc(hidden)]
@@ -2476,7 +2498,16 @@ pub mod exports {
                         "cabi_post_toxoid:engine/ecs#[method]iter.entities"] unsafe
                         extern "C" fn _post_return_method_iter_entities(arg0 : * mut u8,)
                         { $($path_to_types)*:: __post_return_method_iter_entities::<<$ty
-                        as $($path_to_types)*:: Guest >::Iter > (arg0) } const _ : () = {
+                        as $($path_to_types)*:: Guest >::Iter > (arg0) } #[export_name =
+                        "toxoid:engine/ecs#add-singleton"] unsafe extern "C" fn
+                        export_add_singleton(arg0 : i64,) { $($path_to_types)*::
+                        _export_add_singleton_cabi::<$ty > (arg0) } #[export_name =
+                        "toxoid:engine/ecs#get-singleton"] unsafe extern "C" fn
+                        export_get_singleton(arg0 : i64,) -> i64 { $($path_to_types)*::
+                        _export_get_singleton_cabi::<$ty > (arg0) } #[export_name =
+                        "toxoid:engine/ecs#remove-singleton"] unsafe extern "C" fn
+                        export_remove_singleton(arg0 : i64,) { $($path_to_types)*::
+                        _export_remove_singleton_cabi::<$ty > (arg0) } const _ : () = {
                         #[doc(hidden)] #[export_name =
                         "toxoid:engine/ecs#[dtor]component-type"]
                         #[allow(non_snake_case)] unsafe extern "C" fn dtor(rep : * mut
@@ -2787,9 +2818,9 @@ pub(crate) use __export_toxoid_engine_world_impl as export;
 #[cfg(target_arch = "wasm32")]
 #[link_section = "component-type:wit-bindgen:0.35.0:toxoid:engine:toxoid-engine-world:encoded world"]
 #[doc(hidden)]
-pub static __WIT_BINDGEN_COMPONENT_TYPE: [u8; 3329] = *b"\
-\0asm\x0d\0\x01\0\0\x19\x16wit-component-encoding\x04\0\x07\xf7\x18\x01A\x02\x01\
-A\x02\x01B\x91\x01\x01w\x04\0\x0cecs-entity-t\x03\0\0\x01m\x10\x04u8-t\x05u16-t\x05\
+pub static __WIT_BINDGEN_COMPONENT_TYPE: [u8; 3424] = *b"\
+\0asm\x0d\0\x01\0\0\x19\x16wit-component-encoding\x04\0\x07\xd6\x19\x01A\x02\x01\
+A\x02\x01B\x96\x01\x01w\x04\0\x0cecs-entity-t\x03\0\0\x01m\x10\x04u8-t\x05u16-t\x05\
 u32-t\x05u64-t\x04i8-t\x05i16-t\x05i32-t\x05i64-t\x05f32-t\x05f64-t\x06bool-t\x08\
 string-t\x07array-t\x0au32array-t\x0af32array-t\x09pointer-t\x04\0\x0bmember-typ\
 e\x03\0\x02\x01ps\x01p}\x01r\x03\x04names\x0cmember-names\x04\x0cmember-types\x05\
@@ -2850,10 +2881,12 @@ tem\x01S\x01h\x15\x01@\x01\x04self\xd4\0\x01\0\x04\0\x14[method]system.build\x01
 U\x01@\x01\x04self\xd4\0\0x\x04\0\x17[method]system.callback\x01V\x01@\x01\x03pt\
 rx\0\xcf\0\x04\0\x11[constructor]iter\x01W\x01h\x16\x01@\x01\x04self\xd8\0\0\x7f\
 \x04\0\x11[method]iter.next\x01Y\x01@\x01\x04self\xd8\0\0z\x04\0\x12[method]iter\
-.count\x01Z\x01@\x01\x04self\xd8\0\0\xca\0\x04\0\x15[method]iter.entities\x01[\x04\
-\0\x11toxoid:engine/ecs\x05\0\x04\0!toxoid:engine/toxoid-engine-world\x04\0\x0b\x19\
-\x01\0\x13toxoid-engine-world\x03\0\0\0G\x09producers\x01\x0cprocessed-by\x02\x0d\
-wit-component\x070.220.0\x10wit-bindgen-rust\x060.35.0";
+.count\x01Z\x01@\x01\x04self\xd8\0\0\xca\0\x04\0\x15[method]iter.entities\x01[\x01\
+@\x01\x0ccomponent-id\x01\x01\0\x04\0\x0dadd-singleton\x01\\\x01@\x01\x0ccompone\
+nt-id\x01\0x\x04\0\x0dget-singleton\x01]\x04\0\x10remove-singleton\x01\\\x04\0\x11\
+toxoid:engine/ecs\x05\0\x04\0!toxoid:engine/toxoid-engine-world\x04\0\x0b\x19\x01\
+\0\x13toxoid-engine-world\x03\0\0\0G\x09producers\x01\x0cprocessed-by\x02\x0dwit\
+-component\x070.220.0\x10wit-bindgen-rust\x060.35.0";
 #[inline(never)]
 #[doc(hidden)]
 pub fn __link_custom_section_describing_imports() {
