@@ -343,7 +343,6 @@ pub static mut CALLBACKS: once_cell::sync::Lazy<Vec<Box<dyn Fn(&Iter)>>> = once_
 impl Callback {
     pub fn new(callback_fn: fn(&Iter)) -> Self {
         let handle = unsafe { CALLBACKS.push(Box::new(callback_fn)); CALLBACKS.len() - 1 };
-        println!("Callback handle: {}", handle);
         Self { callback: ToxoidCallback::new(handle as i64) }   
     }
 

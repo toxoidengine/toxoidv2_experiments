@@ -176,13 +176,12 @@ impl toxoid_component::component::ecs::HostSystem for StoreState {
     fn new(&mut self, desc: toxoid_component::component::ecs::SystemDesc) -> Resource<SystemProxy> {
         let callback_proxy = self.table.get(&desc.callback).unwrap() as &CallbackProxy;
         let callback = unsafe { Box::from_raw(callback_proxy.ptr) };
-        println!("Callback rep: {}", desc.callback.rep());
-        println!("Callback handle: {}", callback.handle);
         let query_desc = toxoid_host::bindings::exports::toxoid::engine::ecs::QueryDesc {
             expr: desc.query_desc.expr,
         };
         let query = toxoid_host::Query::new(query_desc.clone());
-        let query_ptr = Box::into_raw(Box::new(query));
+        // TODO: Remove this
+        let _query_ptr = Box::into_raw(Box::new(query));
         let system = <toxoid_host::System as toxoid_host::bindings::exports::toxoid::engine::ecs::GuestSystem>::new(toxoid_host::bindings::exports::toxoid::engine::ecs::SystemDesc {
             name: desc.name,
             query_desc,

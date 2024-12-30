@@ -8,6 +8,9 @@ component! {
         left: bool,
         right: bool, 
     },
+    Direction {
+        direction: u8
+    },
     
     // Components
     Position {
@@ -24,15 +27,28 @@ component! {
         b: f32,
         a: f32
     },
+    Stats {
+        score: u32,
+        high_score: u32,
+        tail_length: u32
+    },
 
     // Tags
-    // TODO: Replace these with tags that have no fields
+    Player {
+        foo: bool
+    },
+    Food {
+        foo: bool
+    },
+    Head {
+        foo: bool
+    },
+    Tail {
+        foo: bool
+    },
     Rect {
         foo: bool
     },
-
-    // State Representation Tags
-    // TODO: Replace these with tags that have no fields
     Renderable {
         foo: bool
     }
@@ -41,16 +57,23 @@ component! {
 pub fn init() {
     // Register singletons
     KeyboardInput::register();
+    Direction::register();
 
     // Register components
     Position::register();
     Size::register();
     Color::register();
+    Stats::register();
 
     // Register tags
+    Player::register();
+    Food::register();
+    Head::register();
+    Tail::register();
     Rect::register();
     Renderable::register();
 
     // Add singletons
     World::add_singleton::<KeyboardInput>();
+    World::add_singleton::<Direction>();
 }
