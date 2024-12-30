@@ -50,4 +50,7 @@ pub fn init() {
     // Register tags
     Rect::register();
     Renderable::register();
+
+    // Add singletons
+    World::add_singleton::<KeyboardInput>();
 }

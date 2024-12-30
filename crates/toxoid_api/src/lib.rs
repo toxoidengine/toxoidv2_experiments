@@ -1,6 +1,8 @@
 #![allow(warnings)]
 pub mod components;
-// pub use components::*;
+pub use components::*;
+
+use toxoid_host::bindings::exports::toxoid::engine::ecs::Guest;
 
 // Native
 #[cfg(not(target_arch = "wasm32"))]
@@ -399,6 +401,37 @@ impl Iter {
                 }
             })
             .collect()
+    }
+}
+
+pub struct World;
+
+// TODO: Track the component pointers to free them when singleton is removed
+// static mut WORLD_SINGLETONS: once_cell::sync::Lazy<Vec<*mut toxoid_host::Component>> = once_cell::sync::Lazy::new(|| Vec::new());
+
+impl World {
+    pub fn add_singleton<T: Component + ComponentType + 'static>() {
+        toxoid_host::ToxoidApi::add_singleton(T::get_id())
+    }
+
+    pub fn get_singleton<T: Component + ComponentType + Default + 'static>() -> T {
+        let mut component = T::default();
+        let component_ptr = toxoid_host::ToxoidApi::get_singleton(T::get_id());
+        #[cfg(not(target_arch = "wasm32"))]
+        let toxoid_component = toxoid_host::Component::new(component_ptr);
+        #[cfg(target_arch = "wasm32")]
+        let toxoid_component = component_ptr;
+        let toxoid_component_ptr = Box::into_raw(Box::new(toxoid_component));
+        // TODO: Track the pointer
+        // unsafe { WORLD_SINGLETONS.push(toxoid_component_ptr); }
+        component.set_ptr(toxoid_component_ptr);
+        component
+    }
+
+    pub fn remove_singleton<T: Component + ComponentType + 'static>() {
+        let component_ptr = toxoid_host::ToxoidApi::get_singleton(T::get_id());
+        // unsafe { WORLD_SINGLETONS.remove(T::get_id() as usize); }
+        toxoid_host::ToxoidApi::remove_singleton(T::get_id());
     }
 }
 

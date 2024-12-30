@@ -6,6 +6,7 @@ mod watch;
 // mod game_loop;
 
 pub fn init() {
+    toxoid_api::components::init();
     entities::init();
     systems::init();
     watch::init();

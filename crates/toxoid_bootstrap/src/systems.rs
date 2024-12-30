@@ -73,4 +73,28 @@ pub fn init() {
             });
     })
         .build();
+
+    System::dsl("Rect, Position, Size, Color, Renderable", None, |iter| {
+        iter
+            .entities()
+            .iter_mut()
+            .for_each(|entity| {
+                let mut pos = entity.get::<Position>();
+                let mut size = entity.get::<Size>();
+                let keyboard_input = World::get_singleton::<KeyboardInput>();
+                if keyboard_input.get_up() && pos.get_y() >= 5 {
+                    pos.set_y(pos.get_y() - 5);
+                }
+                if keyboard_input.get_down() && pos.get_y() <= 500 {
+                    pos.set_y(pos.get_y() + 5);
+                }
+                if keyboard_input.get_left() && pos.get_x() >= 5 {
+                    pos.set_x(pos.get_x() - 5);
+                }
+                if keyboard_input.get_right() && pos.get_x() <= 700 {
+                    pos.set_x(pos.get_x() + 5);
+                }
+            });
+    })
+        .build();
 }

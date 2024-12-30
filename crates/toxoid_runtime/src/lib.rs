@@ -1,5 +1,4 @@
 #![allow(unused_must_use)]
-
 bindgen!({
     world: "toxoid-component-world",
     path: "../toxoid_guest/wit",
