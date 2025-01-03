@@ -107,31 +107,17 @@ pub trait ComponentType {
     fn get_name() -> &'static str;
     fn get_id() -> ecs_entity_t;
     fn register() -> ecs_entity_t;
-    // fn get_hash() -> u64;
 }
 
 pub trait Component {
-    // fn get_id(&self) -> u64;
-    // #[cfg(all(target_arch="wasm32", target_os="unknown"))]
     #[cfg(target_arch = "wasm32")]
-    fn set_ptr(&mut self, ptr: *mut toxoid_guest::bindings::toxoid_component::component::ecs::Component);
+    fn set_component(&mut self, ptr: toxoid_guest::bindings::toxoid_component::component::ecs::Component);
     #[cfg(not(target_arch = "wasm32"))]
-    fn set_ptr(&mut self, ptr: *mut ToxoidComponent);
-    // #[cfg(all(target_arch="wasm32", target_os="unknown"))]
-    // fn get_ptr(&self) -> i64;
-    // #[cfg(not(all(target_arch="wasm32", target_os="unknown")))]
-    // fn get_ptr(&self) -> *mut c_void;
-    // fn set_singleton(&mut self, singleton: bool);
-    // fn get_singleton(&self) -> bool;
+    fn set_component(&mut self, ptr: ToxoidComponent);
 }
 
 pub struct Entity {
-    entity: ToxoidEntity,
-     // Track component pointers that need to be freed
-     #[cfg(not(target_arch = "wasm32"))]
-     components: Vec<*mut ToxoidComponent>,
-     #[cfg(target_arch = "wasm32")]
-     components: Vec<*mut toxoid_guest::bindings::toxoid_component::component::ecs::Component>,
+    entity: ToxoidEntity
 }
 
 impl Entity {
@@ -141,10 +127,7 @@ impl Entity {
         let entity = ToxoidEntity::new(desc);
         #[cfg(target_arch = "wasm32")]
         let entity = ToxoidEntity::new(&desc);
-        Self { 
-            entity,
-            components: Vec::new()
-        }
+        Self { entity }
     }
 
     pub fn named(name: &str) -> Self {
@@ -153,10 +136,7 @@ impl Entity {
         let entity = ToxoidEntity::new(desc);
         #[cfg(target_arch = "wasm32")]
         let entity = ToxoidEntity::new(&desc);
-        Self { 
-            entity,
-            components: Vec::new()
-        }
+        Self { entity }
     }
 
     pub fn get_id(&self) -> u64 {
@@ -166,16 +146,11 @@ impl Entity {
     pub fn get<T: Component + ComponentType + Default + 'static>(&mut self) -> T {
         let mut component = T::default();
         let component_ptr = self.entity.get(T::get_id());
-        
         #[cfg(not(target_arch = "wasm32"))]
         let toxoid_component = ToxoidComponent::new(component_ptr);
         #[cfg(target_arch = "wasm32")]
         let toxoid_component = component_ptr;
-        
-        let toxoid_component_ptr = Box::into_raw(Box::new(toxoid_component));
-        // Track the pointer
-        self.components.push(toxoid_component_ptr);
-        component.set_ptr(toxoid_component_ptr);
+        component.set_component(toxoid_component);
         component
     }
 
@@ -193,17 +168,6 @@ impl Entity {
         // let component_id_split = toxoid_component_cache_get(type_hash);
         // let component_id = combine_u32(component_id_split);
         // toxoid_entity_remove_component(self.entity.id, component_id);
-    }
-}
-
-impl Drop for Entity {
-    fn drop(&mut self) {
-        // Clean up all component pointers
-        for ptr in self.components.drain(..) {
-            unsafe {
-                let _ = Box::from_raw(ptr);
-            }
-        }
     }
 }
 
@@ -249,10 +213,14 @@ impl Query {
 
     #[cfg(target_arch = "wasm32")]
     pub fn entities(&self) -> Vec<Entity> {
-        self.query.entities().iter().map(|entity| Entity { 
-            entity: ToxoidEntity::from_id(entity.get_id()) ,
-            components: Vec::new()
-        }).collect()
+        self
+            .query
+            .entities()
+            .iter()
+            .map(|entity| Entity { 
+                entity: ToxoidEntity::from_id(entity.get_id()) 
+            })
+            .collect()
     }
 }
 
@@ -384,30 +352,21 @@ impl Iter {
             .iter()
             .map(|entity| {
                 #[cfg(not(target_arch = "wasm32"))]
-                {
-                    // In native mode, we get a u64 ID directly
-                    Entity {
-                        entity: ToxoidEntity { id: *entity },
-                        components: Vec::new()
-                    }
-                }
+                // In native mode, we get a u64 ID directly
+                return Entity {
+                    entity: ToxoidEntity { id: *entity }
+                };
                 #[cfg(target_arch = "wasm32")]
-                {
-                    // In WASM mode, we're working with the guest component object
-                    Entity {
-                        entity: ToxoidEntity::from_id(entity.get_id()),
-                        components: Vec::new()
-                    }
-                }
+                // In WASM mode, we're working with the guest component object
+                return Entity {
+                    entity: ToxoidEntity::from_id(entity.get_id())
+                };
             })
             .collect()
     }
 }
 
 pub struct World;
-
-// TODO: Track the component pointers to free them when singleton is removed
-// static mut WORLD_SINGLETONS: once_cell::sync::Lazy<Vec<*mut toxoid_host::Component>> = once_cell::sync::Lazy::new(|| Vec::new());
 
 impl World {
     pub fn add_singleton<T: Component + ComponentType + 'static>() {
@@ -416,71 +375,18 @@ impl World {
 
     pub fn get_singleton<T: Component + ComponentType + Default + 'static>() -> T {
         let mut component = T::default();
-        let component_ptr = ToxoidApi::get_singleton(T::get_id());
+        let component_id = T::get_id();
+        let component_ptr = ToxoidApi::get_singleton(component_id);
         #[cfg(not(target_arch = "wasm32"))]
         let toxoid_component = ToxoidComponent::new(component_ptr);
         #[cfg(target_arch = "wasm32")]
         let toxoid_component = component_ptr;
-        let toxoid_component_ptr = Box::into_raw(Box::new(toxoid_component));
-        // TODO: Track the pointer
-        // unsafe { WORLD_SINGLETONS.push(toxoid_component_ptr); }
-        component.set_ptr(toxoid_component_ptr);
+        component.set_component(toxoid_component);
         component
     }
 
     pub fn remove_singleton<T: Component + ComponentType + 'static>() {
-        let component_ptr = ToxoidApi::get_singleton(T::get_id());
-        // unsafe { WORLD_SINGLETONS.remove(T::get_id() as usize); }
-        ToxoidApi::remove_singleton(T::get_id());
+        let component_id = T::get_id();
+        ToxoidApi::remove_singleton(component_id);
     }
 }
-
-/* Native
-    let component = ComponentType::new(ComponentDesc {
-        name: "Position".to_string(),
-        member_names: vec!["x".to_string(), "y".to_string()],
-        member_types: vec![MemberType::U32T as u8, MemberType::U32T as u8],
-    });
-    println!("{:?}", component.get_id());
-    let entity = Entity::new(EntityDesc {
-        name: Some("Test entity".to_string())
-    });
-    entity.add_component(component.get_id());
-    let component = entity.get_component(component.get_id());
-    let component = Component::new(component);
-    component.set_member_u64(0, 777);
-    let value = component.get_member_u64(0) as u64;
-    println!("{:?}", value);
-    let query = Query::new(QueryDesc { expr: "Position($this)".to_string() });
-    query.build();
-    query.iter();
-    query.next();
-    // toxoid_host::toxoid_progress(1.0);
-    let count = query.count();
-    println!("{:?}", count); 
-*/
-
-/* WASM32
-    let component = ComponentType::new(&ComponentDesc {
-        name: "Position".to_string(),
-        member_names: vec!["x".to_string(), "y".to_string()],
-        member_types: vec![MemberType::U32T as u8, MemberType::U32T as u8],
-    });
-    let entity = Entity::new(&EntityDesc {
-        name: Some(format!("Test entity {}", name))
-    });
-    let component_id = component.get_id();
-    entity.add(component_id);
-    let component = entity.get(component_id);
-    component.set_member_u64(0, 777);
-    component.get_member_u64(0) as u64;
-    let query = Query::new(&QueryDesc { expr: "Position($this)".to_string() });
-    query.build();
-    query.iter();
-    query.next();
-    let entities = query.entities();
-    let entity = entities.get(0).unwrap();
-    let component = entity.get(component_id);
-    let value = component.get_member_u64(0) as u64;
-    value 
-*/
