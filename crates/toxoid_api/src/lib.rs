@@ -2,8 +2,6 @@
 pub mod components;
 pub use components::*;
 
-use toxoid_host::bindings::exports::toxoid::engine::ecs::Guest;
-
 // Native
 #[cfg(not(target_arch = "wasm32"))]
 pub use toxoid_host::{
@@ -23,6 +21,7 @@ pub use toxoid_host::{
         GuestCallback,
         GuestIter,
     },
+    ToxoidApi
 };
 #[cfg(not(target_arch = "wasm32"))]
 pub use toxoid_host::bindings::exports::toxoid::engine::ecs::{
@@ -31,6 +30,7 @@ pub use toxoid_host::bindings::exports::toxoid::engine::ecs::{
     QueryDesc,
     SystemDesc,
     MemberType,
+    Guest as WorldGuest,
 };
 // WASM
 #[cfg(target_arch = "wasm32")]
@@ -47,7 +47,8 @@ pub use toxoid_guest::bindings::{
         ComponentDesc,
         QueryDesc,
         SystemDesc,
-        MemberType
+        MemberType,
+        self as ToxoidApi
     },
     self,
     exports::toxoid_component::component::callbacks::Guest as CallbacksGuest,
@@ -115,7 +116,7 @@ pub trait Component {
     #[cfg(target_arch = "wasm32")]
     fn set_ptr(&mut self, ptr: *mut toxoid_guest::bindings::toxoid_component::component::ecs::Component);
     #[cfg(not(target_arch = "wasm32"))]
-    fn set_ptr(&mut self, ptr: *mut toxoid_host::Component);
+    fn set_ptr(&mut self, ptr: *mut ToxoidComponent);
     // #[cfg(all(target_arch="wasm32", target_os="unknown"))]
     // fn get_ptr(&self) -> i64;
     // #[cfg(not(all(target_arch="wasm32", target_os="unknown")))]
@@ -128,7 +129,7 @@ pub struct Entity {
     entity: ToxoidEntity,
      // Track component pointers that need to be freed
      #[cfg(not(target_arch = "wasm32"))]
-     components: Vec<*mut toxoid_host::Component>,
+     components: Vec<*mut ToxoidComponent>,
      #[cfg(target_arch = "wasm32")]
      components: Vec<*mut toxoid_guest::bindings::toxoid_component::component::ecs::Component>,
 }
@@ -167,7 +168,7 @@ impl Entity {
         let component_ptr = self.entity.get(T::get_id());
         
         #[cfg(not(target_arch = "wasm32"))]
-        let toxoid_component = toxoid_host::Component::new(component_ptr);
+        let toxoid_component = ToxoidComponent::new(component_ptr);
         #[cfg(target_arch = "wasm32")]
         let toxoid_component = component_ptr;
         
@@ -410,14 +411,14 @@ pub struct World;
 
 impl World {
     pub fn add_singleton<T: Component + ComponentType + 'static>() {
-        toxoid_host::ToxoidApi::add_singleton(T::get_id())
+        ToxoidApi::add_singleton(T::get_id())
     }
 
     pub fn get_singleton<T: Component + ComponentType + Default + 'static>() -> T {
         let mut component = T::default();
-        let component_ptr = toxoid_host::ToxoidApi::get_singleton(T::get_id());
+        let component_ptr = ToxoidApi::get_singleton(T::get_id());
         #[cfg(not(target_arch = "wasm32"))]
-        let toxoid_component = toxoid_host::Component::new(component_ptr);
+        let toxoid_component = ToxoidComponent::new(component_ptr);
         #[cfg(target_arch = "wasm32")]
         let toxoid_component = component_ptr;
         let toxoid_component_ptr = Box::into_raw(Box::new(toxoid_component));
@@ -428,9 +429,9 @@ impl World {
     }
 
     pub fn remove_singleton<T: Component + ComponentType + 'static>() {
-        let component_ptr = toxoid_host::ToxoidApi::get_singleton(T::get_id());
+        let component_ptr = ToxoidApi::get_singleton(T::get_id());
         // unsafe { WORLD_SINGLETONS.remove(T::get_id() as usize); }
-        toxoid_host::ToxoidApi::remove_singleton(T::get_id());
+        ToxoidApi::remove_singleton(T::get_id());
     }
 }
 

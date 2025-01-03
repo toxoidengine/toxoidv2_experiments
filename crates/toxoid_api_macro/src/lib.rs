@@ -19,8 +19,6 @@ enum FieldType {
     F64,
     Bool,
     String,
-    U32Array,
-    F32Array,
     Pointer
 }
 
@@ -253,13 +251,20 @@ pub fn component(input: TokenStream) -> TokenStream {
                                     }
                                 }
                             },
-                            _ if field_type_str == "U32Array" => {
+                            _ if field_type_str == "Vec<u32>" => {
                                 quote! {
                                     pub fn #getter_name(&self) -> Vec<u32> {
                                         unsafe {
                                             self.ptr.as_mut().unwrap().get_member_u32_array(#field_offset)
                                         }
                                     }
+                                    #[cfg(target_arch = "wasm32")]
+                                    pub fn #setter_name(&mut self, value: &[u32]) {
+                                        unsafe {
+                                            self.ptr.as_mut().unwrap().set_member_u32_array(#field_offset, value);
+                                        }
+                                    }
+                                    #[cfg(not(target_arch = "wasm32"))]
                                     pub fn #setter_name(&mut self, value: Vec<u32>) {
                                         unsafe {
                                             self.ptr.as_mut().unwrap().set_member_u32_array(#field_offset, value);
@@ -267,13 +272,41 @@ pub fn component(input: TokenStream) -> TokenStream {
                                     }
                                 }
                             },
-                            _ if field_type_str == "F32Array" => {
+                            _ if field_type_str == "Vec :: < u64 >" => {
+                                quote! {
+                                    pub fn #getter_name(&self) -> Vec<u64> {
+                                        unsafe {
+                                            self.ptr.as_mut().unwrap().get_member_u64list(#field_offset)
+                                        }
+                                    }
+                                    #[cfg(target_arch = "wasm32")]
+                                    pub fn #setter_name(&mut self, value: &[u64]) {
+                                        unsafe {
+                                            self.ptr.as_mut().unwrap().set_member_u64list(#field_offset, value);
+                                        }
+                                    }
+                                    #[cfg(not(target_arch = "wasm32"))]
+                                    pub fn #setter_name(&mut self, value: Vec<u64>) {
+                                        unsafe {
+                                            self.ptr.as_mut().unwrap().set_member_u64list(#field_offset, value);
+                                        }
+                                    }
+                                }
+                            },
+                            _ if field_type_str == "Vec<f32>" => {
                                 quote! {
                                     pub fn #getter_name(&self) -> Vec<f32> {
                                         unsafe {
                                             self.ptr.as_mut().unwrap().get_member_f32_array(#field_offset)
                                         }
                                     }
+                                    #[cfg(target_arch = "wasm32")   ]
+                                    pub fn #setter_name(&mut self, value: &[f32]) {
+                                        unsafe {
+                                            self.ptr.as_mut().unwrap().set_member_f32_array(#field_offset, value);
+                                        }
+                                    }
+                                    #[cfg(not(target_arch = "wasm32"))]
                                     pub fn #setter_name(&mut self, value: Vec<f32>) {
                                         unsafe {
                                             self.ptr.as_mut().unwrap().set_member_f32_array(#field_offset, value);
@@ -281,23 +314,9 @@ pub fn component(input: TokenStream) -> TokenStream {
                                     }
                                 }
                             },
-                            _ if field_type_str == "Pointer" => {
-                                quote! {
-                                    pub fn #getter_name(&self) -> *const core::ffi::c_void {
-                                        unsafe {
-                                            // self.ptr.as_mut().unwrap().get_member_f32_array(#field_offset)
-                                        }
-                                    }
-                                    pub fn #setter_name(&mut self, value: *const core::ffi::c_void) {
-                                        unsafe {
-                                            // self.ptr.as_mut().unwrap().set_member_f32_array(#field_offset, value);
-                                        }
-                                    }
-                                }
-                            },
                             _ => {
                                 println!("Unsupported field type: {}", quote!(#field_type));
-                                panic!("Unsupported field type for getter/setter");
+                                panic!("Unsupported field type for getter/setter, {}", quote!(#field_type));
                             }
                         }
                     });
@@ -307,20 +326,23 @@ pub fn component(input: TokenStream) -> TokenStream {
                     .clone()
                     .zip(field_types.clone())
                     .map(|(field_name, field_type)| {
-                        let field_type_str = format!("{}", quote!(#field_type));
-                        match field_type_str.as_str() {
-                            "Pointer" | "* mut c_void" | "U32Array" | "F32Array" => {
-                                quote! {
-                                    #[serde(skip)]
-                                    pub #field_name: i64,
-                                }
-                            },
-                            _ => {
-                                quote! {
-                                    pub #field_name: #field_type,
-                                }
-                            }
+                        quote! {
+                            pub #field_name: #field_type,
                         }
+                        // let field_type_str = format!("{}", quote!(#field_type));
+                        // match field_type_str.as_str() {
+                        //     "Pointer" | "* mut c_void" | "F32Array" => {
+                        //         quote! {
+                        //             #[serde(skip)]
+                        //             pub #field_name: i64,
+                        //         }
+                        //     },
+                        //     _ => {
+                        //         quote! {
+                        //             pub #field_name: #field_type,
+                        //         }
+                        //     }
+                        // }
                     });
 
             let default_body =
@@ -345,14 +367,9 @@ pub fn component(input: TokenStream) -> TokenStream {
                     }
                 }
             };
-
+            
+            // Create the struct name string.
             let struct_name_str = name.to_string();
-            // let type_hash = fnv1a_hash_str(&struct_name_str);
-            // let type_hash_fn = quote! {
-            //     fn get_hash() -> u64 {
-            //         #type_hash
-            //     }
-            // };
 
             // Create the register component tokens.
             let field_names_str = field_names.clone().map(|f| f.clone().unwrap().to_string());
@@ -398,34 +415,16 @@ pub fn component(input: TokenStream) -> TokenStream {
                 }
 
                 impl ComponentType for #name {
-                    // // Static methods
+                    // Static methods
                     #register_fn
-                    // #type_hash_fn
                     #type_name_fn
                     #type_get_id_fn
                 }
 
                 impl Component for #name {
-                    // Object compatible trait methods
-                    // fn get_id(&self) -> u64 {
-                    //     combine_u32(unsafe { &self.component.lookup(toxoid_make_c_string(#type_name)) }) 
-                    // }
-
                     fn set_ptr(&mut self, ptr: *mut ToxoidComponent) {
                         self.ptr = ptr;
                     }
-
-                    // fn get_ptr(&self) -> *mut core::ffi::c_void {
-                    //     self.ptr
-                    // }
-
-                    // fn set_singleton(&mut self, singleton: bool) {
-                    //     self.singleton = singleton;
-                    // }
-
-                    // fn get_singleton(&self) -> bool {
-                    //     self.singleton
-                    // }
                 }
             }
             
@@ -451,27 +450,52 @@ fn get_type_code(ty: &Type) -> u8 {
         Type::Path(tp) if tp.path.is_ident("f64") => FieldType::F64 as u8,
         Type::Path(tp) if tp.path.is_ident("bool") => FieldType::Bool as u8,
         Type::Path(tp) if tp.path.is_ident("String") => FieldType::String as u8,
-        Type::Path(tp) if tp.path.is_ident("U32Array") => FieldType::U32Array as u8,
-        Type::Path(tp) if tp.path.is_ident("F32Array") => FieldType::U32Array as u8,
-        Type::Path(tp) if tp.path.is_ident("Pointer") => FieldType::Pointer as u8,
-        Type::Path(tp) if tp.path.is_ident("StringPtr") => FieldType::String as u8,
-        Type::Ptr(ptr) => {
-            match *ptr.elem {
-                Type::Path(ref tp) if tp.path.is_ident("u32") => {
-                    FieldType::U32Array as u8
-                },
-                Type::Path(ref tp) if tp.path.is_ident("f32") => {
-                    FieldType::F32Array as u8
-                },
-                Type::Path(ref tp) if tp.path.is_ident("c_void") => {
-                    FieldType::Pointer as u8
+        Type::Path(tp) if tp.path.is_ident("Vec<u32>") => FieldType::Pointer as u8,
+        Type::Path(tp) if tp.path.is_ident("Vec<u64>") => FieldType::Pointer as u8,
+        Type::Path(tp) if tp.path.is_ident("Vec<f32>") => FieldType::Pointer as u8,
+        Type::Path(tp) => {
+            let segment = match tp.path.segments.last() {
+                Some(seg) => seg,
+                None => {
+                    println!("Invalid type path: {}", quote!(#ty));
+                    panic!("Unsupported type code");
+                }
+            };
+        
+            // If it's not a Vec, we don't need to process further
+            if segment.ident != "Vec" {
+                println!("Unexpected type: {}", quote!(#ty));
+                panic!("Unsupported type code");
+            }
+        
+            // Get the generic type argument
+            let inner_type = match &segment.arguments {
+                syn::PathArguments::AngleBracketed(args) => {
+                    match args.args.first() {
+                        Some(syn::GenericArgument::Type(Type::Path(inner_ty))) => inner_ty,
+                        _ => {
+                            println!("Invalid Vec generic argument: {}", quote!(#ty));
+                            panic!("Unsupported type code");
+                        }
+                    }
                 },
                 _ => {
-                    println!("Unsupported pointer type code: {}", quote!(#ptr));
-                    panic!("Unsupported type code")
+                    println!("Invalid Vec arguments: {}", quote!(#ty));
+                    panic!("Unsupported type code");
                 }
+            };
+        
+            // Check if the inner type is supported
+            if inner_type.path.is_ident("u64") || 
+               inner_type.path.is_ident("u32") || 
+               inner_type.path.is_ident("f32") {
+                return FieldType::Pointer as u8;
             }
+        
+            println!("Unsupported Vec type: {}", quote!(#ty));
+            panic!("Unsupported type code");
         }
+        Type::Ptr(_) => FieldType::Pointer as u8,
         _ => {
             println!("Unsupported type: {}", quote!(#ty));
             panic!("Unsupported type code")
@@ -493,26 +517,51 @@ fn get_type_size(ty: &Type) -> u32 {
         Type::Path(tp) if tp.path.is_ident("f64") => 8,
         Type::Path(tp) if tp.path.is_ident("bool") => 1,
         Type::Path(tp) if tp.path.is_ident("String") => 8,
-        Type::Path(tp) if tp.path.is_ident("U32Array") => 8,
-        Type::Path(tp) if tp.path.is_ident("F32Array") => 8,
-        Type::Path(tp) if tp.path.is_ident("Pointer") => 8,
-        Type::Path(tp) if tp.path.is_ident("StringPtr") => 8,
-        Type::Ptr(ptr) => {
-            match *ptr.elem {
-                Type::Path(ref tp) if tp.path.is_ident("u32") => {
-                    8
-                },
-                Type::Path(ref tp) if tp.path.is_ident("f32") => {
-                    8
-                },
-                Type::Path(ref tp) if tp.path.is_ident("c_void") => {
-                    8
+        Type::Path(tp) if tp.path.is_ident("Vec<u32>") => 8,
+        Type::Path(tp) if tp.path.is_ident("Vec<u64>") => 8,
+        Type::Path(tp) if tp.path.is_ident("Vec<f32>") => 8,
+        Type::Ptr(_) => 8,
+        Type::Path(tp) => {
+            let segment = match tp.path.segments.last() {
+                Some(seg) => seg,
+                None => {
+                    println!("Invalid type path: {}", quote!(#ty));
+                    panic!("Unsupported type code");
+                }
+            };
+        
+            // If it's not a Vec, we don't need to process further
+            if segment.ident != "Vec" {
+                println!("Unexpected type: {}", quote!(#ty));
+                panic!("Unsupported type code");
+            }
+        
+            // Get the generic type argument
+            let inner_type = match &segment.arguments {
+                syn::PathArguments::AngleBracketed(args) => {
+                    match args.args.first() {
+                        Some(syn::GenericArgument::Type(Type::Path(inner_ty))) => inner_ty,
+                        _ => {
+                            println!("Invalid Vec generic argument: {}", quote!(#ty));
+                            panic!("Unsupported type code");
+                        }
+                    }
                 },
                 _ => {
-                    println!("Unsupported pointer field type: {}", quote!(#ptr));
-                    panic!("Unsupported field type")
+                    println!("Invalid Vec arguments: {}", quote!(#ty));
+                    panic!("Unsupported type code");
                 }
+            };
+        
+            // Check if the inner type is supported
+            if inner_type.path.is_ident("u64") || 
+               inner_type.path.is_ident("u32") || 
+               inner_type.path.is_ident("f32") {
+                return 8;
             }
+        
+            println!("Unsupported Vec type: {}", quote!(#ty));
+            panic!("Unsupported type code");
         }
         _ => {
             println!("Unsupported field type: {}", quote!(#ty));
@@ -535,11 +584,52 @@ fn get_type_alignment(ty: &Type) -> u32 {
         Type::Path(tp) if tp.path.is_ident("f64") => 8,
         Type::Path(tp) if tp.path.is_ident("bool") => 1,
         Type::Path(tp) if tp.path.is_ident("String") => 8, // Assuming String is a pointer
-        Type::Path(tp) if tp.path.is_ident("U32Array") => 8, // Assuming U32Array is a pointer
-        Type::Path(tp) if tp.path.is_ident("F32Array") => 8, // Assuming F32Array is a pointer
-        Type::Path(tp) if tp.path.is_ident("Pointer") => 8, // Assuming Pointer is a pointer
-        Type::Path(tp) if tp.path.is_ident("StringPtr") => 8, // Assuming StringPtr is a pointer
+        Type::Path(tp) if tp.path.is_ident("Vec<u32>") => 8, // Assuming Vec<u32> is a pointer
+        Type::Path(tp) if tp.path.is_ident("Vec<u64>") => 8, // Assuming Vec<u64> is a pointer
+        Type::Path(tp) if tp.path.is_ident("Vec<f32>") => 8, // Assuming Vec<f32> is a pointer
         Type::Ptr(_) => 8, // Pointers are 8 bytes in a 64-bit context
+        Type::Path(tp) => {
+            let segment = match tp.path.segments.last() {
+                Some(seg) => seg,
+                None => {
+                    println!("Invalid type path: {}", quote!(#ty));
+                    panic!("Unsupported type code");
+                }
+            };
+        
+            // If it's not a Vec, we don't need to process further
+            if segment.ident != "Vec" {
+                println!("Unexpected type: {}", quote!(#ty));
+                panic!("Unsupported type code");
+            }
+        
+            // Get the generic type argument
+            let inner_type = match &segment.arguments {
+                syn::PathArguments::AngleBracketed(args) => {
+                    match args.args.first() {
+                        Some(syn::GenericArgument::Type(Type::Path(inner_ty))) => inner_ty,
+                        _ => {
+                            println!("Invalid Vec generic argument: {}", quote!(#ty));
+                            panic!("Unsupported type code");
+                        }
+                    }
+                },
+                _ => {
+                    println!("Invalid Vec arguments: {}", quote!(#ty));
+                    panic!("Unsupported type code");
+                }
+            };
+        
+            // Check if the inner type is supported
+            if inner_type.path.is_ident("u64") || 
+               inner_type.path.is_ident("u32") || 
+               inner_type.path.is_ident("f32") {
+                return 8;
+            }
+        
+            println!("Unsupported Vec type: {}", quote!(#ty));
+            panic!("Unsupported type code");
+        }
         _ => {
             println!("Unsupported field type: {}", quote!(#ty));
             panic!("Unsupported field type")

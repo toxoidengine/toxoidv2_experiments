@@ -44,7 +44,7 @@ component! {
         foo: bool
     },
     Tail {
-        foo: bool
+        entities: Vec::<u64>
     },
     Rect {
         foo: bool

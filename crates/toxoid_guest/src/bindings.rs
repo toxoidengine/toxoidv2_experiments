@@ -9,6 +9,8 @@ pub trait Guest {
 }
 #[doc(hidden)]
 #[macro_export]
+#[macro_export]
+#[macro_export]
 macro_rules! __export_world_toxoid_component_world_cabi {
     ($ty:ident with_types_in $($path_to_types:tt)*) => {
         const _ : () = { #[export_name = "init"] unsafe extern "C" fn export_init() {
@@ -1095,7 +1097,7 @@ pub mod toxoid_component {
             }
             impl Component {
                 #[allow(unused_unsafe, clippy::all)]
-                pub fn set_member_u32array(&self, offset: u32, value: &[u32]) {
+                pub fn set_member_u32list(&self, offset: u32, value: &[u32]) {
                     unsafe {
                         let vec0 = value;
                         let ptr0 = vec0.as_ptr().cast::<u8>();
@@ -1103,7 +1105,7 @@ pub mod toxoid_component {
                         #[cfg(target_arch = "wasm32")]
                         #[link(wasm_import_module = "toxoid-component:component/ecs")]
                         extern "C" {
-                            #[link_name = "[method]component.set-member-u32array"]
+                            #[link_name = "[method]component.set-member-u32list"]
                             fn wit_import(_: i32, _: i32, _: *mut u8, _: usize);
                         }
                         #[cfg(not(target_arch = "wasm32"))]
@@ -1121,7 +1123,7 @@ pub mod toxoid_component {
             }
             impl Component {
                 #[allow(unused_unsafe, clippy::all)]
-                pub fn get_member_u32array(&self, offset: u32) -> _rt::Vec<u32> {
+                pub fn get_member_u32list(&self, offset: u32) -> _rt::Vec<u32> {
                     unsafe {
                         #[repr(align(4))]
                         struct RetArea([::core::mem::MaybeUninit<u8>; 8]);
@@ -1132,7 +1134,7 @@ pub mod toxoid_component {
                         #[cfg(target_arch = "wasm32")]
                         #[link(wasm_import_module = "toxoid-component:component/ecs")]
                         extern "C" {
-                            #[link_name = "[method]component.get-member-u32array"]
+                            #[link_name = "[method]component.get-member-u32list"]
                             fn wit_import(_: i32, _: i32, _: *mut u8);
                         }
                         #[cfg(not(target_arch = "wasm32"))]
@@ -1149,7 +1151,7 @@ pub mod toxoid_component {
             }
             impl Component {
                 #[allow(unused_unsafe, clippy::all)]
-                pub fn set_member_f32array(&self, offset: u32, value: &[f32]) {
+                pub fn set_member_u64list(&self, offset: u32, value: &[u64]) {
                     unsafe {
                         let vec0 = value;
                         let ptr0 = vec0.as_ptr().cast::<u8>();
@@ -1157,7 +1159,7 @@ pub mod toxoid_component {
                         #[cfg(target_arch = "wasm32")]
                         #[link(wasm_import_module = "toxoid-component:component/ecs")]
                         extern "C" {
-                            #[link_name = "[method]component.set-member-f32array"]
+                            #[link_name = "[method]component.set-member-u64list"]
                             fn wit_import(_: i32, _: i32, _: *mut u8, _: usize);
                         }
                         #[cfg(not(target_arch = "wasm32"))]
@@ -1175,7 +1177,7 @@ pub mod toxoid_component {
             }
             impl Component {
                 #[allow(unused_unsafe, clippy::all)]
-                pub fn get_member_f32array(&self, offset: u32) -> _rt::Vec<f32> {
+                pub fn get_member_u64list(&self, offset: u32) -> _rt::Vec<u64> {
                     unsafe {
                         #[repr(align(4))]
                         struct RetArea([::core::mem::MaybeUninit<u8>; 8]);
@@ -1186,7 +1188,61 @@ pub mod toxoid_component {
                         #[cfg(target_arch = "wasm32")]
                         #[link(wasm_import_module = "toxoid-component:component/ecs")]
                         extern "C" {
-                            #[link_name = "[method]component.get-member-f32array"]
+                            #[link_name = "[method]component.get-member-u64list"]
+                            fn wit_import(_: i32, _: i32, _: *mut u8);
+                        }
+                        #[cfg(not(target_arch = "wasm32"))]
+                        fn wit_import(_: i32, _: i32, _: *mut u8) {
+                            unreachable!()
+                        }
+                        wit_import((self).handle() as i32, _rt::as_i32(&offset), ptr0);
+                        let l1 = *ptr0.add(0).cast::<*mut u8>();
+                        let l2 = *ptr0.add(4).cast::<usize>();
+                        let len3 = l2;
+                        _rt::Vec::from_raw_parts(l1.cast(), len3, len3)
+                    }
+                }
+            }
+            impl Component {
+                #[allow(unused_unsafe, clippy::all)]
+                pub fn set_member_f32list(&self, offset: u32, value: &[f32]) {
+                    unsafe {
+                        let vec0 = value;
+                        let ptr0 = vec0.as_ptr().cast::<u8>();
+                        let len0 = vec0.len();
+                        #[cfg(target_arch = "wasm32")]
+                        #[link(wasm_import_module = "toxoid-component:component/ecs")]
+                        extern "C" {
+                            #[link_name = "[method]component.set-member-f32list"]
+                            fn wit_import(_: i32, _: i32, _: *mut u8, _: usize);
+                        }
+                        #[cfg(not(target_arch = "wasm32"))]
+                        fn wit_import(_: i32, _: i32, _: *mut u8, _: usize) {
+                            unreachable!()
+                        }
+                        wit_import(
+                            (self).handle() as i32,
+                            _rt::as_i32(&offset),
+                            ptr0.cast_mut(),
+                            len0,
+                        );
+                    }
+                }
+            }
+            impl Component {
+                #[allow(unused_unsafe, clippy::all)]
+                pub fn get_member_f32list(&self, offset: u32) -> _rt::Vec<f32> {
+                    unsafe {
+                        #[repr(align(4))]
+                        struct RetArea([::core::mem::MaybeUninit<u8>; 8]);
+                        let mut ret_area = RetArea(
+                            [::core::mem::MaybeUninit::uninit(); 8],
+                        );
+                        let ptr0 = ret_area.0.as_mut_ptr().cast::<u8>();
+                        #[cfg(target_arch = "wasm32")]
+                        #[link(wasm_import_module = "toxoid-component:component/ecs")]
+                        extern "C" {
+                            #[link_name = "[method]component.get-member-f32list"]
                             fn wit_import(_: i32, _: i32, _: *mut u8);
                         }
                         #[cfg(not(target_arch = "wasm32"))]
@@ -1812,6 +1868,8 @@ pub mod exports {
                 }
                 #[doc(hidden)]
                 #[macro_export]
+#[macro_export]
+#[macro_export]
 macro_rules! __export_toxoid_component_component_callbacks_cabi {
                     ($ty:ident with_types_in $($path_to_types:tt)*) => {
                         const _ : () = { #[export_name =
@@ -2087,9 +2145,9 @@ pub use __export_toxoid_component_world_impl as export;
 #[cfg(target_arch = "wasm32")]
 #[link_section = "component-type:wit-bindgen:0.35.0:toxoid-component:component:toxoid-component-world:encoded world"]
 #[doc(hidden)]
-pub static __WIT_BINDGEN_COMPONENT_TYPE: [u8; 3564] = *b"\
-\0asm\x0d\0\x01\0\0\x19\x16wit-component-encoding\x04\0\x07\xdf\x1a\x01A\x02\x01\
-A\x07\x01B\x96\x01\x01w\x04\0\x0cecs-entity-t\x03\0\0\x01m\x10\x04u8-t\x05u16-t\x05\
+pub static __WIT_BINDGEN_COMPONENT_TYPE: [u8; 3693] = *b"\
+\0asm\x0d\0\x01\0\0\x19\x16wit-component-encoding\x04\0\x07\xe0\x1b\x01A\x02\x01\
+A\x07\x01B\x9b\x01\x01w\x04\0\x0cecs-entity-t\x03\0\0\x01m\x10\x04u8-t\x05u16-t\x05\
 u32-t\x05u64-t\x04i8-t\x05i16-t\x05i32-t\x05i64-t\x05f32-t\x05f64-t\x06bool-t\x08\
 string-t\x07array-t\x0au32array-t\x0af32array-t\x09pointer-t\x04\0\x0bmember-typ\
 e\x03\0\x02\x01ps\x01p}\x01r\x03\x04names\x0cmember-names\x04\x0cmember-types\x05\
@@ -2128,37 +2186,40 @@ ethod]component.get-member-f64\x012\x01@\x03\x04self\x1e\x06offsety\x05value\x7f
 ety\0\x7f\x04\0![method]component.get-member-bool\x014\x01@\x03\x04self\x1e\x06o\
 ffsety\x05values\x01\0\x04\0#[method]component.set-member-string\x015\x01@\x02\x04\
 self\x1e\x06offsety\0s\x04\0#[method]component.get-member-string\x016\x01py\x01@\
-\x03\x04self\x1e\x06offsety\x05value7\x01\0\x04\0%[method]component.set-member-u\
-32array\x018\x01@\x02\x04self\x1e\x06offsety\07\x04\0%[method]component.get-memb\
-er-u32array\x019\x01pv\x01@\x03\x04self\x1e\x06offsety\x05value:\x01\0\x04\0%[me\
-thod]component.set-member-f32array\x01;\x01@\x02\x04self\x1e\x06offsety\0:\x04\0\
-%[method]component.get-member-f32array\x01<\x01i\x0f\x01@\x01\x04init\x0a\0=\x04\
-\0\x13[constructor]entity\x01>\x01@\x01\x02idw\0=\x04\0\x16[static]entity.from-i\
-d\x01?\x01h\x0f\x01@\x01\x04self\xc0\0\0\x01\x04\0\x15[method]entity.get-id\x01A\
-\x01@\x02\x04self\xc0\0\x09component\x01\0\x1c\x04\0\x12[method]entity.get\x01B\x01\
-@\x02\x04self\xc0\0\x09component\x01\x01\0\x04\0\x12[method]entity.add\x01C\x01i\
-\x10\x01@\x01\x04desc\x0c\0\xc4\0\x04\0\x12[constructor]query\x01E\x01h\x10\x01@\
-\x02\x04self\xc6\0\x04exprs\x01\0\x04\0\x12[method]query.expr\x01G\x01@\x01\x04s\
-elf\xc6\0\x01\0\x04\0\x13[method]query.build\x01H\x04\0\x12[method]query.iter\x01\
-H\x01@\x01\x04self\xc6\0\0\x7f\x04\0\x12[method]query.next\x01I\x01@\x01\x04self\
-\xc6\0\0z\x04\0\x13[method]query.count\x01J\x01p=\x01@\x01\x04self\xc6\0\0\xcb\0\
-\x04\0\x16[method]query.entities\x01L\x01@\x01\x06handlex\0\x13\x04\0\x15[constr\
-uctor]callback\x01M\x01h\x11\x01i\x17\x01@\x02\x04self\xce\0\x04iter\xcf\0\x01\0\
-\x04\0\x14[method]callback.run\x01P\x01@\x01\x04self\xce\0\0x\x04\0\x1a[method]c\
-allback.cb-handle\x01Q\x01i\x16\x01@\x01\x04desc\x15\0\xd2\0\x04\0\x13[construct\
-or]system\x01S\x01h\x16\x01@\x01\x04self\xd4\0\x01\0\x04\0\x14[method]system.bui\
-ld\x01U\x01@\x01\x04self\xd4\0\0\x13\x04\0\x17[method]system.callback\x01V\x01@\x01\
-\x03ptrx\0\xcf\0\x04\0\x11[constructor]iter\x01W\x01h\x17\x01@\x01\x04self\xd8\0\
-\0\x7f\x04\0\x11[method]iter.next\x01Y\x01@\x01\x04self\xd8\0\0z\x04\0\x12[metho\
-d]iter.count\x01Z\x01@\x01\x04self\xd8\0\0\xcb\0\x04\0\x15[method]iter.entities\x01\
-[\x01@\x01\x09component\x01\x01\0\x04\0\x0dadd-singleton\x01\\\x01@\x01\x09compo\
-nent\x01\0\x1c\x04\0\x0dget-singleton\x01]\x04\0\x10remove-singleton\x01\\\x03\0\
-\x1etoxoid-component:component/ecs\x05\0\x01@\0\x01\0\x04\0\x04init\x01\x01\x02\x03\
-\0\0\x04iter\x01B\x05\x02\x03\x02\x01\x02\x04\0\x04iter\x03\0\0\x01i\x01\x01@\x02\
-\x04iter\x02\x06handlex\x01\0\x04\0\x03run\x01\x03\x04\0$toxoid-component:compon\
-ent/callbacks\x05\x03\x04\01toxoid-component:component/toxoid-component-world\x04\
-\0\x0b\x1c\x01\0\x16toxoid-component-world\x03\0\0\0G\x09producers\x01\x0cproces\
-sed-by\x02\x0dwit-component\x070.220.0\x10wit-bindgen-rust\x060.35.0";
+\x03\x04self\x1e\x06offsety\x05value7\x01\0\x04\0$[method]component.set-member-u\
+32list\x018\x01@\x02\x04self\x1e\x06offsety\07\x04\0$[method]component.get-membe\
+r-u32list\x019\x01pw\x01@\x03\x04self\x1e\x06offsety\x05value:\x01\0\x04\0$[meth\
+od]component.set-member-u64list\x01;\x01@\x02\x04self\x1e\x06offsety\0:\x04\0$[m\
+ethod]component.get-member-u64list\x01<\x01pv\x01@\x03\x04self\x1e\x06offsety\x05\
+value=\x01\0\x04\0$[method]component.set-member-f32list\x01>\x01@\x02\x04self\x1e\
+\x06offsety\0=\x04\0$[method]component.get-member-f32list\x01?\x01i\x0f\x01@\x01\
+\x04init\x0a\0\xc0\0\x04\0\x13[constructor]entity\x01A\x01@\x01\x02idw\0\xc0\0\x04\
+\0\x16[static]entity.from-id\x01B\x01h\x0f\x01@\x01\x04self\xc3\0\0\x01\x04\0\x15\
+[method]entity.get-id\x01D\x01@\x02\x04self\xc3\0\x09component\x01\0\x1c\x04\0\x12\
+[method]entity.get\x01E\x01@\x02\x04self\xc3\0\x09component\x01\x01\0\x04\0\x12[\
+method]entity.add\x01F\x01i\x10\x01@\x01\x04desc\x0c\0\xc7\0\x04\0\x12[construct\
+or]query\x01H\x01h\x10\x01@\x02\x04self\xc9\0\x04exprs\x01\0\x04\0\x12[method]qu\
+ery.expr\x01J\x01@\x01\x04self\xc9\0\x01\0\x04\0\x13[method]query.build\x01K\x04\
+\0\x12[method]query.iter\x01K\x01@\x01\x04self\xc9\0\0\x7f\x04\0\x12[method]quer\
+y.next\x01L\x01@\x01\x04self\xc9\0\0z\x04\0\x13[method]query.count\x01M\x01p\xc0\
+\0\x01@\x01\x04self\xc9\0\0\xce\0\x04\0\x16[method]query.entities\x01O\x01@\x01\x06\
+handlex\0\x13\x04\0\x15[constructor]callback\x01P\x01h\x11\x01i\x17\x01@\x02\x04\
+self\xd1\0\x04iter\xd2\0\x01\0\x04\0\x14[method]callback.run\x01S\x01@\x01\x04se\
+lf\xd1\0\0x\x04\0\x1a[method]callback.cb-handle\x01T\x01i\x16\x01@\x01\x04desc\x15\
+\0\xd5\0\x04\0\x13[constructor]system\x01V\x01h\x16\x01@\x01\x04self\xd7\0\x01\0\
+\x04\0\x14[method]system.build\x01X\x01@\x01\x04self\xd7\0\0\x13\x04\0\x17[metho\
+d]system.callback\x01Y\x01@\x01\x03ptrx\0\xd2\0\x04\0\x11[constructor]iter\x01Z\x01\
+h\x17\x01@\x01\x04self\xdb\0\0\x7f\x04\0\x11[method]iter.next\x01\\\x01@\x01\x04\
+self\xdb\0\0z\x04\0\x12[method]iter.count\x01]\x01@\x01\x04self\xdb\0\0\xce\0\x04\
+\0\x15[method]iter.entities\x01^\x01@\x01\x09component\x01\x01\0\x04\0\x0dadd-si\
+ngleton\x01_\x01@\x01\x09component\x01\0\x1c\x04\0\x0dget-singleton\x01`\x04\0\x10\
+remove-singleton\x01_\x03\0\x1etoxoid-component:component/ecs\x05\0\x01@\0\x01\0\
+\x04\0\x04init\x01\x01\x02\x03\0\0\x04iter\x01B\x05\x02\x03\x02\x01\x02\x04\0\x04\
+iter\x03\0\0\x01i\x01\x01@\x02\x04iter\x02\x06handlex\x01\0\x04\0\x03run\x01\x03\
+\x04\0$toxoid-component:component/callbacks\x05\x03\x04\01toxoid-component:compo\
+nent/toxoid-component-world\x04\0\x0b\x1c\x01\0\x16toxoid-component-world\x03\0\0\
+\0G\x09producers\x01\x0cprocessed-by\x02\x0dwit-component\x070.220.0\x10wit-bind\
+gen-rust\x060.35.0";
 #[inline(never)]
 #[doc(hidden)]
 pub fn __link_custom_section_describing_imports() {

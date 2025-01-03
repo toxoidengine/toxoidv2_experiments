@@ -67,8 +67,9 @@ enum FieldType {
     F64,
     Bool,
     String,
-    U32Array,
-    F32Array,
+    U32List,
+    U64List,
+    F32List,
     Pointer
 }
 
@@ -376,14 +377,14 @@ impl GuestComponent for Component {
         }
     }
 
-    fn set_member_u32array(&self, offset: u32, value: Vec<u32>) {
+    fn set_member_u32list(&self, offset: u32, value: Vec<u32>) {
         unsafe {
             let member_ptr = self.ptr.offset(offset as isize) as *mut Vec<u32>;
             *member_ptr = value;
         }
     }
 
-    fn get_member_u32array(&self, offset: u32) -> Vec<u32> {
+    fn get_member_u32list(&self, offset: u32) -> Vec<u32> {
         unsafe {
             let member_ptr = self.ptr.offset(offset as isize) as *mut Vec<u32>;
             let member_value: Vec<u32> = (*member_ptr).clone();
@@ -391,14 +392,29 @@ impl GuestComponent for Component {
         }
     }   
 
-    fn set_member_f32array(&self, offset: u32, value: Vec<f32>) {
+    fn set_member_u64list(&self, offset: u32, value: Vec<u64>) {
+        unsafe {
+            let member_ptr = self.ptr.offset(offset as isize) as *mut Vec<u64>;
+            *member_ptr = value;
+        }
+    }
+
+    fn get_member_u64list(&self, offset: u32) -> Vec<u64> {
+        unsafe {
+            let member_ptr = self.ptr.offset(offset as isize) as *mut Vec<u64>;
+            let member_value: Vec<u64> = (*member_ptr).clone();
+            member_value
+        }
+    }
+
+    fn set_member_f32list(&self, offset: u32, value: Vec<f32>) {
         unsafe {
             let member_ptr = self.ptr.offset(offset as isize) as *mut Vec<f32>;
             *member_ptr = value;
         }
     }
 
-    fn get_member_f32array(&self, offset: u32) -> Vec<f32> {
+    fn get_member_f32list(&self, offset: u32) -> Vec<f32> {
         unsafe {
             let member_ptr = self.ptr.offset(offset as isize) as *mut Vec<f32>;
             let member_value: Vec<f32> = (*member_ptr).clone();
