@@ -7,7 +7,7 @@ mod watch;
 
 pub fn init() {
     toxoid_api::components::init();
-    // entities::init();
+    entities::init();
     systems::init();
     watch::init();
     renderer::init();

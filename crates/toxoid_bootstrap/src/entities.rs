@@ -2,31 +2,42 @@ use toxoid_api::*;
 use toxoid_api::components::*;
 
 pub fn create_snake() {
-    let mut snake_head = Entity::new(Some(EntityDesc {
+    let mut snake = Entity::new(Some(EntityDesc {
         name: Some("Snake Head".to_string())
     }));
-    snake_head.add::<Position>();
-    snake_head.add::<Size>();
-    snake_head.add::<Color>();
-    snake_head.add::<Head>();
-    snake_head.add::<Player>();
-    snake_head.add::<Renderable>();
+    snake.add::<Position>();
+    snake.add::<Size>();
+    snake.add::<Color>();
+    snake.add::<Head>();
+    snake.add::<Tail>();
+    snake.add::<Player>();
+    snake.add::<Renderable>();
 
     World::add_singleton::<Direction>();
 
-    let mut pos = snake_head.get::<Position>();
+    let mut pos = snake.get::<Position>();
     pos.set_x(0);
     pos.set_y(0);
 
-    let mut size = snake_head.get::<Size>();
+    let mut size = snake.get::<Size>();
     size.set_width(50);
     size.set_height(50);
 
-    let mut color = snake_head.get::<Color>();
+    let mut color = snake.get::<Color>();
     color.set_r(0.0);
     color.set_g(1.0);
     color.set_b(0.0);
     color.set_a(1.0);
+
+    let mut tail = snake.get::<Tail>();
+    tail.set_entities(vec![]);
+    // let mut entities_vec = tail.get_entities();
+    // entities_vec.push(0);
+    // entities_vec.push(1);
+    // entities_vec.push(2);
+    // entities_vec.push(3);
+    // entities_vec.push(420);
+    // tail.set_entities(entities_vec);
 }
 
 pub fn create_food() {
@@ -52,4 +63,9 @@ pub fn create_food() {
     color.set_g(0.0);
     color.set_b(0.0);
     color.set_a(1.0);
+}
+
+pub fn init() {
+    create_snake();
+    create_food();
 }

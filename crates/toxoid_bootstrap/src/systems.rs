@@ -16,9 +16,6 @@ pub fn init() {
         toxoid_host::QUERY_TRAMPOLINE = Some(toxoid_runtime::query_trampoline);
     }
 
-    entities::create_snake();
-    entities::create_food();
-
     // Movement System
     System::dsl("Head, Player, Position", Some(10), |iter| {
         iter.entities().iter_mut().for_each(|entity| {
