@@ -5,6 +5,7 @@ pub mod bindings;
 use bindings::exports::toxoid::engine::ecs::{EcsEntityT, GuestIter};
 use bindings::exports::toxoid::engine::ecs::{self, ComponentDesc, EntityDesc, Guest, GuestCallback, GuestComponent, GuestComponentType, GuestEntity, GuestQuery, GuestSystem, QueryDesc, SystemDesc};
 pub use toxoid_flecs::bindings::{ecs_add_id, ecs_entity_desc_t, ecs_entity_init, ecs_fini, ecs_get_mut_id, ecs_init, ecs_iter_t, ecs_lookup, ecs_make_pair, ecs_member_t, ecs_progress, ecs_query_desc_t, ecs_query_init, ecs_query_iter, ecs_query_next, ecs_query_t, ecs_struct_desc_t, ecs_struct_init, ecs_system_desc_t, ecs_system_init, ecs_system_t, ecs_world_t, EcsDependsOn, EcsOnUpdate, ecs_set_rate, ecs_get_id, ecs_remove_id};
+use toxoid_flecs::{ecs_delete, ecs_ensure_id};
 use std::{borrow::BorrowMut, mem::MaybeUninit};
 use core::ffi::c_void;
 use core::ffi::c_char;
@@ -118,19 +119,6 @@ fn c_string(rust_str: &str) -> *const i8 {
     std::mem::forget(c_string); // Prevent CString from being deallocated
     c_ptr
 }
-
-// Constants for FNV-1a hashing
-const FNV_PRIME: u64 = 1099511628211;
-const OFFSET_BASIS: u64 = 14695981039346656037;
-
-// Function to compute FNV-1a hash of a string
-fn fnv1a_hash_str(s: &str) -> u64 {
-    s.bytes().fold(OFFSET_BASIS, |hash, byte| {
-        (hash ^ (byte as u64)).wrapping_mul(FNV_PRIME)
-    })
-}
-
-// pub static mut COMPONENT_CACHE: Lazy<HashMap<u64, Component>> = Lazy::new(|| HashMap::new());
 
 impl GuestComponentType for ComponentType {
     fn new(desc: ComponentDesc) -> ComponentType {
@@ -441,7 +429,15 @@ impl GuestEntity for Entity {
 
     fn add(&self, component: ecs_entity_t) {
         unsafe {
+            // println!("Adding component {:?} to entity {:?}", component, self.id);
+            // ecs_emplace_id(WORLD.0, self.id, component, &mut true as *mut bool);
             ecs_add_id(WORLD.0, self.id, component);
+        }
+    }
+
+    fn remove(&self, component: ecs_entity_t) {
+        unsafe {
+            ecs_remove_id(WORLD.0, self.id, component);
         }
     }
 
@@ -451,7 +447,8 @@ impl GuestEntity for Entity {
 
     fn get(&self, component: ecs_entity_t) -> i64 {
         unsafe {
-            ecs_get_mut_id(WORLD.0, self.id, component) as i64
+            // println!("Getting component {:?} from entity {:?}", component, self.id);
+            ecs_ensure_id(WORLD.0, self.id, component) as i64
         }
     }
 }
@@ -616,5 +613,13 @@ impl Guest for ToxoidApi {
 
     fn remove_singleton(component: ecs_entity_t) {
         unsafe { ecs_remove_id(WORLD.0, component, component) };
+    }
+
+    fn add_entity(entity: ecs_entity_t) {
+        unsafe { ecs_add_id(WORLD.0, entity, entity) };
+    }
+
+    fn remove_entity(entity: ecs_entity_t) {
+        unsafe { ecs_delete(WORLD.0, entity); }
     }
 }

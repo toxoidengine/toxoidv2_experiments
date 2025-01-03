@@ -96,6 +96,14 @@ impl toxoid_component::component::ecs::Host for StoreState {
             SINGLETON_MAP.remove(&component);
         }
     }
+
+    fn add_entity(&mut self, entity: toxoid_component::component::ecs::EcsEntityT) {
+        ToxoidApi::add_entity(entity);
+    }
+
+    fn remove_entity(&mut self, entity: toxoid_component::component::ecs::EcsEntityT) {
+        ToxoidApi::remove_entity(entity);
+    }
 }
 
 impl toxoid_component::component::ecs::HostIter for StoreState {
@@ -282,6 +290,13 @@ impl toxoid_component::component::ecs::HostEntity for StoreState {
         let entity_proxy = self.table.get(&entity).unwrap() as &EntityProxy;
         let entity = unsafe { Box::from_raw(entity_proxy.ptr) };
         entity.add(component);
+        Box::into_raw(entity);
+    }
+
+    fn remove(&mut self, entity: Resource<toxoid_component::component::ecs::Entity>, component: toxoid_component::component::ecs::EcsEntityT) -> () {
+        let entity_proxy = self.table.get(&entity).unwrap() as &EntityProxy;
+        let entity = unsafe { Box::from_raw(entity_proxy.ptr) };
+        entity.remove(component);
         Box::into_raw(entity);
     }
 

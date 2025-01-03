@@ -83,7 +83,7 @@ interface ecs {
         get-id: func() -> ecs-entity-t;
         get: func(component: ecs-entity-t) -> component;
         add: func(component: ecs-entity-t);
-        // remove: func(component: ecs-entity-t);
+        remove: func(component: ecs-entity-t);
     }
 
     resource query {
@@ -127,6 +127,8 @@ interface ecs {
     add-singleton: func(component: ecs-entity-t);
     get-singleton: func(component: ecs-entity-t) -> component;
     remove-singleton: func(component: ecs-entity-t);
+    add-entity: func(entity: ecs-entity-t);
+    remove-entity: func(entity: ecs-entity-t);
 }
 
 interface callbacks {

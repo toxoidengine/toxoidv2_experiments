@@ -87,7 +87,7 @@ interface ecs {
         from-id: static func(id: u64) -> s64;
         get: func(component: ecs-entity-t) -> s64;
         add: func(component: ecs-entity-t);
-        // remove: func(component: ecs-entity-t);
+        remove: func(component: ecs-entity-t);
     }
 
     resource query {
@@ -132,6 +132,8 @@ interface ecs {
     add-singleton: func(component-id: ecs-entity-t);
     get-singleton: func(component-id: ecs-entity-t) -> s64;
     remove-singleton: func(component-id: ecs-entity-t);
+    add-entity: func(entity-id: ecs-entity-t);
+    remove-entity: func(entity-id: ecs-entity-t);
 }
 
 world toxoid-engine-world {

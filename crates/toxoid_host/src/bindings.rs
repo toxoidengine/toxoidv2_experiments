@@ -1591,6 +1591,18 @@ pub mod exports {
                 }
                 #[doc(hidden)]
                 #[allow(non_snake_case)]
+                pub unsafe fn _export_method_entity_remove_cabi<T: GuestEntity>(
+                    arg0: *mut u8,
+                    arg1: i64,
+                ) {
+                    #[cfg(target_arch = "wasm32")] _rt::run_ctors_once();
+                    T::remove(
+                        EntityBorrow::lift(arg0 as u32 as usize).get(),
+                        arg1 as u64,
+                    );
+                }
+                #[doc(hidden)]
+                #[allow(non_snake_case)]
                 pub unsafe fn _export_constructor_query_cabi<T: GuestQuery>(
                     arg0: *mut u8,
                     arg1: usize,
@@ -1868,6 +1880,18 @@ pub mod exports {
                     #[cfg(target_arch = "wasm32")] _rt::run_ctors_once();
                     T::remove_singleton(arg0 as u64);
                 }
+                #[doc(hidden)]
+                #[allow(non_snake_case)]
+                pub unsafe fn _export_add_entity_cabi<T: Guest>(arg0: i64) {
+                    #[cfg(target_arch = "wasm32")] _rt::run_ctors_once();
+                    T::add_entity(arg0 as u64);
+                }
+                #[doc(hidden)]
+                #[allow(non_snake_case)]
+                pub unsafe fn _export_remove_entity_cabi<T: Guest>(arg0: i64) {
+                    #[cfg(target_arch = "wasm32")] _rt::run_ctors_once();
+                    T::remove_entity(arg0 as u64);
+                }
                 pub trait Guest {
                     type ComponentType: GuestComponentType;
                     type Component: GuestComponent;
@@ -1879,6 +1903,8 @@ pub mod exports {
                     fn add_singleton(component_id: EcsEntityT);
                     fn get_singleton(component_id: EcsEntityT) -> i64;
                     fn remove_singleton(component_id: EcsEntityT);
+                    fn add_entity(entity_id: EcsEntityT);
+                    fn remove_entity(entity_id: EcsEntityT);
                 }
                 pub trait GuestComponentType: 'static {
                     #[doc(hidden)]
@@ -2043,6 +2069,7 @@ pub mod exports {
                     fn from_id(id: u64) -> i64;
                     fn get(&self, component: EcsEntityT) -> i64;
                     fn add(&self, component: EcsEntityT);
+                    fn remove(&self, component: EcsEntityT);
                 }
                 pub trait GuestQuery: 'static {
                     #[doc(hidden)]
@@ -2481,13 +2508,18 @@ pub mod exports {
                         i64,) { $($path_to_types)*::
                         _export_method_entity_add_cabi::<<$ty as $($path_to_types)*::
                         Guest >::Entity > (arg0, arg1) } #[export_name =
-                        "toxoid:engine/ecs#[constructor]query"] unsafe extern "C" fn
-                        export_constructor_query(arg0 : * mut u8, arg1 : usize,) -> i32 {
-                        $($path_to_types)*:: _export_constructor_query_cabi::<<$ty as
-                        $($path_to_types)*:: Guest >::Query > (arg0, arg1) }
-                        #[export_name = "toxoid:engine/ecs#[method]query.expr"] unsafe
-                        extern "C" fn export_method_query_expr(arg0 : * mut u8, arg1 : *
-                        mut u8, arg2 : usize,) { $($path_to_types)*::
+                        "toxoid:engine/ecs#[method]entity.remove"] unsafe extern "C" fn
+                        export_method_entity_remove(arg0 : * mut u8, arg1 : i64,) {
+                        $($path_to_types)*:: _export_method_entity_remove_cabi::<<$ty as
+                        $($path_to_types)*:: Guest >::Entity > (arg0, arg1) }
+                        #[export_name = "toxoid:engine/ecs#[constructor]query"] unsafe
+                        extern "C" fn export_constructor_query(arg0 : * mut u8, arg1 :
+                        usize,) -> i32 { $($path_to_types)*::
+                        _export_constructor_query_cabi::<<$ty as $($path_to_types)*::
+                        Guest >::Query > (arg0, arg1) } #[export_name =
+                        "toxoid:engine/ecs#[method]query.expr"] unsafe extern "C" fn
+                        export_method_query_expr(arg0 : * mut u8, arg1 : * mut u8, arg2 :
+                        usize,) { $($path_to_types)*::
                         _export_method_query_expr_cabi::<<$ty as $($path_to_types)*::
                         Guest >::Query > (arg0, arg1, arg2) } #[export_name =
                         "toxoid:engine/ecs#[method]query.build"] unsafe extern "C" fn
@@ -2571,7 +2603,13 @@ pub mod exports {
                         _export_get_singleton_cabi::<$ty > (arg0) } #[export_name =
                         "toxoid:engine/ecs#remove-singleton"] unsafe extern "C" fn
                         export_remove_singleton(arg0 : i64,) { $($path_to_types)*::
-                        _export_remove_singleton_cabi::<$ty > (arg0) } const _ : () = {
+                        _export_remove_singleton_cabi::<$ty > (arg0) } #[export_name =
+                        "toxoid:engine/ecs#add-entity"] unsafe extern "C" fn
+                        export_add_entity(arg0 : i64,) { $($path_to_types)*::
+                        _export_add_entity_cabi::<$ty > (arg0) } #[export_name =
+                        "toxoid:engine/ecs#remove-entity"] unsafe extern "C" fn
+                        export_remove_entity(arg0 : i64,) { $($path_to_types)*::
+                        _export_remove_entity_cabi::<$ty > (arg0) } const _ : () = {
                         #[doc(hidden)] #[export_name =
                         "toxoid:engine/ecs#[dtor]component-type"]
                         #[allow(non_snake_case)] unsafe extern "C" fn dtor(rep : * mut
@@ -2882,9 +2920,9 @@ pub(crate) use __export_toxoid_engine_world_impl as export;
 #[cfg(target_arch = "wasm32")]
 #[link_section = "component-type:wit-bindgen:0.35.0:toxoid:engine:toxoid-engine-world:encoded world"]
 #[doc(hidden)]
-pub static __WIT_BINDGEN_COMPONENT_TYPE: [u8; 3553] = *b"\
-\0asm\x0d\0\x01\0\0\x19\x16wit-component-encoding\x04\0\x07\xd7\x1a\x01A\x02\x01\
-A\x02\x01B\x9b\x01\x01w\x04\0\x0cecs-entity-t\x03\0\0\x01m\x10\x04u8-t\x05u16-t\x05\
+pub static __WIT_BINDGEN_COMPONENT_TYPE: [u8; 3628] = *b"\
+\0asm\x0d\0\x01\0\0\x19\x16wit-component-encoding\x04\0\x07\xa2\x1b\x01A\x02\x01\
+A\x02\x01B\x9f\x01\x01w\x04\0\x0cecs-entity-t\x03\0\0\x01m\x10\x04u8-t\x05u16-t\x05\
 u32-t\x05u64-t\x04i8-t\x05i16-t\x05i32-t\x05i64-t\x05f32-t\x05f64-t\x06bool-t\x08\
 string-t\x07array-t\x0au32array-t\x0af32array-t\x09pointer-t\x04\0\x0bmember-typ\
 e\x03\0\x02\x01ps\x01p}\x01r\x03\x04names\x0cmember-names\x04\x0cmember-types\x05\
@@ -2934,25 +2972,27 @@ value<\x01\0\x04\0$[method]component.set-member-f32list\x01=\x01@\x02\x04self\x1
 \0\x01\x04\0\x15[method]entity.get-id\x01B\x01@\x01\x02idw\0x\x04\0\x16[static]e\
 ntity.from-id\x01C\x01@\x02\x04self\xc1\0\x09component\x01\0x\x04\0\x12[method]e\
 ntity.get\x01D\x01@\x02\x04self\xc1\0\x09component\x01\x01\0\x04\0\x12[method]en\
-tity.add\x01E\x01i\x10\x01@\x01\x04desc\x0c\0\xc6\0\x04\0\x12[constructor]query\x01\
-G\x01h\x10\x01@\x02\x04self\xc8\0\x04exprs\x01\0\x04\0\x12[method]query.expr\x01\
-I\x01@\x01\x04self\xc8\0\x01\0\x04\0\x13[method]query.build\x01J\x04\0\x12[metho\
-d]query.iter\x01J\x01@\x01\x04self\xc8\0\0\x7f\x04\0\x12[method]query.next\x01K\x01\
-@\x01\x04self\xc8\0\0z\x04\0\x13[method]query.count\x01L\x01p\x01\x01@\x01\x04se\
-lf\xc8\0\0\xcd\0\x04\0\x16[method]query.entities\x01N\x01i\x11\x01@\x01\x06handl\
-ex\0\xcf\0\x04\0\x15[constructor]callback\x01P\x01h\x11\x01i\x16\x01@\x02\x04sel\
-f\xd1\0\x04iter\xd2\0\x01\0\x04\0\x14[method]callback.run\x01S\x01@\x01\x04self\xd1\
-\0\0x\x04\0\x1a[method]callback.cb-handle\x01T\x01i\x15\x01@\x01\x04desc\x14\0\xd5\
-\0\x04\0\x13[constructor]system\x01V\x01h\x15\x01@\x01\x04self\xd7\0\x01\0\x04\0\
-\x14[method]system.build\x01X\x01@\x01\x04self\xd7\0\0x\x04\0\x17[method]system.\
-callback\x01Y\x01@\x01\x03ptrx\0\xd2\0\x04\0\x11[constructor]iter\x01Z\x01h\x16\x01\
-@\x01\x04self\xdb\0\0\x7f\x04\0\x11[method]iter.next\x01\\\x01@\x01\x04self\xdb\0\
-\0z\x04\0\x12[method]iter.count\x01]\x01@\x01\x04self\xdb\0\0\xcd\0\x04\0\x15[me\
-thod]iter.entities\x01^\x01@\x01\x0ccomponent-id\x01\x01\0\x04\0\x0dadd-singleto\
-n\x01_\x01@\x01\x0ccomponent-id\x01\0x\x04\0\x0dget-singleton\x01`\x04\0\x10remo\
-ve-singleton\x01_\x04\0\x11toxoid:engine/ecs\x05\0\x04\0!toxoid:engine/toxoid-en\
-gine-world\x04\0\x0b\x19\x01\0\x13toxoid-engine-world\x03\0\0\0G\x09producers\x01\
-\x0cprocessed-by\x02\x0dwit-component\x070.220.0\x10wit-bindgen-rust\x060.35.0";
+tity.add\x01E\x04\0\x15[method]entity.remove\x01E\x01i\x10\x01@\x01\x04desc\x0c\0\
+\xc6\0\x04\0\x12[constructor]query\x01G\x01h\x10\x01@\x02\x04self\xc8\0\x04exprs\
+\x01\0\x04\0\x12[method]query.expr\x01I\x01@\x01\x04self\xc8\0\x01\0\x04\0\x13[m\
+ethod]query.build\x01J\x04\0\x12[method]query.iter\x01J\x01@\x01\x04self\xc8\0\0\
+\x7f\x04\0\x12[method]query.next\x01K\x01@\x01\x04self\xc8\0\0z\x04\0\x13[method\
+]query.count\x01L\x01p\x01\x01@\x01\x04self\xc8\0\0\xcd\0\x04\0\x16[method]query\
+.entities\x01N\x01i\x11\x01@\x01\x06handlex\0\xcf\0\x04\0\x15[constructor]callba\
+ck\x01P\x01h\x11\x01i\x16\x01@\x02\x04self\xd1\0\x04iter\xd2\0\x01\0\x04\0\x14[m\
+ethod]callback.run\x01S\x01@\x01\x04self\xd1\0\0x\x04\0\x1a[method]callback.cb-h\
+andle\x01T\x01i\x15\x01@\x01\x04desc\x14\0\xd5\0\x04\0\x13[constructor]system\x01\
+V\x01h\x15\x01@\x01\x04self\xd7\0\x01\0\x04\0\x14[method]system.build\x01X\x01@\x01\
+\x04self\xd7\0\0x\x04\0\x17[method]system.callback\x01Y\x01@\x01\x03ptrx\0\xd2\0\
+\x04\0\x11[constructor]iter\x01Z\x01h\x16\x01@\x01\x04self\xdb\0\0\x7f\x04\0\x11\
+[method]iter.next\x01\\\x01@\x01\x04self\xdb\0\0z\x04\0\x12[method]iter.count\x01\
+]\x01@\x01\x04self\xdb\0\0\xcd\0\x04\0\x15[method]iter.entities\x01^\x01@\x01\x0c\
+component-id\x01\x01\0\x04\0\x0dadd-singleton\x01_\x01@\x01\x0ccomponent-id\x01\0\
+x\x04\0\x0dget-singleton\x01`\x04\0\x10remove-singleton\x01_\x01@\x01\x09entity-\
+id\x01\x01\0\x04\0\x0aadd-entity\x01a\x04\0\x0dremove-entity\x01a\x04\0\x11toxoi\
+d:engine/ecs\x05\0\x04\0!toxoid:engine/toxoid-engine-world\x04\0\x0b\x19\x01\0\x13\
+toxoid-engine-world\x03\0\0\0G\x09producers\x01\x0cprocessed-by\x02\x0dwit-compo\
+nent\x070.220.0\x10wit-bindgen-rust\x060.35.0";
 #[inline(never)]
 #[doc(hidden)]
 pub fn __link_custom_section_describing_imports() {

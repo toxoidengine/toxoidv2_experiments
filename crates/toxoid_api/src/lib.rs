@@ -163,11 +163,8 @@ impl Entity {
         self
     }
 
-    pub fn remove<T: Component + ComponentType + 'static>(&mut self) {
-        // let type_hash = T::get_hash();
-        // let component_id_split = toxoid_component_cache_get(type_hash);
-        // let component_id = combine_u32(component_id_split);
-        // toxoid_entity_remove_component(self.entity.id, component_id);
+    pub fn remove<T: Component + ComponentType + 'static>(&mut self) {  
+        self.entity.remove(T::get_id());
     }
 }
 
@@ -388,5 +385,16 @@ impl World {
     pub fn remove_singleton<T: Component + ComponentType + 'static>() {
         let component_id = T::get_id();
         ToxoidApi::remove_singleton(component_id);
+    }
+
+    pub fn get_entity(entity_id: u64) -> Entity {
+        #[cfg(not(target_arch = "wasm32"))]
+        return Entity { entity: ToxoidEntity { id: entity_id } };
+        #[cfg(target_arch = "wasm32")]
+        return Entity { entity: ToxoidEntity::from_id(entity_id) };
+    }
+
+    pub fn remove_entity(entity_id: u64) {
+        ToxoidApi::remove_entity(entity_id);
     }
 }

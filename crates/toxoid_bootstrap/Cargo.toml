@@ -9,3 +9,4 @@ toxoid_runtime = { path = "../toxoid_runtime" }
 toxoid_host = { path = "../toxoid_host" }
 toxoid_sokol = { path = "../toxoid_sokol" }
 toxoid_render = { path = "../toxoid_render" }
+rand = "0.8.5"
