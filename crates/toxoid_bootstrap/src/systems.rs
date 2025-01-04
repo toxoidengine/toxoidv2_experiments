@@ -36,6 +36,7 @@ pub fn init() {
     // Movement System
     System::dsl("Head, Position", Some(10), |iter| {
         iter.entities().iter_mut().for_each(|entity| {
+            // Keeping track of all tail entities
             let mut tails = World::get_singleton::<Tails>();
             let mut tails_entities = tails.get_entities();
 
@@ -71,9 +72,10 @@ pub fn init() {
             new_head_entity.remove::<Tail>();
             pos.set_x(current_x);
             pos.set_y(current_y);
-            tails_entities.push(new_head_entity.get_id());
 
-            println!("Tails entities: {:?}", tails_entities.clone());
+            // Add new head entity to the front of the list
+            tails_entities.push(new_head_entity.get_id());
+            tails.set_entities(tails_entities.clone());
 
             let direction = World::get_singleton::<Direction>();
             let screen_y_bounds = SCREEN_HEIGHT - 100;
@@ -88,6 +90,8 @@ pub fn init() {
             entity.remove::<Head>(); 
             entity.add::<Tail>();
 
+            println!("Tails entities: {:?}", tails_entities.clone());
+
             // Remove the last tail entity
             println!("Tails entities: {:?}", tails.get_max_length());
             if tails_entities.len() > tails.get_max_length() as usize {
@@ -96,7 +100,7 @@ pub fn init() {
                 let mut last_tail_entity = World::get_entity(last_tail_entity_id);
                 last_tail_entity.remove::<Tail>();
                 tails.set_entities(tails_entities.clone());
-                World::remove_entity(last_tail_entity_id);
+                // World::remove_entity(last_tail_entity_id);
             }
         });
     })
