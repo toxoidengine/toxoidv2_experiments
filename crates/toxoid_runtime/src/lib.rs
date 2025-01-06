@@ -69,8 +69,13 @@ impl toxoid_component::component::ecs::Host for StoreState {
     fn add_singleton(&mut self, component: toxoid_component::component::ecs::EcsEntityT) {
         ToxoidApi::add_singleton(component);
         // TODO: Check if !ptr.is_null()
-        let ptr = ToxoidApi::get_singleton(component) as *mut toxoid_host::Component;
-        let resource = self.table.push::<ComponentProxy>(ComponentProxy { ptr: ptr }).expect("Failed to push component to table");
+        let ptr = ToxoidApi::get_singleton(component);
+        let host_component = toxoid_host::Component::new(ptr);
+        let boxed_component_ptr = Box::into_raw(Box::new(host_component));
+        let resource = self.table.push::<ComponentProxy>(ComponentProxy {
+            ptr: boxed_component_ptr 
+        }
+        ).expect("Failed to push component to table");
         unsafe {
             SINGLETON_MAP.insert(component, resource);
         }
@@ -80,6 +85,7 @@ impl toxoid_component::component::ecs::Host for StoreState {
         unsafe {
             if SINGLETON_MAP.contains_key(&component) {    
                 let resource = SINGLETON_MAP.remove(&component).unwrap();
+                let component_proxy = self.table.get(&resource).unwrap() as &ComponentProxy;
                 resource
             } else {
                 panic!("Failed to get singleton");

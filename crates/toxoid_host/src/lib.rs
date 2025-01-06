@@ -167,22 +167,9 @@ impl GuestComponentType for ComponentType {
 }
 
 impl GuestComponent for Component {
-    #[cfg(not(target_arch = "wasm32"))]
     fn new(ptr: i64) -> Component {
         Component { ptr: ptr as *const c_void, field_offsets: vec![] }
     }
-
-    #[cfg(target_arch = "wasm32")]
-    fn new(resource_id: u32) -> Component {
-        Component { ptr: resource_id as *const c_void, field_offsets: vec![] }
-    }
-
-    // fn set_component_hash(&self, name: String) {
-    //     unsafe 
-    //         let hash = fnv1a_hash_str(&name);
-    //         COMPONENT_CACHE.insert(hash, self);
-    //     }
-    // }
 
     fn set_member_u8(&self, offset: u32, value: u8) {
         unsafe {
@@ -336,6 +323,8 @@ impl GuestComponent for Component {
 
     fn set_member_bool(&self, offset: u32, value: bool) {
         unsafe {
+            println!("Setting bool at offset: {:?}", offset);
+            println!("Ptr: {:?}", self.ptr);
             let member_ptr = self.ptr.offset(offset as isize) as *mut bool;
             *member_ptr = value;
         }

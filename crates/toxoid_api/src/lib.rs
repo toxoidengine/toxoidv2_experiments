@@ -373,12 +373,16 @@ impl World {
     pub fn get_singleton<T: Component + ComponentType + Default + 'static>() -> T {
         let mut component = T::default();
         let component_id = T::get_id();
+        #[cfg(not(target_arch = "wasm32"))]
         let component_ptr = ToxoidApi::get_singleton(component_id);
+        #[cfg(target_arch = "wasm32")]
+        let component_resource = ToxoidApi::get_singleton(component_id);
         #[cfg(not(target_arch = "wasm32"))]
         let toxoid_component = ToxoidComponent::new(component_ptr);
-        #[cfg(target_arch = "wasm32")]
-        let toxoid_component = component_ptr;
+        #[cfg(not(target_arch = "wasm32"))]
         component.set_component(toxoid_component);
+        #[cfg(target_arch = "wasm32")]
+        component.set_component(component_resource);
         component
     }
 

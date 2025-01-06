@@ -13,7 +13,6 @@ impl CallbacksGuest for ToxoidWasmComponent {
 
 impl WorldGuest for ToxoidWasmComponent {
     fn init() {
-        println!("Hello world!");
         components::init();
         entities::init();
         // systems::init();
