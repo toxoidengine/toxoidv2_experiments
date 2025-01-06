@@ -63,7 +63,7 @@ impl WasiView for StoreState {
     fn table(&mut self) -> &mut ResourceTable { &mut self.table }
 }
 
-static mut SINGLETON_MAP: Lazy<HashMap<toxoid_component::component::ecs::EcsEntityT, Resource<ComponentProxy>>> = Lazy::new(|| HashMap::new());
+static mut SINGLETON_MAP: Lazy<HashMap<toxoid_component::component::ecs::EcsEntityT, u32>> = Lazy::new(|| HashMap::new());
 
 impl toxoid_component::component::ecs::Host for StoreState {
     fn add_singleton(&mut self, component: toxoid_component::component::ecs::EcsEntityT) {
@@ -74,21 +74,21 @@ impl toxoid_component::component::ecs::Host for StoreState {
         let boxed_component_ptr = Box::into_raw(Box::new(host_component));
         let resource = self.table.push::<ComponentProxy>(ComponentProxy {
             ptr: boxed_component_ptr 
-        }
-        ).expect("Failed to push component to table");
+        })
+            .expect("Failed to push component to table");
         unsafe {
-            SINGLETON_MAP.insert(component, resource);
+            SINGLETON_MAP.insert(component, resource.rep());
         }
     }
 
     fn get_singleton(&mut self, component: toxoid_component::component::ecs::EcsEntityT) -> Resource<ComponentProxy> {
         unsafe {
             if SINGLETON_MAP.contains_key(&component) {    
-                let resource = SINGLETON_MAP.remove(&component).unwrap();
-                let component_proxy = self.table.get(&resource).unwrap() as &ComponentProxy;
+                let resource_rep = SINGLETON_MAP.get(&component).unwrap().clone();
+                let resource = Resource::<ComponentProxy>::new_own(resource_rep);
                 resource
             } else {
-                panic!("Failed to get singleton");
+                panic!("Failed to get singleton, component ID: {:?}", component);
                 // let ptr = ToxoidApi::get_singleton(component) as *mut toxoid_host::Component;
                 // let resource = self.table.push::<ComponentProxy>(ComponentProxy { ptr: ptr }).expect("Failed to push component to table");
                 // resource
