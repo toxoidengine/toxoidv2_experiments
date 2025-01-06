@@ -87,12 +87,12 @@ pub fn component(input: TokenStream) -> TokenStream {
                                 quote! {
                                     pub fn #getter_name(&self) -> #field_type {
                                         unsafe {
-                                            self.component.get_member_u8(#field_offset)
+                                            self.component.as_mut().unwrap().get_member_u8(#field_offset)
                                         }
                                     }
                                     pub fn #setter_name(&mut self, value: u8) {
                                         unsafe {
-                                            self.component.set_member_u8(#field_offset, value);
+                                            self.component.as_mut().unwrap().set_member_u8(#field_offset, value);
                                         }
                                     }
                                 }
@@ -101,12 +101,12 @@ pub fn component(input: TokenStream) -> TokenStream {
                                 quote! {
                                     pub fn #getter_name(&self) -> #field_type {
                                         unsafe {
-                                            self.component.get_member_u16(#field_offset)
+                                            self.component.as_mut().unwrap().get_member_u16(#field_offset)
                                         }
                                     }
                                     pub fn #setter_name(&mut self, value: u16) {
                                         unsafe {
-                                            self.component.set_member_u16(#field_offset, value);
+                                            self.component.as_mut().unwrap().set_member_u16(#field_offset, value);
                                         }
                                     }
                                 }
@@ -115,12 +115,12 @@ pub fn component(input: TokenStream) -> TokenStream {
                                 quote! {
                                     pub fn #getter_name(&self) -> #field_type {
                                         unsafe {
-                                            self.component.get_member_u32(#field_offset)
+                                            self.component.as_mut().unwrap().get_member_u32(#field_offset)
                                         }
                                     }
                                     pub fn #setter_name(&mut self, value: u32) {
                                         unsafe {
-                                            self.component.set_member_u32(#field_offset, value);
+                                            self.component.as_mut().unwrap().set_member_u32(#field_offset, value);
                                         }
                                     }
                                 }
@@ -129,12 +129,12 @@ pub fn component(input: TokenStream) -> TokenStream {
                                 quote! {
                                     pub fn #getter_name(&self) -> #field_type {
                                         unsafe {
-                                            self.component.get_member_u64(#field_offset)
+                                            self.component.as_mut().unwrap().get_member_u64(#field_offset)
                                         }
                                     }
                                     pub fn #setter_name(&mut self, value: u64) {
                                         unsafe {
-                                            self.component.set_member_u64(#field_offset, value);
+                                            self.component.as_mut().unwrap().set_member_u64(#field_offset, value);
                                         }
                                     }
                                 }
@@ -143,12 +143,12 @@ pub fn component(input: TokenStream) -> TokenStream {
                                 quote! {
                                     pub fn #getter_name(&self) -> #field_type {
                                         unsafe {
-                                            self.component.get_member_i8(#field_offset)
+                                            self.component.as_mut().unwrap().get_member_i8(#field_offset)
                                         }
                                     }
                                     pub fn #setter_name(&mut self, value: i8) {
                                         unsafe {
-                                            self.component.set_member_i8(#field_offset, value);
+                                            self.component.as_mut().unwrap().set_member_i8(#field_offset, value);
                                         }
                                     }
                                 }
@@ -157,12 +157,12 @@ pub fn component(input: TokenStream) -> TokenStream {
                                 quote! {
                                     pub fn #getter_name(&self) -> #field_type {
                                         unsafe {
-                                            self.component.get_member_i16(#field_offset)
+                                            self.component.as_mut().unwrap().get_member_i16(#field_offset)
                                         }
                                     }
                                     pub fn #setter_name(&mut self, value: i16) {
                                         unsafe {
-                                            self.component.set_member_i16(#field_offset, value);
+                                            self.component.as_mut().unwrap().set_member_i16(#field_offset, value);
                                         }
                                     }
                                 }
@@ -171,12 +171,12 @@ pub fn component(input: TokenStream) -> TokenStream {
                                 quote! {
                                     pub fn #getter_name(&self) -> #field_type {
                                         unsafe {
-                                            self.component.get_member_i32(#field_offset)
+                                            self.component.as_mut().unwrap().get_member_i32(#field_offset)
                                         }
                                     }
                                     pub fn #setter_name(&mut self, value: i32) {
                                         unsafe {
-                                            self.component.set_member_i32(#field_offset, value);
+                                            self.component.as_mut().unwrap().set_member_i32(#field_offset, value);
                                         }
                                     }
                                 }
@@ -185,12 +185,12 @@ pub fn component(input: TokenStream) -> TokenStream {
                                 quote! {
                                     pub fn #getter_name(&self) -> #field_type {
                                         unsafe {
-                                            self.component.get_member_i64(#field_offset)
+                                            self.component.as_mut().unwrap().get_member_i64(#field_offset)
                                         }
                                     }
                                     pub fn #setter_name(&mut self, value: i64) {
                                         unsafe {
-                                            self.component.set_member_i64(#field_offset, value);
+                                            self.component.as_mut().unwrap().set_member_i64(#field_offset, value);
                                         }
                                     }
                                 }
@@ -199,12 +199,12 @@ pub fn component(input: TokenStream) -> TokenStream {
                                 quote! {
                                     pub fn #getter_name(&self) -> #field_type {
                                         unsafe {
-                                            self.component.get_member_f32(#field_offset)
+                                            self.component.as_mut().unwrap().get_member_f32(#field_offset)
                                         }
                                     }
                                     pub fn #setter_name(&mut self, value: f32) {
                                         unsafe {
-                                            self.component.set_member_f32(#field_offset, value);
+                                            self.component.as_mut().unwrap().set_member_f32(#field_offset, value);
                                         }
                                     }
                                 }
@@ -213,12 +213,12 @@ pub fn component(input: TokenStream) -> TokenStream {
                                 quote! {
                                     pub fn #getter_name(&self) -> #field_type {
                                         unsafe {
-                                            self.component.get_member_f64(#field_offset)
+                                            self.component.as_mut().unwrap().get_member_f64(#field_offset)
                                         }
                                     }
                                     pub fn #setter_name(&mut self, value: f64) {
                                         unsafe {
-                                            self.component.set_member_f64(#field_offset, value);
+                                            self.component.as_mut().unwrap().set_member_f64(#field_offset, value);
                                         }
                                     }
                                 }
@@ -227,12 +227,12 @@ pub fn component(input: TokenStream) -> TokenStream {
                                 quote! {
                                     pub fn #getter_name(&self) -> #field_type {
                                         unsafe {
-                                            self.component.get_member_bool(#field_offset)
+                                            self.component.as_mut().unwrap().get_member_bool(#field_offset)
                                         }
                                     }
                                     pub fn #setter_name(&mut self, value: bool) {
                                         unsafe {
-                                            self.component.set_member_bool(#field_offset, value);
+                                            self.component.as_mut().unwrap().set_member_bool(#field_offset, value);
                                         }
                                     }
                                 }
@@ -241,12 +241,12 @@ pub fn component(input: TokenStream) -> TokenStream {
                                 quote! {
                                     pub fn #getter_name(&self) -> String {
                                         unsafe {
-                                            self.component.get_member_string(#field_offset)
+                                            self.component.as_mut().unwrap().get_member_string(#field_offset)
                                         }
                                     }
                                     pub fn #setter_name(&mut self, value: String) {
                                         unsafe {
-                                            self.component.set_member_string(#field_offset, value);
+                                            self.component.as_mut().unwrap().set_member_string(#field_offset, value);
                                         }
                                     }
                                 }
@@ -255,19 +255,19 @@ pub fn component(input: TokenStream) -> TokenStream {
                                 quote! {
                                     pub fn #getter_name(&self) -> Vec<u32> {
                                         unsafe {
-                                            self.component.get_member_u32_array(#field_offset)
+                                            self.component.as_mut().unwrap().get_member_u32_array(#field_offset)
                                         }
                                     }
                                     #[cfg(target_arch = "wasm32")]
-                                    pub fn #setter_name(&mut self, value: &[u32]) {
+                                    pub fn #setter_name(&mut self, value: Vec<u32>) {
                                         unsafe {
-                                            self.component.set_member_u32_array(#field_offset, value);
+                                            self.component.as_mut().unwrap().set_member_u32_array(#field_offset, value.as_slice());
                                         }
                                     }
                                     #[cfg(not(target_arch = "wasm32"))]
                                     pub fn #setter_name(&mut self, value: Vec<u32>) {
                                         unsafe {
-                                            self.component.set_member_u32_array(#field_offset, value);
+                                            self.component.as_mut().unwrap().set_member_u32_array(#field_offset, value);
                                         }
                                     }
                                 }
@@ -276,19 +276,19 @@ pub fn component(input: TokenStream) -> TokenStream {
                                 quote! {
                                     pub fn #getter_name(&self) -> Vec<u64> {
                                         unsafe {
-                                            self.component.get_member_u64list(#field_offset)
+                                            self.component.as_mut().unwrap().get_member_u64list(#field_offset)
                                         }
                                     }
                                     #[cfg(target_arch = "wasm32")]
-                                    pub fn #setter_name(&mut self, value: &[u64]) {
+                                    pub fn #setter_name(&mut self, value: Vec<u64>) {
                                         unsafe {
-                                            self.component.set_member_u64list(#field_offset, value);
+                                            self.component.as_mut().unwrap().set_member_u64list(#field_offset, value.as_slice());
                                         }
                                     }
                                     #[cfg(not(target_arch = "wasm32"))]
                                     pub fn #setter_name(&mut self, value: Vec<u64>) {
                                         unsafe {
-                                            self.component.set_member_u64list(#field_offset, value);
+                                            self.component.as_mut().unwrap().set_member_u64list(#field_offset, value);
                                         }
                                     }
                                 }
@@ -297,19 +297,19 @@ pub fn component(input: TokenStream) -> TokenStream {
                                 quote! {
                                     pub fn #getter_name(&self) -> Vec<f32> {
                                         unsafe {
-                                            self.component.get_member_f32_array(#field_offset)
+                                            self.component.as_mut().unwrap().get_member_f32_array(#field_offset)
                                         }
                                     }
                                     #[cfg(target_arch = "wasm32")   ]
-                                    pub fn #setter_name(&mut self, value: &[f32]) {
+                                    pub fn #setter_name(&mut self, value: Vec<f32>) {
                                         unsafe {
-                                            self.component.set_member_f32_array(#field_offset, value);
+                                            self.component.as_mut().unwrap().set_member_f32_array(#field_offset, value.as_slice());
                                         }
                                     }
                                     #[cfg(not(target_arch = "wasm32"))]
                                     pub fn #setter_name(&mut self, value: Vec<f32>) {
                                         unsafe {
-                                            self.component.set_member_f32_array(#field_offset, value);
+                                            self.component.as_mut().unwrap().set_member_f32_array(#field_offset, value);
                                         }
                                     }
                                 }
@@ -359,13 +359,7 @@ pub fn component(input: TokenStream) -> TokenStream {
                 impl Default for #name {
                     fn default() -> Self {
                         Self {
-                            #[cfg(not(target_arch = "wasm32"))]
-                            component: ToxoidComponent {
-                                ptr: core::ptr::null_mut(),
-                                field_offsets: vec![],
-                            },
-                            #[cfg(target_arch = "wasm32")]
-                            component: unsafe { ToxoidComponent::from_handle(0) },
+                            component: std::ptr::null_mut(),
                             singleton: false,
                             id: 0,
                             #(#default_body)*
@@ -408,7 +402,7 @@ pub fn component(input: TokenStream) -> TokenStream {
                 #[repr(C)]
                 pub struct #name {
                     // #[serde(skip)]
-                    component: ToxoidComponent,
+                    component: *mut ToxoidComponent,
                     singleton: bool,
                     id: ecs_entity_t,
                     #(#struct_fields)*
@@ -429,7 +423,19 @@ pub fn component(input: TokenStream) -> TokenStream {
 
                 impl Component for #name {
                     fn set_component(&mut self, component: ToxoidComponent) {
-                        self.component = component;
+                        // TODO: Remove this boxed pointer for host (and possibly guest)
+                        self.component = Box::into_raw(Box::new(component));
+                    }
+                }
+
+                impl Drop for #name {
+                    fn drop(&mut self) {
+                        // Reconstruct the Box and drop it properly
+                        unsafe {
+                            if !self.component.is_null() {
+                                let _ = Box::from_raw(self.component);
+                            }
+                        }
                     }
                 }
             }

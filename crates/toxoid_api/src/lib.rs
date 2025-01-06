@@ -266,7 +266,7 @@ impl System {
     }
 
     #[cfg(target_arch = "wasm32")]
-    pub fn dsl(dsl: &str, SystemDesc: Option<SystemDesc>, callback_fn: fn(&Iter)) -> Self {
+    pub fn dsl(dsl: &str, Stick_rate: Option<i32>, callback_fn: fn(&Iter)) -> Self {
         // Register the callback in the guest environment
         let callback = Callback::new(callback_fn);
         // Create the Toxoid callback with the registered callback handle

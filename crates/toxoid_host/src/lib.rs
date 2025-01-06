@@ -608,7 +608,8 @@ impl Guest for ToxoidApi {
     }
 
     fn get_singleton(component: ecs_entity_t) -> i64 {
-        unsafe { ecs_get_mut_id(WORLD.0, component, component) as i64 }
+        // unsafe { ecs_get_mut_id(WORLD.0, component, component) as i64 }
+        unsafe { ecs_ensure_id(WORLD.0, component, component) as i64 }  
     }
 
     fn remove_singleton(component: ecs_entity_t) {

@@ -68,26 +68,26 @@ static mut SINGLETON_MAP: Lazy<HashMap<toxoid_component::component::ecs::EcsEnti
 impl toxoid_component::component::ecs::Host for StoreState {
     fn add_singleton(&mut self, component: toxoid_component::component::ecs::EcsEntityT) {
         ToxoidApi::add_singleton(component);
-        let ptr = ToxoidApi::get_singleton(component);
-        let resource = self.table.push::<ComponentProxy>(ComponentProxy { ptr: ptr as *mut toxoid_host::Component }).unwrap();
+        // TODO: Check if !ptr.is_null()
+        let ptr = ToxoidApi::get_singleton(component) as *mut toxoid_host::Component;
+        let resource = self.table.push::<ComponentProxy>(ComponentProxy { ptr: ptr }).expect("Failed to push component to table");
         unsafe {
             SINGLETON_MAP.insert(component, resource);
         }
     }
 
     fn get_singleton(&mut self, component: toxoid_component::component::ecs::EcsEntityT) -> Resource<ComponentProxy> {
-        // let singleton = ToxoidApi::get_singleton(component);
-        let singleton = unsafe { SINGLETON_MAP.get(&component).unwrap() };
-        // Get from resource table
-        let resource = self.table.get(&singleton).unwrap() as &ComponentProxy;
-        // Push to resource table
-        let id = self
-            .table
-            .push::<ComponentProxy>(ComponentProxy { 
-                ptr: resource.ptr
-            })
-            .expect("Failed to push component to table");
-        id
+        unsafe {
+            if SINGLETON_MAP.contains_key(&component) {    
+                let resource = SINGLETON_MAP.remove(&component).unwrap();
+                resource
+            } else {
+                panic!("Failed to get singleton");
+                // let ptr = ToxoidApi::get_singleton(component) as *mut toxoid_host::Component;
+                // let resource = self.table.push::<ComponentProxy>(ComponentProxy { ptr: ptr }).expect("Failed to push component to table");
+                // resource
+            }
+        }
     }
 
     fn remove_singleton(&mut self, component: toxoid_component::component::ecs::EcsEntityT) {
