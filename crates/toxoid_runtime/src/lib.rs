@@ -709,8 +709,6 @@ pub fn load_wasm_component(filename: &str) -> Result<()> {
         *STORE = new_store();
     }
     let store = unsafe { &mut *STORE }; // Ensure STORE is initialized
-    // Reset the world
-    toxoid_host::toxoid_reset();
 
     // Load the component from disk
     let bytes = std::fs::read(filename)?;
