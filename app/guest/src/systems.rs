@@ -73,7 +73,7 @@ pub fn init() {
             println!("Tails entities: {:?}", tails_entities.clone());
 
             // Remove the last tail entity
-            println!("Tails entities: {:?}", tails.get_max_length());
+            println!("Tails entities max length: {:?}", tails.get_max_length());
             if tails_entities.len() > tails.get_max_length() as usize {
                 println!("Removing last tail entity");
                 let last_tail_entity_id = tails_entities.remove(0);
