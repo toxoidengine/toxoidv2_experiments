@@ -65,10 +65,10 @@ pub struct ToxoidWasmComponent;
 
 pub fn run_callback(iter: ToxoidIter, handle: i64) {
     let iter = Iter::new(iter);
-    // // Print all keys and values in the CALLBACKS vector
-    // for (index, callback) in unsafe { CALLBACKS.iter().enumerate() } {
-    //     println!("Index: {}", index);
-    // }
+    // Print all keys and values in the CALLBACKS vector
+    for (index, callback) in unsafe { CALLBACKS.iter().enumerate() } {
+        println!("Index: {}", index);
+    }
     let callback = unsafe { CALLBACKS[handle as usize].as_ref() };
     callback(&iter);
 }
@@ -266,7 +266,7 @@ impl System {
     }
 
     #[cfg(target_arch = "wasm32")]
-    pub fn dsl(dsl: &str, Stick_rate: Option<i32>, callback_fn: fn(&Iter)) -> Self {
+    pub fn dsl(dsl: &str, tick_rate: Option<i32>, callback_fn: fn(&Iter)) -> Self {
         // Register the callback in the guest environment
         let callback = Callback::new(callback_fn);
         // Create the Toxoid callback with the registered callback handle
@@ -274,9 +274,9 @@ impl System {
         let desc = SystemDesc { 
             name: None, 
             callback, 
-            tick_rate: None, 
             is_guest: true, 
-            query_desc: QueryDesc { expr: dsl.to_string() } 
+            query_desc: QueryDesc { expr: dsl.to_string() },
+            tick_rate
         };
         Self { system: ToxoidSystem::new(desc) }
     }

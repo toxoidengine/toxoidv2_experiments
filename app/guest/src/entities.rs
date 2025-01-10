@@ -24,6 +24,8 @@ pub fn create_snake() {
     head_entity.add::<Position>();
     head_entity.add::<Size>();
     head_entity.add::<Color>();
+    head_entity.add::<Renderable>();
+    head_entity.add::<Rect>();
 
     let mut pos = head_entity.get::<Position>();
     pos.set_x((SCREEN_WIDTH - 100) / 2);
@@ -49,6 +51,8 @@ pub fn create_new_head() -> Entity {
     new_head_entity.add::<Position>();
     new_head_entity.add::<Size>();
     new_head_entity.add::<Color>();
+    new_head_entity.add::<Renderable>();
+    new_head_entity.add::<Rect>();
     
     let mut size = new_head_entity.get::<Size>();
     size.set_width(50);
@@ -75,6 +79,8 @@ pub fn create_food() {
     food.add::<Position>();
     food.add::<Size>();
     food.add::<Color>();
+    food.add::<Renderable>();
+    food.add::<Rect>();
 
     let mut pos = food.get::<Position>();
     let grid_size = 50;

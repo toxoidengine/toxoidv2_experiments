@@ -1,6 +1,6 @@
 mod components;
 mod entities;
-// mod systems;
+mod systems;
 use toxoid_api::*;
 
 pub struct ToxoidWasmComponent;
@@ -19,7 +19,7 @@ impl WorldGuest for ToxoidWasmComponent {
             println!("Position system guest.");
         })
             .build();
-        // systems::init();
+        systems::init();
     }
 }
 
