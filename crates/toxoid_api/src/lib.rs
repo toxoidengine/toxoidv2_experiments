@@ -65,10 +65,10 @@ pub struct ToxoidWasmComponent;
 
 pub fn run_callback(iter: ToxoidIter, handle: i64) {
     let iter = Iter::new(iter);
-    // Print all keys and values in the CALLBACKS vector
-    for (index, callback) in unsafe { CALLBACKS.iter().enumerate() } {
-        println!("Index: {}", index);
-    }
+    // // Print all keys and values in the CALLBACKS vector
+    // for (index, callback) in unsafe { CALLBACKS.iter().enumerate() } {
+    //     println!("Index: {}", index);
+    // }
     let callback = unsafe { CALLBACKS[handle as usize].as_ref() };
     callback(&iter);
 }
@@ -278,7 +278,7 @@ impl System {
             is_guest: true, 
             query_desc: QueryDesc { expr: dsl.to_string() } 
         };
-        Self::new(Some(desc), callback_fn)
+        Self { system: ToxoidSystem::new(desc) }
     }
 
     #[cfg(not(target_arch = "wasm32"))]
@@ -292,7 +292,7 @@ impl System {
             is_guest: false,
             tick_rate
         };
-        Self::new(Some(desc), callback_fn)
+        Self { system: ToxoidSystem::new(desc) }
     }
 
     pub fn build(&mut self) {
@@ -308,6 +308,7 @@ pub static mut CALLBACKS: once_cell::sync::Lazy<Vec<Box<dyn Fn(&Iter)>>> = once_
 
 impl Callback {
     pub fn new(callback_fn: fn(&Iter)) -> Self {
+        println!("Callback new");
         let handle = unsafe { CALLBACKS.push(Box::new(callback_fn)); CALLBACKS.len() - 1 };
         Self { callback: ToxoidCallback::new(handle as i64) }   
     }

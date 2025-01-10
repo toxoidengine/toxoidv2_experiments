@@ -7,7 +7,7 @@ pub struct ToxoidWasmComponent;
 
 impl CallbacksGuest for ToxoidWasmComponent {
     fn run(iter: ToxoidIter, handle: i64) {
-        // run_callback(iter, handle);
+        run_callback(iter, handle);
     }
 }
 
@@ -15,6 +15,10 @@ impl WorldGuest for ToxoidWasmComponent {
     fn init() {
         components::init();
         entities::init();
+        System::dsl("Position", None, |iter| {
+            println!("Position system guest.");
+        })
+            .build();
         // systems::init();
     }
 }
