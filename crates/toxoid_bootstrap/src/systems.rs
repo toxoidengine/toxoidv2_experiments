@@ -7,12 +7,6 @@ pub fn init() {
     unsafe {
         toxoid_host::QUERY_TRAMPOLINE = Some(toxoid_runtime::query_trampoline);
     }
-
-    // Position System
-    System::dsl("Position", None, |iter| {
-        println!("Position system host.");
-    })
-        .build();
     
     // Rendering System
     System::dsl("Rect, Position, Size, Color, Renderable", None, |iter| {

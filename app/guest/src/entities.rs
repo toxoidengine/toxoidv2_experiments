@@ -108,9 +108,7 @@ pub fn init() {
     let mut tails = World::get_singleton::<Tails>();
     tails.set_max_length(777);
     tails.set_entities(vec![]);
-    println!("Tails singleton again: {:?}", tails.get_max_length());
     let mut tails = World::get_singleton::<Tails>();
-    println!("Tails singleton max length again: {:?}", tails.get_max_length());
     create_snake();
     create_food();
 }
