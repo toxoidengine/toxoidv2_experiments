@@ -94,10 +94,10 @@ pub fn create_food() {
     size.set_height(50);
 
     let mut color = food.get::<Color>();
-    color.set_r(1.0);
-    color.set_g(0.0);
-    color.set_b(0.0);
-    color.set_a(1.0);
+    color.set_r(1.);
+    color.set_g(0.);
+    color.set_b(1.);
+    color.set_a(1.);
 
     let mut food_entity = World::get_singleton::<FoodEntity>();
     food_entity.set_entity(food.get_id());

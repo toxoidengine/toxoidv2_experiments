@@ -323,8 +323,6 @@ impl GuestComponent for Component {
 
     fn set_member_bool(&self, offset: u32, value: bool) {
         unsafe {
-            println!("Setting bool at offset: {:?}", offset);
-            println!("Ptr: {:?}", self.ptr);
             let member_ptr = self.ptr.offset(offset as isize) as *mut bool;
             *member_ptr = value;
         }
